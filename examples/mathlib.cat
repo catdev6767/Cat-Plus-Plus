@@ -1,0 +1,14 @@
+# Thư viện toán học
+purr square(n)
+    give n * n
+
+purr cube(n)
+    give n * n * n
+
+paw PI = 3.14159
+
+purr circle_area(r)
+    give PI * r * r
+
+purr circle_perimeter(r)
+    give 2 * PI * r

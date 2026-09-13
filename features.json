@@ -1,0 +1,95 @@
+{
+  "version": "2.0.0",
+  "updated": "2026-09-13",
+  "language": {
+    "core": {
+      "meow": "In ra màn hình",
+      "paw": "Khai báo biến",
+      "purr": "Định nghĩa hàm",
+      "give": "Trả về giá trị",
+      "sniff": "Điều kiện (if)",
+      "swat": "Ngược lại (else)",
+      "knead": "Vòng lặp while",
+      "groom": "Vòng lặp danh sách (for-each)",
+      "tap": "Bắt đầu try",
+      "hiss": "Bắt lỗi (catch)",
+      "sit": "Thoát vòng lặp (break)",
+      "leap": "Bỏ qua lần lặp (continue)",
+      "nod": "Đúng (true)",
+      "shake": "Sai (false)",
+      "hungry": "Rỗng (null)",
+      "with": "Và (and)",
+      "either": "Hoặc (or)",
+      "never": "Không (not)"
+    },
+    "oop": {
+      "cat": "Định nghĩa class",
+      "me": "Instance (self)",
+      "kin": "Kế thừa (extends)",
+      "litter": "Enum"
+    },
+    "operators": {
+      "compound_assign": "+= -= *= /= %=",
+      "increment": "++ --",
+      "in": "Toán tử in cho list/dict/string",
+      "slice": "arr[a:b]",
+      "interpolation": "Chuỗi \"{var}\""
+    },
+    "advanced": {
+      "lambda": "kit(x) => expr",
+      "regex": "match, find_all, replace_all",
+      "match_case": "match x \\n case 1 ...",
+      "use_import": "use \"file.cat\""
+    }
+  },
+  "builtins": {
+    "basic": ["tail", "puff", "melt", "nip", "bolt", "kitten", "lion"],
+    "math": ["scratch", "flop", "perch", "sway", "wave", "slant", "grow", "bound"],
+    "convert": ["say", "tally", "drip"],
+    "string": ["shred", "weave", "swap", "lick", "hunt"],
+    "list": ["stash", "snatch", "line", "flip", "head", "rear", "pile", "walk"],
+    "dict": ["collar", "kits", "seek"],
+    "functional": ["chase", "sift", "curl"],
+    "random": ["wander", "dice"],
+    "regex": ["match", "find_all", "replace_all"]
+  },
+  "ide": {
+    "editor": "Monaco Editor",
+    "terminal": "xterm.js",
+    "theme": ["dark", "light", "cat"],
+    "i18n": ["vi", "en"],
+    "features": {
+      "tabs": "Nhiều tab",
+      "file_tree": "Cây file",
+      "project": "Hệ thống dự án",
+      "run": "Ctrl+Enter",
+      "command_palette": "Ctrl+Shift+P",
+      "search_project": "Ctrl+Shift+F",
+      "format": "Ctrl+Shift+I",
+      "rename": "F2",
+      "export_import": ".catpp",
+      "share_link": "Base64 URL"
+    }
+  },
+  "tools": {
+    "cli": "catpp run/repl/fmt/lint/test",
+    "docs": {
+      "url": "/docs/",
+      "languages": ["vi", "en"],
+      "pages": "77 mỗi ngôn ngữ",
+      "download": ["md", "txt", "zip"]
+    },
+    "learn": "10 bài tập tương tác"
+  },
+  "architecture": {
+    "core": ["module.py", "registry.py", "bus.py", "loader.py"],
+    "modules": ["interpreter", "server", "cli"],
+    "tests": "tests/test_all.py — 40 tests"
+  },
+  "todo": [
+    "type_hints",
+    "debug_breakpoint",
+    "bytecode_vm",
+    "transpile_cpp"
+  ]
+}

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Backup
+.backup/
+catpp-backup-*/
+
+# Logs
+*.log
+/tmp/
+
+# Local data
+.cache/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

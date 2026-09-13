@@ -1,0 +1,365 @@
+#!/usr/bin/env python3
+"""Cat++ CLI — REPL, run file, format, lint, test."""
+import sys, os, argparse
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from interpreter import run_catpp, CatError
+
+
+# ============ COLORS ============
+class C:
+    R = '\033[0m'
+    B = '\033[1m'
+    DIM = '\033[2m'
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    ORANGE = '\033[38;5;208m'
+
+def c(text, color):
+    return color + text + C.R
+
+
+# ============ CMD: run ============
+def cmd_run(args):
+    path = args.file
+    if not os.path.exists(path):
+        print(c('Lỗi: ', C.RED) + f'không tìm thấy file "{path}"')
+        return 1
+    with open(path, encoding='utf-8') as f:
+        code = f.read()
+    try:
+        out = run_catpp(code, timeout=args.timeout)
+        if out:
+            print(out)
+        return 0
+    except CatError as e:
+        line = getattr(e, 'line', 0)
+        if line:
+            print(c(f'Lỗi dòng {line}: ', C.RED) + str(e), file=sys.stderr)
+            # Hiện dòng lỗi
+            lines = code.split('\n')
+            if 1 <= line <= len(lines):
+                print(c(f'  {line} | ', C.DIM) + lines[line-1], file=sys.stderr)
+        else:
+            print(c('Lỗi: ', C.RED) + str(e), file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(c('Lỗi: ', C.RED) + f'{type(e).__name__}: {e}', file=sys.stderr)
+        return 1
+
+
+# ============ CMD: repl ============
+def cmd_repl(args):
+    print(c('🐱 Cat++ REPL v1.0', C.ORANGE + C.B))
+    print(c('Gõ code Cat++, Enter để chạy.', C.DIM))
+    print(c('Gõ "exit" hoặc Ctrl+D để thoát.', C.DIM))
+    print()
+
+    env_lines = []  # giữ code đã gõ
+    counter = 0
+
+    while True:
+        try:
+            line = input(c('>>> ', C.ORANGE + C.B))
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        if line.strip() in ('exit', 'quit', ':q'):
+            break
+        if not line.strip():
+            continue
+
+        counter += 1
+        env_lines.append(line)
+        code = '\n'.join(env_lines)
+
+        try:
+            out = run_catpp(code, timeout=5.0)
+            # Nếu là dòng cuối in ra kết quả
+            if out:
+                # Chỉ in dòng cuối
+                last = out.split('\n')[-1]
+                print(c(last, C.GREEN))
+        except CatError as e:
+            # Nếu lỗi, có thể do đang viết dở block
+            # Thử bỏ dòng cuối
+            env_lines.pop()
+            counter -= 1
+
+            # Thử chỉ chạy dòng hiện tại
+            try:
+                out = run_catpp(line, timeout=5.0)
+                if out:
+                    last = out.split('\n')[-1]
+                    print(c(last, C.GREEN))
+                env_lines.append(line)
+                counter += 1
+            except CatError as e2:
+                line_no = getattr(e2, 'line', 0)
+                msg = c('Lỗi', C.RED) + (f' dòng {line_no}:' if line_no else ':') + ' ' + str(e2)
+                print(msg)
+            except Exception as e2:
+                print(c('Lỗi: ', C.RED) + str(e2))
+        except Exception as e:
+            print(c('Lỗi: ', C.RED) + f'{type(e).__name__}: {e}')
+
+    print(c('👋 Tạm biệt!', C.ORANGE))
+    return 0
+
+
+# ============ CMD: fmt ============
+def cmd_fmt(args):
+    path = args.file
+    if not os.path.exists(path):
+        print(c('Lỗi: ', C.RED) + f'không tìm thấy file "{path}"')
+        return 1
+    with open(path, encoding='utf-8') as f:
+        code = f.read()
+
+    lines = code.split('\n')
+    out = []
+    level = 0
+    INDENT = '    '
+    increase = ('purr', 'sniff', 'swat', 'knead', 'groom', 'tap', 'hiss', 'cat', 'litter')
+    decrease = ('swat', 'hiss')
+
+    for raw in lines:
+        trimmed = raw.strip()
+        if not trimmed:
+            out.append('')
+            continue
+
+        first_word = trimmed.split()[0] if trimmed.split() else ''
+
+        if first_word in decrease:
+            level = max(0, level - 1)
+
+        out.append(INDENT * level + trimmed)
+
+        if first_word in increase and first_word not in decrease:
+            level += 1
+
+    formatted = '\n'.join(out)
+
+    if args.check:
+        if formatted == code:
+            print(c('✓ File đã đúng format', C.GREEN))
+            return 0
+        else:
+            print(c('✗ File chưa đúng format', C.RED))
+            return 1
+
+    if args.diff:
+        import difflib
+        diff = difflib.unified_diff(
+            code.splitlines(keepends=True),
+            formatted.splitlines(keepends=True),
+            fromfile=path, tofile=path + ' (formatted)'
+        )
+        for d in diff:
+            if d.startswith('+'):
+                print(c(d.rstrip(), C.GREEN))
+            elif d.startswith('-'):
+                print(c(d.rstrip(), C.RED))
+            else:
+                print(d.rstrip())
+        return 0
+
+    if formatted == code:
+        print(c('✓ File đã đúng format', C.GREEN))
+        return 0
+
+    if args.write:
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(formatted)
+        print(c(f'✓ Đã format {path}', C.GREEN))
+    else:
+        print(formatted)
+    return 0
+
+
+# ============ CMD: lint ============
+def cmd_lint(args):
+    path = args.file
+    if not os.path.exists(path):
+        print(c('Lỗi: ', C.RED) + f'không tìm thấy file "{path}"')
+        return 1
+    with open(path, encoding='utf-8') as f:
+        code = f.read()
+    lines = code.split('\n')
+    warnings = []
+
+    # Rule 1: dòng quá 100 ký tự
+    for i, line in enumerate(lines, 1):
+        if len(line) > 100:
+            warnings.append((i, 'Dòng quá dài (' + str(len(line)) + ' ký tự > 100)'))
+
+    # Rule 2: tab thay vì space
+    for i, line in enumerate(lines, 1):
+        if '\t' in line:
+            warnings.append((i, 'Dùng tab thay vì space'))
+
+    # Rule 3: khoảng trắng cuối dòng
+    for i, line in enumerate(lines, 1):
+        if line.rstrip() != line and line.strip():
+            warnings.append((i, 'Khoảng trắng thừa cuối dòng'))
+
+    # Rule 4: dòng trống liên tiếp > 2
+    blank = 0
+    for i, line in enumerate(lines, 1):
+        if not line.strip():
+            blank += 1
+            if blank == 3:
+                warnings.append((i, 'Quá nhiều dòng trống liên tiếp'))
+        else:
+            blank = 0
+
+    # Rule 5: tên biến dùng camelCase (nên dùng snake_case)
+    import re
+    for i, line in enumerate(lines, 1):
+        m = re.search(r'paw\s+([a-z]+[A-Z]\w*)', line)
+        if m:
+            warnings.append((i, f'Tên biến "{m.group(1)}" nên dùng snake_case'))
+
+    # Rule 6: so sánh == shake/no thay vì dùng never
+    for i, line in enumerate(lines, 1):
+        if '== shake' in line:
+            warnings.append((i, 'Nên dùng "never" thay vì "== shake"'))
+
+    if not warnings:
+        print(c(f'✓ {path}: không có cảnh báo', C.GREEN))
+        return 0
+
+    print(c(f'{path}: {len(warnings)} cảnh báo', C.YELLOW + C.B))
+    for line, msg in warnings:
+        print(c(f'  dòng {line}: ', C.DIM) + c(msg, C.YELLOW))
+    return 1
+
+
+# ============ CMD: test ============
+def cmd_test(args):
+    path = args.file
+    if not os.path.exists(path):
+        print(c('Lỗi: ', C.RED) + f'không tìm thấy file "{path}"')
+        return 1
+
+    with open(path, encoding='utf-8') as f:
+        code = f.read()
+
+    # Parse test cases: # TEST: <name> \n <code> \n # EXPECT: <output>
+    import re
+    tests = []
+    pattern = re.compile(
+        r'#\s*TEST:\s*(.+?)\n(.*?)(?=#\s*TEST:|\Z)',
+        re.DOTALL
+    )
+    for m in pattern.finditer(code):
+        name = m.group(1).strip()
+        body = m.group(2)
+        exp_match = re.search(r'#\s*EXPECT:\s*(.*?)(?=\n|$)', body)
+        expected = exp_match.group(1).strip() if exp_match else ''
+        test_code = re.sub(r'#\s*EXPECT:.*', '', body).strip()
+        tests.append((name, test_code, expected))
+
+    if not tests:
+        print(c('Không tìm thấy test case nào.', C.YELLOW))
+        print(c('Format:', C.DIM))
+        print('  # TEST: tên test')
+        print('  <code>')
+        print('  # EXPECT: kết quả')
+        return 1
+
+    print(c(f'🐱 Chạy {len(tests)} test...', C.ORANGE + C.B))
+    print()
+
+    passed = 0
+    failed = 0
+    for name, test_code, expected in tests:
+        try:
+            got = run_catpp(test_code, timeout=5.0).strip()
+            if got == expected:
+                print(c('  ✓ ', C.GREEN) + name)
+                passed += 1
+            else:
+                print(c('  ✗ ', C.RED) + name)
+                print(c('    mong đợi: ', C.DIM) + expected)
+                print(c('    nhận được: ', C.DIM) + got)
+                failed += 1
+        except Exception as e:
+            print(c('  ✗ ', C.RED) + name + c(f' ({type(e).__name__}: {e})', C.DIM))
+            failed += 1
+
+    print()
+    print(c(f'  {passed} pass, {failed} fail', C.GREEN if failed == 0 else C.YELLOW))
+    return 0 if failed == 0 else 1
+
+
+# ============ MAIN ============
+def main():
+    parser = argparse.ArgumentParser(
+        prog='catpp',
+        description='🐱 Cat++ CLI — ngôn ngữ lập trình cú pháp tiếng mèo',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''Ví dụ:
+  catpp run hello.cat          # chạy file
+  catpp repl                   # REPL tương tác
+  catpp fmt hello.cat --write  # format file
+  catpp lint hello.cat         # kiểm tra
+  catpp test tests.cat         # chạy tests
+  catpp --version              # xem phiên bản
+'''
+    )
+    parser.add_argument('--version', action='version', version='Cat++ v2.0.0')
+    sub = parser.add_subparsers(dest='cmd', help='Lệnh')
+
+    # run
+    p_run = sub.add_parser('run', help='Chạy file .cat')
+    p_run.add_argument('file', help='File cần chạy')
+    p_run.add_argument('--timeout', '-t', type=float, default=5.0, help='Timeout (giây)')
+    p_run.set_defaults(func=cmd_run)
+
+    # repl
+    p_repl = sub.add_parser('repl', help='REPL tương tác')
+    p_repl.set_defaults(func=cmd_repl)
+
+    # fmt
+    p_fmt = sub.add_parser('fmt', help='Format code')
+    p_fmt.add_argument('file', help='File cần format')
+    p_fmt.add_argument('--write', '-w', action='store_true', help='Ghi vào file')
+    p_fmt.add_argument('--check', '-c', action='store_true', help='Chỉ kiểm tra')
+    p_fmt.add_argument('--diff', '-d', action='store_true', help='Xem diff')
+    p_fmt.set_defaults(func=cmd_fmt)
+
+    # lint
+    p_lint = sub.add_parser('lint', help='Kiểm tra code')
+    p_lint.add_argument('file', help='File cần kiểm tra')
+    p_lint.set_defaults(func=cmd_lint)
+
+    # test
+    p_test = sub.add_parser('test', help='Chạy test')
+    p_test.add_argument('file', help='File test .cat')
+    p_test.set_defaults(func=cmd_test)
+
+    # Nếu không có subcommand → mở REPL
+    if len(sys.argv) == 1:
+        sys.argv.append('repl')
+
+    args = parser.parse_args()
+    if not hasattr(args, 'func'):
+        parser.print_help()
+        return 0
+
+    try:
+        return args.func(args)
+    except KeyboardInterrupt:
+        print()
+        return 130
+
+
+if __name__ == '__main__':
+    sys.exit(main())

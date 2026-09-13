@@ -1,0 +1,5 @@
+meow "Meow! Hello, Cat++!"
+paw x = 10
+purr add(a, b)
+    give a + b
+meow add(x, 5)

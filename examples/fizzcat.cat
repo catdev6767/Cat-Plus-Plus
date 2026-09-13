@@ -1,0 +1,13 @@
+purr fizzcat(n)
+    sniff n % 15 == 0
+        give "FizzCat"
+    sniff n % 3 == 0
+        give "Fizz"
+    sniff n % 5 == 0
+        give "Cat"
+    give n
+
+paw i = 1
+knead i <= 20
+    meow fizzcat(i)
+    paw i = i + 1

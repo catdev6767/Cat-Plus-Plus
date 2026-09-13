@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Cat++ IDE</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/extras.css">
+<link rel="stylesheet" href="/learn.css">
+<link rel="stylesheet" href="/cat-theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.sidebar-project { padding: 10px 12px 8px; border-bottom: 1px solid var(--border-soft); }
+.sidebar-project-label { font-size: 10px; letter-spacing: 1.2px; color: var(--fg-dim);
+  text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.project-select { width: 100%; background: var(--bg-edit); color: var(--fg);
+  border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px;
+  font-size: 13px; outline: none; font-family: inherit; }
+.project-select:focus { border-color: var(--accent); }
+.project-btns { display: flex; gap: 4px; margin-top: 6px; }
+.project-btn { flex: 1; background: var(--bg-hover); color: var(--fg);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 4px 0; cursor: pointer; font-size: 13px; transition: all .15s; }
+.project-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+</style>
+</head>
+<body class="theme-dark">
+<div class="menubar">
+  <button id="hamburger"><i class="fas fa-bars"></i></button>
+  <span class="title">Cat++ <small>IDE</small></span>
+  <a href="/docs/" class="menu-item" target="_blank"><i class="fas fa-book"></i> Tài liệu</a>
+  <span class="menu-item" data-menu="examples"><i class="fas fa-code"></i> <span data-i18n="menu.examples">Ví dụ</span></span>
+  <span class="menu-item" data-menu="cheatsheet"><i class="fas fa-list"></i> <span data-i18n="menu.cheatsheet">Cheatsheet</span></span>
+  <span class="menu-item" data-menu="shortcuts"><i class="fas fa-keyboard"></i> <span data-i18n="menu.shortcuts">Phím tắt</span></span>
+  <div class="spacer"></div>
+  <button id="cat-btn" class="tb-icon-btn" title="Giao diện mèo">🐱</button>
+  <button id="lang-btn" class="tb-icon-btn" title="Language"><span id="lang-flag">🇻🇳</span></button>
+  <button id="theme-btn" class="tb-icon-btn"><i class="fas fa-adjust"></i></button>
+  <button id="zen-btn" class="tb-icon-btn"><i class="fas fa-expand"></i></button>
+</div>
+
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span>Cat++ IDE</span>
+    <button id="drawer-close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="drawer-section">
+      <div class="drawer-section-title">Bắt đầu</div>
+      <a class="drawer-item" data-menu="examples"><i class="fas fa-code"></i> Thư viện ví dụ</a>
+      <a class="drawer-item" data-menu="cheatsheet"><i class="fas fa-list"></i> <span data-i18n="menu.cheatsheet">Cheatsheet</span></a>
+      <a class="drawer-item" data-menu="shortcuts"><i class="fas fa-keyboard"></i> <span data-i18n="menu.shortcuts">Phím tắt</span></a>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">File</div>
+      <a class="drawer-item" id="act-new"><i class="fas fa-file"></i> File mới</a>
+      <a class="drawer-item" id="act-download"><i class="fas fa-download"></i> Tải về</a>
+      <a class="drawer-item" id="act-upload"><i class="fas fa-upload"></i> Mở file</a>
+      <a class="drawer-item" id="act-share"><i class="fas fa-share-alt"></i> Chia sẻ link</a>
+      <a class="drawer-item" id="act-export"><i class="fas fa-file-export"></i> Xuất dự án (.catpp)</a>
+      <a class="drawer-item" id="act-import"><i class="fas fa-file-import"></i> Nhập dự án (.catpp)</a>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Chạy</div>
+      <a class="drawer-item" id="act-run"><i class="fas fa-play"></i> Chạy (Ctrl+Enter)</a>
+      <a class="drawer-item" id="act-clear"><i class="fas fa-trash"></i> Xóa terminal</a>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Giao diện</div>
+      <a class="drawer-item" id="act-theme"><i class="fas fa-adjust"></i> Đổi theme</a>
+      <a class="drawer-item" id="act-sidebar"><i class="fas fa-columns"></i> Ẩn/hiện sidebar</a>
+      <a class="drawer-item" id="act-terminal"><i class="fas fa-terminal"></i> Ẩn/hiện terminal</a>
+      <a class="drawer-item" id="act-minimap"><i class="fas fa-map"></i> Ẩn/hiện minimap</a>
+    </div>
+  </div>
+</aside>
+
+<div class="body" id="main-body">
+  <div class="activitybar">
+    <div class="act-icon active"><i class="fas fa-file-code"></i></div>
+    <div class="act-icon" data-menu="examples"><i class="fas fa-code"></i></div>
+    <div class="act-icon" data-menu="cheatsheet"><i class="fas fa-list"></i></div>
+  </div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-project">
+      <div class="sidebar-project-label">📁 DỰ ÁN</div>
+      <select id="project-selector" class="project-select"></select>
+      <div class="project-btns">
+        <button id="project-new" class="project-btn" title="Dự án mới">+</button>
+        <button id="project-rename" class="project-btn" title="Đổi tên">✎</button>
+        <button id="project-delete" class="project-btn" title="Xóa">🗑</button>
+      </div>
+    </div>
+    <div class="sidebar-title">FILES</div>
+    <div class="file-tree" id="file-tree"></div>
+  </div>
+  <div class="main" id="main-col">
+    <div class="tabs" id="tabs"></div>
+    <div id="editor"></div>
+    <div class="panel" id="panel">
+      <div class="panel-header">
+        <span class="panel-tab active">TERMINAL</span>
+        <div class="spacer"></div>
+        <button id="run-btn"><i class="fas fa-play"></i> Run</button>
+        <button id="clear-btn"><i class="fas fa-trash"></i></button>
+      </div>
+      <div id="terminal"></div>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <span>Cat++ v2.0</span>
+  <span id="status">Ready</span>
+  <span class="spacer"></span>
+  <span id="cursor-pos">Ln 1, Col 1</span>
+  <span>UTF-8</span>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">Tiêu đề</span>
+      <button id="modal-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<input type="file" id="file-import-input" accept=".catpp,.json" style="display:none">
+<input type="file" id="file-input" accept=".cat,.txt" style="display:none">
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+<script src="/lang/vi.js"></script>
+<script src="/lang/en.js"></script>
+<script src="/app.js"></script>
+<script src="/extras.js"></script>
+<script src="/learn.js"></script>
+</body>
+</html>
