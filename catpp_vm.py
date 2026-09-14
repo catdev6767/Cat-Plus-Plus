@@ -16,6 +16,10 @@ OP_NEW            = 'NEW'
 OP_GET_FIELD      = 'GET_FIELD'
 OP_SET_FIELD      = 'SET_FIELD'
 OP_CALL_METHOD    = 'CALL_METHOD'
+OP_MATCH          = 'MATCH'
+OP_LAMBDA         = 'LAMBDA'
+OP_BUILD_LIST     = 'BUILD_LIST'
+OP_INDEX          = 'INDEX'
 OP_ADD            = 'ADD'
 OP_SUB            = 'SUB'
 OP_MUL            = 'MUL'
@@ -322,6 +326,31 @@ class Compiler:
                 self.emit(OP_NEW, (name, len(args)))
             else:
                 self.emit(OP_CALL, (name, len(args)))
+        elif t == 'index':
+            obj = expr[1]
+            idx = expr[2]
+            self.compile_expr(obj)
+            self.compile_expr(idx)
+            self.emit(OP_INDEX)
+        elif t == 'list':
+            items = expr[1]
+            for item in items:
+                self.compile_expr(item)
+            self.emit(OP_BUILD_LIST, len(items))
+        elif t == 'lambda':
+            params = expr[1]
+            body = expr[2]
+            # Compile body thành sub-function
+            saved_code = self.code
+            saved_loop = self.loop_stack
+            self.code = []
+            self.loop_stack = []
+            self.compile_expr(body)
+            self.emit(OP_RETURN)
+            lambda_code = self.code
+            self.code = saved_code
+            self.loop_stack = saved_loop
+            self.emit(OP_LAMBDA, (params, lambda_code))
         elif t == 'dot':
             obj = expr[1]
             field = expr[2]
@@ -363,7 +392,15 @@ class Instance:
     def __init__(self, cls):
         self.cls = cls
         self.data = {}
-        for f in cls.fields:
+        # Gom fields từ class cha (dùng MRO đơn giản)
+        all_fields = []
+        c = cls
+        while c:
+            for f in c.fields:
+                if f not in all_fields:
+                    all_fields.append(f)
+            c = c.parent
+        for f in all_fields:
             self.data[f] = None
 
 
@@ -399,11 +436,41 @@ class VM:
         self.code = code
         self.functions = functions or {}
         self.classes_data = classes or {}
-        self.instances = {}
         self.stack = []
         self.env = Env()
         self.output = []
         self.call_stack = []
+        # Load builtins từ interpreter
+        try:
+            from interpreter import make_builtins
+            bi = make_builtins()
+            for k, v in bi.items():
+                self.env.define(k, v)
+            # Aliases tiếng Anh → tên mèo
+            aliases = {
+                'len': 'tail', 'upper': 'puff', 'lower': 'melt', 'slice': 'nip',
+                'abs': 'bolt', 'min': 'kitten', 'max': 'lion',
+                'sqrt': 'scratch', 'floor': 'flop', 'ceil': 'perch',
+                'str': 'say', 'int': 'tally', 'float': 'drip',
+                'keys': 'collar', 'values': 'kits', 'has': 'seek',
+                'split': 'shred', 'join': 'weave', 'replace': 'swap',
+                'trim': 'lick', 'contains': 'hunt',
+                'push': 'stash', 'pop': 'snatch', 'sort': 'line',
+                'reverse': 'flip', 'first': 'head', 'last': 'rear',
+                'sum': 'pile', 'range': 'walk',
+                'map': 'chase', 'filter': 'sift', 'reduce': 'curl',
+                'sin': 'sway', 'cos': 'wave', 'tan': 'slant',
+                'log': 'grow', 'pow': 'bound',
+                'random': 'wander', 'random_int': 'dice',
+                'match': 'match', 'find_all': 'find_all',
+                'replace_all': 'replace_all',
+            }
+            for eng, meow_name in aliases.items():
+                if meow_name in bi:
+                    self.env.define(eng, bi[meow_name])
+        except Exception as e:
+            print(f"[VM] Không load được builtins: {e}")
+
 
     def push(self, v):
         self.stack.append(v)
@@ -529,7 +596,18 @@ class VM:
 
             elif op == OP_CALL:
                 fname, argc = ins.arg
+                # Builtin? — gọi trực tiếp
                 if fname not in self.functions:
+                    try:
+                        bfn = env.get(fname)
+                        if callable(bfn):
+                            args = []
+                            for _ in range(argc):
+                                args.insert(0, stack.pop())
+                            stack.append(bfn(*args))
+                            continue
+                    except NameError:
+                        pass
                     raise NameError(f"Ham chua dinh nghia: '{fname}'")
                 fn = self.functions[fname]
                 params = fn['params']
@@ -568,6 +646,215 @@ class VM:
                     pass
                 else:
                     stack.append(result)
+
+            elif op == OP_NEW:
+                cname, argc = ins.arg
+                if cname not in self.classes_data:
+                    raise NameError(f"Class chua dinh nghia: '{cname}'")
+                cdata = self.classes_data[cname]
+                def build_class(cd, nm):
+                    parent_obj = None
+                    if cd.get('parent'):
+                        pdata = self.classes_data.get(cd['parent'], {})
+                        parent_obj = build_class(pdata, cd['parent'])
+                    return ClassObj(nm, parent_obj, cd['fields'], cd['methods'])
+                cls = build_class(cdata, cname)
+                inst = Instance(cls)
+                args = []
+                for _ in range(argc):
+                    args.insert(0, stack.pop())
+                stack.append(inst)
+                if 'new' in cls.methods:
+                    m = cls.methods['new']
+                    new_env = Env(parent=env)
+                    new_env.define('me', inst)
+                    for p, a in zip(m['params'], args):
+                        new_env.define(p, a)
+                    self.call_stack.append({
+                        'return_pc': pc,
+                        'saved_env': env,
+                        'saved_code': code,
+                        'saved_n': n,
+                        'is_constructor': True,
+                    })
+                    env = new_env
+                    code = m['code']
+                    n = len(code)
+                    pc = 0
+                else:
+                    # Không có constructor → bind args vào fields theo thứ tự
+                    if argc > 0:
+                        all_fields = []
+                        c = cls
+                        while c:
+                            for f in c.fields:
+                                if f not in all_fields:
+                                    all_fields.append(f)
+                            c = c.parent
+                        for f, a in zip(all_fields, args):
+                            inst.data[f] = a
+
+            elif op == OP_GET_FIELD:
+                obj = stack.pop()
+                if isinstance(obj, Instance):
+                    if ins.arg in obj.data:
+                        stack.append(obj.data[ins.arg])
+                    else:
+                        cc, mm = obj.cls.find_method(ins.arg)
+                        if mm is not None:
+                            stack.append(('bound', obj, ins.arg))
+                        else:
+                            raise AttributeError(f"Instance khong co '{ins.arg}'")
+                elif isinstance(obj, dict):
+                    stack.append(obj.get(ins.arg))
+                else:
+                    raise TypeError(f"Khong lay duoc field '{ins.arg}'")
+
+            elif op == OP_SET_FIELD:
+                value = stack.pop()
+                obj = stack.pop()
+                if isinstance(obj, Instance):
+                    obj.data[ins.arg] = value
+                elif isinstance(obj, dict):
+                    obj[ins.arg] = value
+                else:
+                    raise TypeError(f"Khong gan duoc field '{ins.arg}'")
+
+            elif op == OP_CALL_METHOD:
+                mname, argc = ins.arg
+                args = []
+                for _ in range(argc):
+                    args.insert(0, stack.pop())
+                obj = stack.pop()
+                if not isinstance(obj, Instance):
+                    raise TypeError(f"'{mname}' chi goi tren instance")
+                cc, mm = obj.cls.find_method(mname)
+                if mm is None:
+                    raise AttributeError(f"Method '{mname}' khong ton tai")
+                new_env = Env(parent=env)
+                new_env.define('me', obj)
+                for p, a in zip(mm['params'], args):
+                    new_env.define(p, a)
+                self.call_stack.append({
+                    'return_pc': pc,
+                    'saved_env': env,
+                    'saved_code': code,
+                    'saved_n': n,
+                    'is_method': True,
+                })
+                env = new_env
+                code = mm['code']
+                n = len(code)
+                pc = 0
+
+            elif op == OP_LAMBDA:
+                params, lcode = ins.arg
+                # Tạo closure — hàm Python đóng gói
+                def make_closure(_params, _code, _env):
+                    def closure(*args):
+                        # Mini-VM cho lambda
+                        sub_env = Env(parent=_env)
+                        for p, a in zip(_params, args):
+                            sub_env.define(p, a)
+                        sub_vm = VM(_code, self.functions, self.classes_data)
+                        sub_vm.env = sub_env
+                        # Chạy code, lấy kết quả
+                        # Ghi đè run() để trả giá trị cuối
+                        sub_stack = sub_vm.stack
+                        sub_code = sub_vm.code
+                        sub_pc = 0
+                        sub_n = len(sub_code)
+                        while sub_pc < sub_n:
+                            sub_ins = sub_code[sub_pc]
+                            sub_pc += 1
+                            op2 = sub_ins.op
+                            if op2 == OP_CONST:
+                                sub_stack.append(sub_ins.arg)
+                            elif op2 == OP_LOAD:
+                                sub_stack.append(sub_env.get(sub_ins.arg))
+                            elif op2 == OP_ADD:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                if isinstance(a, str) or isinstance(b, str):
+                                    sub_stack.append(str(a) + str(b))
+                                else:
+                                    sub_stack.append(a + b)
+                            elif op2 == OP_SUB:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a - b)
+                            elif op2 == OP_MUL:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a * b)
+                            elif op2 == OP_DIV:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a / b)
+                            elif op2 == OP_MOD:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a % b)
+                            elif op2 == OP_LT:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a < b)
+                            elif op2 == OP_GT:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a > b)
+                            elif op2 == OP_EQ:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a == b)
+                            elif op2 == OP_NEQ:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a != b)
+                            elif op2 == OP_LTE:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a <= b)
+                            elif op2 == OP_GTE:
+                                b = sub_stack.pop(); a = sub_stack.pop()
+                                sub_stack.append(a >= b)
+                            elif op2 == OP_RETURN:
+                                if sub_stack:
+                                    return sub_stack.pop()
+                                return None
+                            elif op2 == OP_CALL:
+                                fname, argc = sub_ins.arg
+                                if fname in sub_vm.functions:
+                                    ff = sub_vm.functions[fname]
+                                    cargs = []
+                                    for _ in range(argc):
+                                        cargs.insert(0, sub_stack.pop())
+                                    ce = Env(parent=sub_env)
+                                    for p, a in zip(ff['params'], cargs):
+                                        ce.define(p, a)
+                                    # Mini-call — đơn giản hóa
+                                    sub_stack.append(None)
+                                else:
+                                    try:
+                                        bfn = sub_env.get(fname)
+                                        cargs = []
+                                        for _ in range(argc):
+                                            cargs.insert(0, sub_stack.pop())
+                                        sub_stack.append(bfn(*cargs))
+                                    except Exception:
+                                        sub_stack.append(None)
+                            else:
+                                return None
+                        return sub_stack[-1] if sub_stack else None
+                    return closure
+                stack.append(make_closure(params, lcode, env))
+
+            elif op == OP_BUILD_LIST:
+                n_items = ins.arg
+                items = []
+                for _ in range(n_items):
+                    items.insert(0, stack.pop())
+                stack.append(items)
+
+            elif op == OP_INDEX:
+                idx = stack.pop()
+                obj = stack.pop()
+                try:
+                    if isinstance(idx, float):
+                        idx = int(idx)
+                    stack.append(obj[idx])
+                except Exception as e:
+                    raise IndexError(f"Index lỗi: {e}")
 
             elif op == OP_HALT:
                 break
