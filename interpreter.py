@@ -4,7 +4,8 @@ import time, math, random as _random, sys
 KEYWORDS = {'paw','meow','purr','give','hiss','tap','sit','leap','listen',
             'sniff','swat','knead','groom','of','nod','shake','hungry',
             'with','either','never','cat','me','kin','kit','litter','in',
-            'match','case','use','in'}
+            'match','case','use','in',
+            'struct','volatile','cast','sizeof','asm','ptr','null','packed'}
 
 class CatError(Exception):
     def __init__(self, msg, line=0): super().__init__(msg); self.line = line
@@ -29,10 +30,24 @@ def tokenize(src):
             c = line[i]
             if c in ' \t': i += 1; continue
             if c == '#': break
-            if c.isdigit():
+            # Hex / binary / decimal
+            if c.isdigit() or (c == '0' and i + 1 < len(line) and line[i+1] in 'xXbB'):
                 j = i
+                if c == '0' and i + 1 < len(line) and line[i+1] in 'xX':
+                    j = i + 2
+                    while j < len(line) and line[j] in '0123456789abcdefABCDEF': j += 1
+                    toks.append(Tok('NUMBER', float(int(line[i:j], 16)), ln)); i = j; continue
+                if c == '0' and i + 1 < len(line) and line[i+1] in 'bB':
+                    j = i + 2
+                    while j < len(line) and line[j] in '01': j += 1
+                    toks.append(Tok('NUMBER', float(int(line[i:j], 2)), ln)); i = j; continue
                 while j < len(line) and (line[j].isdigit() or line[j]=='.'): j += 1
-                toks.append(Tok('NUMBER', float(line[i:j]), ln)); i = j; continue
+                num_str = line[i:j]
+                if '.' in num_str:
+                    toks.append(Tok('NUMBER', float(num_str), ln))
+                else:
+                    toks.append(Tok('NUMBER', int(num_str), ln))
+                i = j; continue
             if c == '"':
                 j, s = i+1, ''
                 while j < len(line) and line[j] != '"':
@@ -45,15 +60,24 @@ def tokenize(src):
                 while j < len(line) and (line[j].isalnum() or line[j]=='_'): j += 1
                 w = line[i:j]
                 toks.append(Tok(w.upper() if w in KEYWORDS else 'IDENT', w, ln)); i = j; continue
+            # 2-char operators
             two = line[i:i+2]
+            if two == '<<': toks.append(Tok('SHL', '<<', ln)); i += 2; continue
+            if two == '>>': toks.append(Tok('SHR', '>>', ln)); i += 2; continue
+            if two == '->': toks.append(Tok('ARROW_R', '->', ln)); i += 2; continue
             if two == '??': toks.append(Tok('COALESCE', '??', ln)); i += 2; continue
-            if c == '?': toks.append(Tok('QUESTION', '?', ln)); i += 1; continue
             if two in ('+=','-=','*=','/=','%='):
                 toks.append(Tok('OP_ASSIGN', two, ln)); i += 2; continue
             if two == '++': toks.append(Tok('INC', '++', ln)); i += 2; continue
             if two == '--': toks.append(Tok('DEC', '--', ln)); i += 2; continue
             if two == '=>': toks.append(Tok('ARROW', '=>', ln)); i += 2; continue
             if two in ('==','!=','<=','>='): toks.append(Tok(two, two, ln)); i += 2; continue
+            # 1-char operators
+            if c == '&': toks.append(Tok('AMP', '&', ln)); i += 1; continue
+            if c == '|': toks.append(Tok('PIPE', '|', ln)); i += 1; continue
+            if c == '^': toks.append(Tok('CARET', '^', ln)); i += 1; continue
+            if c == '~': toks.append(Tok('TILDE', '~', ln)); i += 1; continue
+            if c == '?': toks.append(Tok('QUESTION', '?', ln)); i += 1; continue
             if c in '+-*/%=<>()[]{}.,:': toks.append(Tok(c, c, ln)); i += 1; continue
             i += 1
         toks.append(Tok('NEWLINE','',ln))
@@ -61,6 +85,7 @@ def tokenize(src):
         indent_stack.pop(); toks.append(Tok('DEDENT','',len(lines)))
     toks.append(Tok('EOF','',0))
     return toks
+
 
 class Parser:
     def __init__(self, toks): self.toks, self.pos = toks, 0
