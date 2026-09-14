@@ -17,6 +17,7 @@ class CGen:
         self.vars = {}  # name → type
         self.structs = {}  # name → [fields]
         self.declarations = []  # global typedef/enum/struct
+        self.func_returns = {}  # name → C type
 
     def new_temp(self):
         self.temp_counter += 1
@@ -139,17 +140,25 @@ class CGen:
                 out.append(f'{self.ind()}{ctype} {name} = {{{args}}};')
                 self.vars[name] = ctype
                 return
+            # Function call → dùng return type
+            if isinstance(e, tuple) and e[0] == 'call' and e[1] in self.func_returns:
+                rtype = self.func_returns[e[1]]
+                if rtype != 'void':
+                    val = self.expr(e)
+                    out.append(f'{self.ind()}{rtype} {name} = {val};')
+                    self.vars[name] = rtype
+                    return
             val = self.expr(e)
-            # Đoán type
             if isinstance(e, tuple) and e[0] == 'num':
-                if isinstance(e[1], int): ctype = 'long'
-                else: ctype = 'double'
+                ctype = 'long' if isinstance(e[1], int) else 'double'
             elif isinstance(e, tuple) and e[0] == 'str':
                 ctype = 'char*'
             elif isinstance(e, tuple) and e[0] == 'bool':
                 ctype = 'int'
             elif isinstance(e, tuple) and e[0] == 'cast':
                 ctype = self.c_type(e[1])
+            elif isinstance(e, tuple) and e[0] == 'var' and e[1] in self.vars:
+                ctype = self.vars[e[1]]
             else:
                 ctype = 'long'
             out.append(f'{self.ind()}{ctype} {name} = {val};')
@@ -245,48 +254,114 @@ class CGen:
         else:
             out.append(f'{self.ind()}/* unknown stmt: {t} */')
 
-    def gen_func(self, name, params, body):
-        # Đoán return type từ body
+
+    def infer_return_type(self, body):
+        """Suy return type từ body."""
+        locals_ = {}
         rtype = 'void'
         for st in body:
-            if st[0] == 'return':
+            if not isinstance(st, tuple): continue
+            if st[0] == 'let':
+                name = st[1]; e = st[2]
+                if isinstance(e, tuple):
+                    if e[0] == 'call' and e[1] in self.structs:
+                        locals_[name] = e[1]
+                    elif e[0] == 'call' and e[1] in self.func_returns:
+                        locals_[name] = self.func_returns[e[1]]
+                    elif e[0] == 'num':
+                        locals_[name] = 'long' if isinstance(e[1], int) else 'double'
+                    elif e[0] == 'str':
+                        locals_[name] = 'char*'
+                    else:
+                        locals_[name] = 'long'
+            elif st[0] == 'return':
                 e = st[1]
                 if isinstance(e, tuple):
-                    if e[0] == 'num':
+                    if e[0] == 'var' and e[1] in locals_:
+                        rtype = locals_[e[1]]
+                    elif e[0] == 'call' and e[1] in self.structs:
+                        rtype = e[1]
+                    elif e[0] == 'call' and e[1] in self.func_returns:
+                        rtype = self.func_returns[e[1]]
+                    elif e[0] == 'num':
                         rtype = 'long' if isinstance(e[1], int) else 'double'
                     elif e[0] == 'str':
                         rtype = 'char*'
+                    else:
+                        rtype = 'long'
+        return rtype
+
+    def infer_param_types(self, params, body):
+        """Suy param types từ cách dùng trong body."""
+        types = {p: 'long' for p in params}
+        def scan(node):
+            if not isinstance(node, tuple): return
+            if node[0] == 'dot':
+                obj = node[1]; field = node[2]
+                if isinstance(obj, tuple) and obj[0] == 'var':
+                    pname = obj[1]
+                    if pname in types:
+                        for sname, sfields in self.structs.items():
+                            if field in sfields:
+                                types[pname] = sname
+                                break
+            for x in node[1:]:
+                if isinstance(x, tuple): scan(x)
+                elif isinstance(x, list):
+                    for y in x:
+                        if isinstance(y, (tuple, list)): scan(y)
+        for st in body:
+            scan(st)
+        return types
+
+    def gen_func(self, name, params, body):
+        rtype = self.func_returns.get(name, 'void')
+        ptypes = self.infer_param_types(params, body)
+        param_str = ', '.join(f'{ptypes[p]} {p}' for p in params)
         lines = []
         self.indent = 1
         for st in body:
             self.stmt(st, lines)
         self.indent = 0
-        sig = f'{rtype} {name}({", ".join("long " + p for p in params)}) {{\n'
+        sig = f'{rtype} {name}({param_str}) {{\n'
         sig += '\n'.join(lines)
         sig += '\n}'
         self.functions.append(sig)
 
+
     def gen(self, ast):
-        self.includes.add('catpp_rt.h')
+        # ═══ PASS 1: scan structs ═══
+        for s in ast:
+            if s[0] == 'struct':
+                self.structs[s[1]] = s[2]
+
+        # ═══ PASS 2: infer return types ═══
+        for s in ast:
+            if s[0] == 'func':
+                name = s[1]; body = s[3]
+                self.func_returns[name] = self.infer_return_type(body)
+
+        # ═══ PASS 3: generate ═══
         body = []
         for s in ast:
             self.stmt(s, body)
+
+        header = '#include <stdint.h>\n'
+        header += '#include <stdio.h>\n'
+        header += '#include <stdlib.h>\n'
+        header += '#include "catpp_rt.h"\n\n'
+
         out = []
-        # Main
         out.append('int main(void) {')
         for line in body:
             out.append('    ' + line)
         out.append('    return 0;')
         out.append('}')
-        # Header
-        header = '#include <stdint.h>\n'
-        header += '#include <stdio.h>\n'
-        header += '#include <stdlib.h>\n'
-        header += '#include "catpp_rt.h"\n\n'
-        # Order: header → declarations → functions → main
+
         decls = '\n'.join(self.declarations)
         funcs = '\n\n'.join(self.functions)
         return header + decls + '\n\n' + funcs + '\n\n' + '\n'.join(out) + '\n'
+
 
 
 def transpile(code):
