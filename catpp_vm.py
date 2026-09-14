@@ -11,6 +11,11 @@ Không đụng interpreter.py. Chạy song song, fallback khi cần.
 OP_CONST          = 'CONST'
 OP_LOAD           = 'LOAD'
 OP_STORE          = 'STORE'
+OP_DEFINE         = 'DEFINE'
+OP_NEW            = 'NEW'
+OP_GET_FIELD      = 'GET_FIELD'
+OP_SET_FIELD      = 'SET_FIELD'
+OP_CALL_METHOD    = 'CALL_METHOD'
 OP_ADD            = 'ADD'
 OP_SUB            = 'SUB'
 OP_MUL            = 'MUL'
@@ -61,7 +66,9 @@ class Compiler:
         self.code = []
         self.loop_stack = []
         self.functions = {}
+        self.classes = {}
         self.func_stack = []
+
 
     def emit(self, op, arg=None, line=0):
         idx = len(self.code)
@@ -126,17 +133,73 @@ class Compiler:
         if t == 'func':
             return
 
+        if t == 'class':
+            name = stmt[1]
+            parent = stmt[2] if len(stmt) > 2 else None
+            # Detect: fields ở vị trí nào
+            # Pattern cũ: ('class', name, parent, fields, methods, line)
+            # Pattern mới: ('class', name, parent, fields, methods, static, ...)
+            fields = stmt[3] if len(stmt) > 3 and isinstance(stmt[3], list) else []
+            methods = {}
+            for i in range(4, len(stmt)):
+                if isinstance(stmt[i], dict):
+                    methods = stmt[i]
+                    break
+            # Fallback: methods ở vị trí 4
+            if not methods and len(stmt) > 4 and isinstance(stmt[4], dict):
+                methods = stmt[4]
+            # Compile từng method thành bytecode
+            method_code = {}
+            for mname, (params, body) in methods.items():
+                saved_code = self.code
+                saved_loop = self.loop_stack
+                self.code = []
+                self.loop_stack = []
+                for s in body:
+                    self.compile_stmt(s)
+                self.emit(OP_CONST, None)
+                self.emit(OP_RETURN)
+                method_code[mname] = {
+                    'params': params,
+                    'code': self.code,
+                }
+                self.code = saved_code
+                self.loop_stack = saved_loop
+            self.classes[name] = {
+                'parent': parent,
+                'fields': fields,
+                'methods': method_code,
+            }
+            return
+
         if t == 'return':
             self.compile_expr(stmt[1])
             self.emit(OP_RETURN, None, line)
 
         elif t == 'let':
             self.compile_expr(stmt[2])
-            self.emit(OP_STORE, stmt[1], line)
+            self.emit(OP_DEFINE, stmt[1], line)
 
         elif t == 'assign':
             self.compile_expr(stmt[2])
             self.emit(OP_STORE, stmt[1], line)
+
+        elif t == 'assign_target':
+            # me.x = value hoặc obj.field = value
+            target = stmt[1]
+            value = stmt[2]
+            if target[0] == 'dot':
+                # obj.field = value
+                self.compile_expr(target[1])  # obj
+                self.compile_expr(value)
+                self.emit(OP_SET_FIELD, target[2], line)
+            elif target[0] == 'index':
+                raise Unsupported("index assign chua ho tro")
+            elif target[0] == 'var':
+                self.compile_expr(value)
+                self.emit(OP_STORE, target[1], line)
+            else:
+                raise Unsupported(f"assign_target '{target[0]}' chua ho tro")
 
         elif t == 'op_assign':
             target, op, rhs = stmt[1], stmt[2], stmt[3]
@@ -254,7 +317,24 @@ class Compiler:
             args = expr[2]
             for a in args:
                 self.compile_expr(a)
-            self.emit(OP_CALL, (name, len(args)))
+            # Nếu là class → OP_NEW
+            if name in self.classes:
+                self.emit(OP_NEW, (name, len(args)))
+            else:
+                self.emit(OP_CALL, (name, len(args)))
+        elif t == 'dot':
+            obj = expr[1]
+            field = expr[2]
+            self.compile_expr(obj)
+            self.emit(OP_GET_FIELD, field)
+        elif t == 'method_call':
+            obj = expr[1]
+            mname = expr[2]
+            args = expr[3]
+            self.compile_expr(obj)
+            for a in args:
+                self.compile_expr(a)
+            self.emit(OP_CALL_METHOD, (mname, len(args)))
         else:
             raise Unsupported(f"Expr '{t}' chua ho tro trong VM")
 
@@ -262,6 +342,31 @@ class Compiler:
 # ═══════════════════════════════════════════════
 # VM — Execute bytecode
 # ═══════════════════════════════════════════════
+class ClassObj:
+    def __init__(self, name, parent, fields, methods, env=None):
+        self.name = name
+        self.parent = parent
+        self.fields = fields
+        self.methods = methods
+        self.env = env
+
+    def find_method(self, name):
+        cls = self
+        while cls:
+            if name in cls.methods:
+                return (cls, cls.methods[name])
+            cls = cls.parent
+        return (None, None)
+
+
+class Instance:
+    def __init__(self, cls):
+        self.cls = cls
+        self.data = {}
+        for f in cls.fields:
+            self.data[f] = None
+
+
 class Env:
     def __init__(self, parent=None):
         self.vars = {}
@@ -290,9 +395,11 @@ class Env:
 
 
 class VM:
-    def __init__(self, code, functions=None):
+    def __init__(self, code, functions=None, classes=None):
         self.code = code
         self.functions = functions or {}
+        self.classes_data = classes or {}
+        self.instances = {}
         self.stack = []
         self.env = Env()
         self.output = []
@@ -337,6 +444,9 @@ class VM:
 
             elif op == OP_STORE:
                 env.set(ins.arg, stack.pop())
+
+            elif op == OP_DEFINE:
+                env.define(ins.arg, stack.pop())
 
             elif op == OP_ADD:
                 b = stack.pop(); a = stack.pop()
@@ -446,16 +556,18 @@ class VM:
 
             elif op == OP_RETURN:
                 result = stack.pop()
-                # Pop call stack
                 if not self.call_stack:
-                    # Top-level return — dừng
                     break
                 frame = self.call_stack.pop()
                 pc = frame['return_pc']
                 env = frame['saved_env']
                 code = frame['saved_code']
                 n = frame['saved_n']
-                stack.append(result)
+                # Constructor: instance đã nằm trong stack, không push lại
+                if frame.get('is_constructor'):
+                    pass
+                else:
+                    stack.append(result)
 
             elif op == OP_HALT:
                 break
@@ -476,7 +588,7 @@ def compile_ast(ast):
 def run_ast(ast):
     comp = Compiler()
     code = comp.compile(ast)
-    return VM(code, comp.functions).run()
+    return VM(code, comp.functions, comp.classes).run()
 
 
 def run_catpp_vm(source):
