@@ -975,14 +975,21 @@ def exec_(s, env, out, rt):
                     if errname: local.define(errname, str(e))
                     for x in handler: exec_(x, local, out, rt)
         elif t == 'func':
-            name, params, body = s[1], s[2], s[3]
-            def fn(*args, _p=params, _b=body, _e=env, _rt=rt):
+            name, params, defaults = s[1], s[2], s[3]
+            body = s[4]
+            def fn(*args, _p=params, _d=defaults, _b=body, _e=env, _rt=rt, _o=out):
                 _rt.depth += 1
                 if _rt.depth > _rt.max_depth:
                     _rt.depth -= 1
                     raise CatError(f"Meo qua sau (>{_rt.max_depth})")
                 local = Env(_e)
-                for p, a in zip(_p, args): local.define(p, a)
+                for i, p in enumerate(_p):
+                    if i < len(args):
+                        local.define(p, args[i])
+                    elif p in _d:
+                        local.define(p, eval_(_d[p], _e, _o, _rt))
+                    else:
+                        raise CatError(f"Thieu tham so '{p}'")
                 try:
                     for x in _b: exec_(x, local, out, _rt)
                 except ReturnEx as r:
