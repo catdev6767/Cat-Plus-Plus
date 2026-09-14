@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from interpreter import run_catpp, CatError
+
+# Engine nhanh (tuỳ chọn)
+try:
+    from catpp_pycompiler import run_catpp_py, Unsupported as PyUnsupported
+    HAVE_PYCOMPILER = True
+except Exception:
+    HAVE_PYCOMPILER = False
+
+def run_catpp_fast(code, timeout=5.0):
+    """Thử PyCompiler trước, fallback interpreter."""
+    if HAVE_PYCOMPILER:
+        try:
+            return run_catpp_py(code, timeout=timeout)
+        except PyUnsupported:
+            pass
+        except Exception:
+            pass  # Lỗi runtime → fallback
+    return run_catpp(code, timeout=timeout)
 import json, time, threading, os
 
 PORT = 5000
@@ -136,7 +154,7 @@ class Handler(SimpleHTTPRequestHandler):
             n = int(self.headers.get('Content-Length', 0))
             body = json.loads(self.rfile.read(n) or b'{}')
             try:
-                out = run_catpp(body.get('code', ''), timeout=5.0)
+                out = run_catpp_fast(body.get('code', ''), timeout=5.0)
                 self._json({'ok': True, 'output': out, 'line': 0})
             except CatError as e:
                 self._json({'ok': False, 'output': str(e), 'line': getattr(e, 'line', 0)})

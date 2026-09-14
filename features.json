@@ -43,21 +43,79 @@
     }
   },
   "builtins": {
-    "basic": ["tail", "puff", "melt", "nip", "bolt", "kitten", "lion"],
-    "math": ["scratch", "flop", "perch", "sway", "wave", "slant", "grow", "bound"],
-    "convert": ["say", "tally", "drip"],
-    "string": ["shred", "weave", "swap", "lick", "hunt"],
-    "list": ["stash", "snatch", "line", "flip", "head", "rear", "pile", "walk"],
-    "dict": ["collar", "kits", "seek"],
-    "functional": ["chase", "sift", "curl"],
-    "random": ["wander", "dice"],
-    "regex": ["match", "find_all", "replace_all"]
+    "basic": [
+      "tail",
+      "puff",
+      "melt",
+      "nip",
+      "bolt",
+      "kitten",
+      "lion"
+    ],
+    "math": [
+      "scratch",
+      "flop",
+      "perch",
+      "sway",
+      "wave",
+      "slant",
+      "grow",
+      "bound"
+    ],
+    "convert": [
+      "say",
+      "tally",
+      "drip"
+    ],
+    "string": [
+      "shred",
+      "weave",
+      "swap",
+      "lick",
+      "hunt"
+    ],
+    "list": [
+      "stash",
+      "snatch",
+      "line",
+      "flip",
+      "head",
+      "rear",
+      "pile",
+      "walk"
+    ],
+    "dict": [
+      "collar",
+      "kits",
+      "seek"
+    ],
+    "functional": [
+      "chase",
+      "sift",
+      "curl"
+    ],
+    "random": [
+      "wander",
+      "dice"
+    ],
+    "regex": [
+      "match",
+      "find_all",
+      "replace_all"
+    ]
   },
   "ide": {
     "editor": "Monaco Editor",
     "terminal": "xterm.js",
-    "theme": ["dark", "light", "cat"],
-    "i18n": ["vi", "en"],
+    "theme": [
+      "dark",
+      "light",
+      "cat"
+    ],
+    "i18n": [
+      "vi",
+      "en"
+    ],
     "features": {
       "tabs": "Nhiều tab",
       "file_tree": "Cây file",
@@ -75,15 +133,31 @@
     "cli": "catpp run/repl/fmt/lint/test",
     "docs": {
       "url": "/docs/",
-      "languages": ["vi", "en"],
+      "languages": [
+        "vi",
+        "en"
+      ],
       "pages": "77 mỗi ngôn ngữ",
-      "download": ["md", "txt", "zip"]
+      "download": [
+        "md",
+        "txt",
+        "zip"
+      ]
     },
     "learn": "10 bài tập tương tác"
   },
   "architecture": {
-    "core": ["module.py", "registry.py", "bus.py", "loader.py"],
-    "modules": ["interpreter", "server", "cli"],
+    "core": [
+      "module.py",
+      "registry.py",
+      "bus.py",
+      "loader.py"
+    ],
+    "modules": [
+      "interpreter",
+      "server",
+      "cli"
+    ],
     "tests": "tests/test_all.py — 40 tests"
   },
   "todo": [
@@ -91,5 +165,10 @@
     "debug_breakpoint",
     "bytecode_vm",
     "transpile_cpp"
-  ]
+  ],
+  "engines": {
+    "interpreter": "1x — full features",
+    "bytecode_vm": "2-3x — functions, OOP, builtins",
+    "pycompiler": "20-50x — compile sang Python, dùng làm default"
+  }
 }
