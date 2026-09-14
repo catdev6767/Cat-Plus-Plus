@@ -18,6 +18,26 @@
     l08: { q: 'Hàm tính tổng danh sách là gì?', opts: ['sum()', 'total()', 'pile()', 'add()'], a: 2 },
     l09: { q: 'Chuyển chuỗi sang chữ HOA bằng gì?', opts: ['upper()', 'puff()', 'caps()', 'big()'], a: 1 },
     l10: { q: 'Class trong Cat++ dùng từ khóa nào?', opts: ['class', 'cat', 'type', 'struct'], a: 1 }
+    'l11': { q: 'Default param viết thế nào?', opts: ["f(a)", "f(a=10)", "f(a:10)", "f(a:10=)"], a: 1 },
+    'l12': { q: 'Lambda dùng từ khóa nào?', opts: ["fn", "lambda", "kit", "arrow"], a: 2 },
+    'l13': { q: 'Hàm map trong Cat++ là?', opts: ["map", "chase", "apply", "each"], a: 1 },
+    'l14': { q: 'Hàm reduce trong Cat++ là?', opts: ["reduce", "fold", "curl", "sum"], a: 2 },
+    'l15': { q: 'Regex pattern cho chữ số là?', opts: ["\\w", "\\d", "\\s", "[a-z]"], a: 1 },
+    'l16': { q: 'Trích xuất tất cả dùng hàm nào?', opts: ["match", "find_all", "extract", "grep"], a: 1 },
+    'l17': { q: 'Wildcard trong match/case là?', opts: ["*", "_", "?", "any"], a: 1 },
+    'l18': { q: 'Dict truy cập bằng cách nào?', opts: ["d.key", "d['key']", "d->key", "both d.key and d['key']"], a: 3 },
+    'l19': { q: 'Loại phần tử trùng dùng hàm nào?', opts: ["unique", "dedupe", "set", "clean"], a: 0 },
+    'l20': { q: 'Bắt lỗi bằng từ khóa nào?', opts: ["catch", "except", "hiss", "handle"], a: 2 },
+    'l21': { q: 'Ghi file dùng hàm nào?', opts: ["write", "save", "write_file", "put"], a: 2 },
+    'l22': { q: 'Đọc file theo dòng dùng hàm nào?', opts: ["read_file", "read_lines", "readlines", "readline"], a: 1 },
+    'l23': { q: 'Liệt kê thư mục dùng hàm nào?', opts: ["ls", "dir", "list_dir", "list"], a: 2 },
+    'l24': { q: '3 engine của Cat++ là gì?', opts: ["Interpreter, VM, PyCompiler", "Fast, Slow, Medium", "Tree, Byte, Py", "A, B, C"], a: 0 },
+    'l25': { q: 'PyCompiler nhanh hơn interpreter bao nhiêu lần?', opts: ["2x", "5x", "20-50x", "1000x"], a: 2 },
+    'l26': { q: 'Felis OS viết bằng ngôn ngữ gì?', opts: ["Python", "C + assembly", "Rust", "JavaScript"], a: 1 },
+    'l27': { q: 'Felis OS có bao nhiêu commands?', opts: ["10", "23", "50", "100"], a: 1 },
+    'l28': { q: 'Felis OS lưu file ở đâu?', opts: ["Disk", "USB", "RAM", "Network"], a: 2 },
+    'l29': { q: 'Boot loader của Felis OS là?', opts: ["BIOS", "GRUB", "LILO", "rEFInd"], a: 1 },
+    'l30': { q: 'Số fib(10) là bao nhiêu?', opts: ["34", "55", "89", "144"], a: 1 },
   };
 
   // ============ STORAGE ============

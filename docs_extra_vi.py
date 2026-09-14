@@ -8,7 +8,7 @@ KEYWORDS_EXTRA = {
     'sizeof': {'cat':'Low-level','sig':'sizeof(x) hoặc sizeof(type)','desc':'Kích thước của giá trị hoặc kiểu trong byte.','detail':'Với type: dùng bảng TYPE_SIZES. Với value: đo theo kiểu thực tế.','ex':[('Value','meow sizeof(42)','8'),('String','meow sizeof("hello")','5'),('Type','meow sizeof(i32)','4')]},
     'struct': {'cat':'Low-level','sig':'struct <Tên>\n    <field>: <type>','desc':'Định nghĩa struct C-layout.','detail':'Giống class nhưng không có method. Dùng cho dữ liệu thuần.','ex':[('Point','struct Point\n    x: i32\n    y: i32\npaw p = Point(3, 4)\nmeow p.x','3')]},
     'volatile': {'cat':'Low-level','sig':'volatile paw <name> = <value>','desc':'Biến volatile — compiler không tối ưu.','detail':'Dùng cho memory-mapped I/O (MMIO).','ex':[('Cơ bản','volatile paw status = 0\nmeow status','0')]},
-    'asm': {'cat':'Low-level','sig':'asm("instruction")','desc':'Inline assembly.','detail':'Trong interpreter chỉ parse, không chạy. Trong CatOS transpile thành __asm__ volatile().','ex':[('NOP','asm("nop")\nmeow "ok"','ok')]},
+    'asm': {'cat':'Low-level','sig':'asm("instruction")','desc':'Inline assembly.','detail':'Trong interpreter chỉ parse, không chạy. Trong Felis OS transpile thành __asm__ volatile().','ex':[('NOP','asm("nop")\nmeow "ok"','ok')]},
     'static': {'cat':'OOP','sig':'purr static <method>()','desc':'Static method — gọi qua class, không cần instance.','ex':[('Cơ bản','cat Math\n    purr static square(n)\n        give n * n\nmeow Math.square(5)','25')]},
     'get': {'cat':'OOP','sig':'purr get <name>()','desc':'Getter — chạy khi đọc field.','ex':[('Cơ bản','cat P\n    paw _x\n    purr new(v)\n        me.x = v\n    purr get x()\n        give me._x\nmeow P(42).x','42')]},
     'set': {'cat':'OOP','sig':'purr set <name>(v)','desc':'Setter — chạy khi gán field.','ex':[('Cơ bản','cat P\n    paw _x\n    purr set x(v)\n        me._x = v * 2\n    purr get x()\n        give me._x\npaw p = P()\np.x = 5\nmeow p.x','10')]},
@@ -100,7 +100,7 @@ TUTORIAL_EXTRA = [
     ('12-regex', 'Bài 12 — Regex',               _load_tut('12-regex.html')),
     ('13-match', 'Bài 13 — match/case',          _load_tut('13-match.html')),
     ('14-file',  'Bài 14 — File I/O',            _load_tut('14-file.html')),
-    ('15-catos', 'Bài 15 — CatOS',               _load_tut('15-catos.html')),
+    ('15-catos', 'Bài 15 — Felis OS',               _load_tut('15-felis.html')),
 ]
 
 def _load_file(path):
@@ -123,7 +123,7 @@ ERRORS_EXTRA = [
 ]
 
 GUIDE_EXTRA = [
-    ('catos',          'CatOS — Hướng dẫn',    _load_file('content/guide/catos.html')),
+    ('felis',          'Felis OS — Hướng dẫn',    _load_file('content/guide/felis.html')),
     ('best-practices', 'Best Practices',        _load_file('content/guide/best-practices.html')),
     ('internals',      'Internals — Cách chạy', _load_file('content/guide/internals.html')),
     ('performance',    'Performance Guide',     _load_file('content/guide/performance.html')),

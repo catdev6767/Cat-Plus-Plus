@@ -170,5 +170,49 @@
     "interpreter": "1x — full features",
     "bytecode_vm": "2-3x — functions, OOP, builtins",
     "pycompiler": "20-50x — compile sang Python, dùng làm default"
+  },
+  "os": {
+    "name": "Felis OS",
+    "version": "0.2",
+    "features": [
+      "keyboard driver (PS/2)",
+      "IDT + IRQ",
+      "VGA text mode",
+      "Serial port",
+      "RAM filesystem",
+      "23 shell commands",
+      "line editor (arrows, home, end, delete)",
+      "command history",
+      "tab completion"
+    ]
+  },
+  "learn": {
+    "total_lessons": 30,
+    "categories": [
+      "Cơ bản",
+      "Nâng cao",
+      "Hệ thống",
+      "VM",
+      "Felis OS"
+    ],
+    "features": [
+      "quiz",
+      "dashboard",
+      "certificate",
+      "gallery"
+    ]
+  },
+  "docs": {
+    "pages_vi": 162,
+    "pages_en": 162,
+    "tutorials": 15,
+    "categories": [
+      "Tutorial",
+      "Reference",
+      "Cookbook",
+      "Errors",
+      "Guide",
+      "Spec"
+    ]
   }
 }

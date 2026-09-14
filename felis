@@ -1,0 +1,17 @@
+#!/bin/bash
+# Felis OS — luôn chạy RAM-only
+cd "$(dirname "$0")"
+
+if [ ! -f kernel/felis.elf ]; then
+    echo "Chưa build. Chạy: bash build_felis.sh"
+    exit 1
+fi
+
+exec distrobox enter catos -- qemu-system-x86_64 \
+    -kernel "$HOME/catpp/kernel/felis.elf" \
+    -m 128M \
+    -display curses \
+    -nodefaults \
+    -snapshot \
+    -no-reboot \
+    -monitor none

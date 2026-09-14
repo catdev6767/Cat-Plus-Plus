@@ -50,10 +50,10 @@ Phiên bản đầu tiên. Cat++ là ngôn ngữ lập trình cú pháp tiếng 
 - Reference (keyword + builtin)
 - Cookbook (30 công thức)
 - Error reference (20 lỗi)
-- Guide (CatOS, Best Practices, Internals, Performance)
+- Guide (Felis OS, Best Practices, Internals, Performance)
 - Tải về: MD, TXT, ZIP
 
-### CatOS
+### Felis OS
 
 - Transpiler Cat++ → C (`tools/transpiler.py`)
 - Freestanding runtime (`runtime/`)

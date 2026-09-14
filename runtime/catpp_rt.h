@@ -11,6 +11,7 @@
 void  catpp_init(void);
 void  catpp_print(long v);
 void  catpp_print_str(const char* s);
+void  catpp_putc(char c);
 long  catpp_len(void* arr);
 int   catpp_in(long v, void* arr);
 const char* catpp_str(long v);

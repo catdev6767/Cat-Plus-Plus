@@ -72,18 +72,18 @@ check:
 	@echo ""
 	@echo "Chạy 'make test' để kiểm tra chức năng"
 
-# ═══ CatOS ═══
+# ═══ Felis OS ═══
 build-catos:
-	@bash build_catos.sh
+	@bash build_felis.sh
 
-run-catos: build-catos
-	@if [ -f catos.iso ]; then \
-		qemu-system-x86_64 -cdrom catos.iso; \
+run-felis: build-catos
+	@if [ -f felis.iso ]; then \
+		qemu-system-x86_64 -cdrom felis.iso; \
 	else \
-		echo "Chưa có catos.iso"; \
+		echo "Chưa có felis.iso"; \
 	fi
 
-catos-clean:
-	@rm -f kernel/*.o kernel/*.elf kernel/demo.c catos.iso
+felis-clean:
+	@rm -f kernel/*.o kernel/*.elf kernel/demo.c felis.iso
 	@rm -rf iso/
-	@echo "✓ Đã xóa build CatOS"
+	@echo "✓ Đã xóa build Felis OS"

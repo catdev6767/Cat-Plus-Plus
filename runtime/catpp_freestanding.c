@@ -41,6 +41,12 @@ static void vga_putc(char c) {
     }
     if (c == '\r') { vga_col = 0; return; }
     if (c == '\t') { vga_col = (vga_col + 8) & ~7; return; }
+    if (c == '\b') {
+        /* Backspace — di chuyển con trỏ lùi, KHÔNG in ký tự */
+        if (vga_col > 0) vga_col--;
+        return;
+    }
+    if (c < 32) return;  /* Bỏ qua các ký tự điều khiển khác */
     VGA_MEM[vga_row * VGA_WIDTH + vga_col] = vga_entry(c, vga_color);
     if (++vga_col >= VGA_WIDTH) {
         vga_col = 0;
@@ -82,8 +88,17 @@ void catpp_init(void) {
     vga_clear();
 }
 
+void catpp_putc(char c) {
+    vga_putc(c);
+    serial_putc(c);
+}
+
 void catpp_print_str(const char* s) {
-    if (!s) { vga_putc('('); vga_putc('n'); vga_putc('u'); vga_putc('l'); vga_putc('l'); vga_putc(')'); return; }
+    if (!s) {
+        vga_putc('('); vga_putc('n'); vga_putc('u'); vga_putc('l'); vga_putc('l'); vga_putc(')');
+        vga_putc('\n');
+        return;
+    }
     while (*s) {
         vga_putc(*s);
         serial_putc(*s);
@@ -165,4 +180,28 @@ const char* catpp_str(long v) {
     else while (v > 0) { buf[--i] = '0' + (v % 10); v /= 10; }
     if (neg) buf[--i] = '-';
     return &buf[i];
+}
+
+
+/* ═══ Compiler runtime helpers ═══ */
+void* memcpy(void* dest, const void* src, unsigned long n) {
+    unsigned char* d = (unsigned char*)dest;
+    const unsigned char* s = (const unsigned char*)src;
+    for (unsigned long i = 0; i < n; i++) d[i] = s[i];
+    return dest;
+}
+
+void* memset(void* dest, int c, unsigned long n) {
+    unsigned char* d = (unsigned char*)dest;
+    for (unsigned long i = 0; i < n; i++) d[i] = (unsigned char)c;
+    return dest;
+}
+
+int memcmp(const void* a, const void* b, unsigned long n) {
+    const unsigned char* x = (const unsigned char*)a;
+    const unsigned char* y = (const unsigned char*)b;
+    for (unsigned long i = 0; i < n; i++) {
+        if (x[i] != y[i]) return x[i] - y[i];
+    }
+    return 0;
 }

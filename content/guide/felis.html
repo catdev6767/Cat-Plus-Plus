@@ -1,4 +1,4 @@
-<h1>CatOS — Hướng dẫn đầy đủ</h1>
+<h1>Felis OS — Hướng dẫn đầy đủ</h1>
 <p>Từ Cat++ code tới kernel boot trên bare metal, không Linux, không Python.</p>
 
 <h2>1. Tổng quan kiến trúc</h2>
@@ -20,7 +20,7 @@
                │ ld + linker.ld
                ▼
 ┌──────────────────────────────────────┐
-│  ELF kernel (catos.elf)              │
+│  ELF kernel (felis.elf)              │
 └──────────────┬───────────────────────┘
                │ QEMU hoặc GRUB
                ▼
@@ -49,9 +49,9 @@
 │   ├── stdarg.h
 │   └── limits.h
 │
-└── build_catos.sh                 # Build script</code></pre>
+└── build_felis.sh                 # Build script</code></pre>
 
-<h2>3. Cú pháp low-level chỉ có trong CatOS</h2>
+<h2>3. Cú pháp low-level chỉ có trong Felis OS</h2>
 
 <h3>Bit operations</h3>
 <pre><code>paw a = 0xFF & 0x0F       # AND → 15
@@ -89,7 +89,7 @@ asm("nop")   # Không làm gì</code></pre>
 <h2>4. Viết kernel code</h2>
 
 <h3>Ví dụ 1: In "Hello"</h3>
-<pre><code>meow "Hello from CatOS!"</code></pre>
+<pre><code>meow "Hello from Felis OS!"</code></pre>
 
 <h3>Ví dụ 2: Vòng lặp</h3>
 <pre><code>paw i = 0
@@ -106,7 +106,7 @@ knead i < 10
 meow fib(10)</code></pre>
 
 <h2>5. Build script</h2>
-<pre><code>bash build_catos.sh</code></pre>
+<pre><code>bash build_felis.sh</code></pre>
 
 <p>Các bước build:</p>
 <ol>
@@ -115,33 +115,33 @@ meow fib(10)</code></pre>
 <li><b>Compile runtime</b> → <code>rt.o</code> (VGA, serial)</li>
 <li><b>Compile main.c</b> → <code>main.o</code></li>
 <li><b>Compile demo.c</b> → <code>demo.o</code></li>
-<li><b>Link</b> tất cả → <code>catos.elf</code></li>
+<li><b>Link</b> tất cả → <code>felis.elf</code></li>
 </ol>
 
 <h2>6. Chạy trên QEMU</h2>
 
 <h3>Cách 1 — Terminal (không cửa sổ)</h3>
 <pre><code>qemu-system-x86_64 \
-    -kernel kernel/catos.elf \
+    -kernel kernel/felis.elf \
     -m 128M \
     -display none \
     -serial stdio</code></pre>
 
 <h3>Cách 2 — Cửa sổ đồ họa</h3>
-<pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M</code></pre>
+<pre><code>qemu-system-x86_64 -kernel kernel/felis.elf -m 128M</code></pre>
 
 <h3>Cách 3 — Tạo ISO bootable</h3>
 <pre><code># Cần grub2-tools
 mkdir -p iso/boot/grub
-cp kernel/catos.elf iso/boot/
+cp kernel/felis.elf iso/boot/
 cat > iso/boot/grub/grub.cfg << 'GRUB'
-menuentry "CatOS" {
-    multiboot /boot/catos.elf
+menuentry "Felis OS" {
+    multiboot /boot/felis.elf
     boot
 }
 GRUB
-grub2-mkrescue -o catos.iso iso
-qemu-system-x86_64 -cdrom catos.iso</code></pre>
+grub2-mkrescue -o felis.iso iso
+qemu-system-x86_64 -cdrom felis.iso</code></pre>
 
 <h2>7. Runtime freestanding</h2>
 
@@ -194,17 +194,17 @@ qemu-system-x86_64 -cdrom catos.iso</code></pre>
 <h2>10. Debug</h2>
 
 <h3>Xem serial output</h3>
-<pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -serial stdio</code></pre>
+<pre><code>qemu-system-x86_64 -kernel kernel/felis.elf -serial stdio</code></pre>
 
 <h3>Disassemble kernel</h3>
-<pre><code>objdump -d kernel/catos.elf</code></pre>
+<pre><code>objdump -d kernel/felis.elf</code></pre>
 
 <h3>Xem ELF info</h3>
-<pre><code>readelf -h kernel/catos.elf
-readelf -S kernel/catos.elf</code></pre>
+<pre><code>readelf -h kernel/felis.elf
+readelf -S kernel/felis.elf</code></pre>
 
 <h3>Kiểm tra Multiboot</h3>
-<pre><code>grub-file --is-x86-multiboot kernel/catos.elf</code></pre>
+<pre><code>grub-file --is-x86-multiboot kernel/felis.elf</code></pre>
 
 <h2>11. Ví dụ: vẽ chữ lên VGA</h2>
 <pre><code>struct VgaChar
