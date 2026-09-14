@@ -71,3 +71,19 @@ check:
 	done
 	@echo ""
 	@echo "Chạy 'make test' để kiểm tra chức năng"
+
+# ═══ CatOS ═══
+build-catos:
+	@bash build_catos.sh
+
+run-catos: build-catos
+	@if [ -f catos.iso ]; then \
+		qemu-system-x86_64 -cdrom catos.iso; \
+	else \
+		echo "Chưa có catos.iso"; \
+	fi
+
+catos-clean:
+	@rm -f kernel/*.o kernel/*.elf kernel/demo.c catos.iso
+	@rm -rf iso/
+	@echo "✓ Đã xóa build CatOS"

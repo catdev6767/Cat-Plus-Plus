@@ -189,7 +189,7 @@ class CGen:
             e = s[1]
             # Detect format
             if isinstance(e, tuple) and e[0] == 'str':
-                out.append(f'{self.ind()}printf("%s\\n", {self.expr(e)});')
+                out.append(f'{self.ind()}catpp_print_str({self.expr(e)});')
             else:
                 # Đoán format từ biến
                 out.append(f'{self.ind()}catpp_print({self.expr(e)});')
@@ -347,8 +347,6 @@ class CGen:
             self.stmt(s, body)
 
         header = '#include <stdint.h>\n'
-        header += '#include <stdio.h>\n'
-        header += '#include <stdlib.h>\n'
         header += '#include "catpp_rt.h"\n\n'
 
         out = []

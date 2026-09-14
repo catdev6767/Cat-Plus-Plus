@@ -452,6 +452,18 @@ def build():
         import docs_data_vi, docs_data_en
         importlib.reload(docs_data_vi)
         importlib.reload(docs_data_en)
+        # Merge extra
+        try:
+            import docs_extra_vi, docs_extra_en
+            importlib.reload(docs_extra_vi)
+            importlib.reload(docs_extra_en)
+            docs_data_vi.KEYWORDS = {**docs_data_vi.KEYWORDS, **docs_extra_vi.KEYWORDS_EXTRA}
+            docs_data_vi.BUILTINS = {**docs_data_vi.BUILTINS, **docs_extra_vi.BUILTINS_EXTRA}
+            docs_data_en.KEYWORDS = {**docs_data_en.KEYWORDS, **docs_extra_en.KEYWORDS_EXTRA}
+            docs_data_en.BUILTINS = {**docs_data_en.BUILTINS, **docs_extra_en.BUILTINS_EXTRA}
+            print(f'  + Merged extras')
+        except Exception as e:
+            print(f'  ⚠ Không merge extra: {e}')
         print('Build docs:')
         build_lang('vi', docs_data_vi)
         build_lang('en', docs_data_en)

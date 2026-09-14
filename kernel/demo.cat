@@ -1,0 +1,17 @@
+# Cat++ demo chạy trong CatOS
+
+meow "Hello from Cat++ in kernel!"
+
+paw x = 10
+paw y = 20
+meow x + y
+
+paw i = 0
+knead i < 5
+    meow i
+    i++
+
+purr square(n)
+    give n * n
+
+meow square(7)
