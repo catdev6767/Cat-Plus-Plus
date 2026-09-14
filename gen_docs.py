@@ -324,6 +324,11 @@ def build_lang(lang_code, data_module):
             s += '<div class="sidebar-section">Errors</div>'
             for slug, title, _ in ERRORS:
                 s += '<a href="' + root + 'errors/' + slug + '.html" class="sidebar-link">' + title + '</a>'
+        GUIDE = getattr(data_module, 'GUIDE', [])
+        if GUIDE:
+            s += '<div class="sidebar-section">Guide</div>'
+            for slug, title, _ in GUIDE:
+                s += '<a href="' + root + 'guide/' + slug + '.html" class="sidebar-link">' + title + '</a>'
         return s
 
     def page(title, body, root='', prev=None, nxt=None, bc=None):
@@ -466,7 +471,15 @@ def build_lang(lang_code, data_module):
                 f.write(page(title, '<h1>' + title + '</h1>' + body, root='../',
                     bc=[(TXT['home'], '../index.html'), ('Errors', None), (title, None)]))
 
-    total = 1 + len(TUTORIAL) + len(KEYWORDS) + len(BUILTINS) + len(SPEC) + len(COOKBOOK) + len(ERRORS)
+    GUIDE = getattr(data_module, 'GUIDE', [])
+    if GUIDE:
+        os.makedirs(site + '/guide', exist_ok=True)
+        for slug, title, body in GUIDE:
+            with open(site + '/guide/' + slug + '.html', 'w', encoding='utf-8') as f:
+                f.write(page(title, body, root='../',
+                    bc=[(TXT['home'], '../index.html'), ('Guide', None), (title, None)]))
+
+    total = 1 + len(TUTORIAL) + len(KEYWORDS) + len(BUILTINS) + len(SPEC) + len(COOKBOOK) + len(ERRORS) + len(GUIDE)
     print('  [' + lang_code + '] ' + str(total) + ' trang')
 
 def build():
@@ -501,6 +514,10 @@ def build():
                 docs_data_vi.ERRORS = list(docs_extra_vi.ERRORS_EXTRA)
             if hasattr(docs_extra_en, 'ERRORS_EXTRA'):
                 docs_data_en.ERRORS = list(docs_extra_en.ERRORS_EXTRA)
+            if hasattr(docs_extra_vi, 'GUIDE_EXTRA'):
+                docs_data_vi.GUIDE = list(docs_extra_vi.GUIDE_EXTRA)
+            if hasattr(docs_extra_en, 'GUIDE_EXTRA'):
+                docs_data_en.GUIDE = list(docs_extra_en.GUIDE_EXTRA)
             print(f'  + Merged extras: {len(docs_data_vi.KEYWORDS)} kw, {len(docs_data_vi.BUILTINS)} bi, {len(docs_data_vi.TUTORIAL)} tut')
         except Exception as e:
             print(f'  ⚠ Không merge extra: {e}')

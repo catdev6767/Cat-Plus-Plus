@@ -121,3 +121,10 @@ ERRORS_EXTRA = [
     ('runtime',  'Lỗi runtime',  _load_file('content/errors/runtime.html')),
     ('oop',      'Lỗi OOP',      _load_file('content/errors/oop.html')),
 ]
+
+GUIDE_EXTRA = [
+    ('catos',          'CatOS — Hướng dẫn',    _load_file('content/guide/catos.html')),
+    ('best-practices', 'Best Practices',        _load_file('content/guide/best-practices.html')),
+    ('internals',      'Internals — Cách chạy', _load_file('content/guide/internals.html')),
+    ('performance',    'Performance Guide',     _load_file('content/guide/performance.html')),
+]

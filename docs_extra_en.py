@@ -15,3 +15,6 @@ TUTORIAL_EXTRA = _tut_vi
 from docs_extra_vi import COOKBOOK_EXTRA as _cb_vi, ERRORS_EXTRA as _err_vi
 COOKBOOK_EXTRA = _cb_vi
 ERRORS_EXTRA = _err_vi
+
+from docs_extra_vi import GUIDE_EXTRA as _gd_vi
+GUIDE_EXTRA = _gd_vi
