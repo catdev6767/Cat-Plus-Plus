@@ -1,0 +1,50 @@
+<p>Cách Felis OS được biên dịch từ source C + Assembly thành kernel ELF.</p>
+
+<h2>1. Compiler flags</h2>
+<pre><code>-m32                  # 32-bit
+-ffreestanding        # Không có OS
+-fno-pic              # Không position-independent
+-fno-stack-protector  # Không stack canary
+-fno-builtin          # Không builtin functions
+-nostdlib -nostdinc   # Không standard library
+-Wall -O2             # Warnings + optimize</code></pre>
+
+<h2>2. Include paths</h2>
+<pre><code>-I libc      # stdint.h, stddef.h
+-I runtime   # catpp_rt.h
+-I kernel    # utils.h</code></pre>
+
+<h2>3. Build steps</h2>
+<pre><code># 1. Compile .c → .o
+gcc $CFLAGS -c kernel/main.c -o kernel/main.o
+
+# 2. Compile .s → .o (assembly)
+gcc $CFLAGS -c kernel/entry.s -o kernel/entry.o
+
+# 3. Link tất cả
+ld -m elf_i386 -T linker.ld -nostdlib \
+   kernel/entry.o kernel/main.o ... \
+   $(gcc -m32 -print-libgcc-file-name) \
+   -o kernel/felis.elf</code></pre>
+
+<h2>4. Linker script</h2>
+<pre><code>ENTRY(_start)
+
+SECTIONS {
+    . = 1M;                    /* Load tại 1MB */
+
+    .multiboot : ALIGN(4K) { *(.multiboot) }
+    .text      : ALIGN(4K) { *(.text) }
+    .rodata    : ALIGN(4K) { *(.rodata) }
+    .data      : ALIGN(4K) { *(.data) }
+    .bss       : ALIGN(4K) { *(COMMON) *(.bss) }
+}</code></pre>
+
+<h2>5. Tại sao load tại 1MB?</h2>
+<p>Vùng 0-1MB dành cho BIOS, VGA buffer, bootloader. Kernel phải nằm trên 1MB.</p>
+
+<h2>Bài tập</h2>
+<ol>
+<li>Sửa linker script load kernel tại 2MB.</li>
+<li>Thêm <code>-Os</code> thay vì <code>-O2</code> → so sánh kích thước.</li>
+</ol>

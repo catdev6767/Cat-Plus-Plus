@@ -100,7 +100,22 @@ TUTORIAL_EXTRA = [
     ('12-regex', 'Bài 12 — Regex',               _load_tut('12-regex.html')),
     ('13-match', 'Bài 13 — match/case',          _load_tut('13-match.html')),
     ('14-file',  'Bài 14 — File I/O',            _load_tut('14-file.html')),
-    ('15-catos', 'Bài 15 — Felis OS',               _load_tut('15-felis.html')),
+    ('15-catos', 'Bài 15 — CatOS cũ',            _load_tut('15-catos.html')),
+    ('16-vm',    'Bài 16 — Bytecode VM',         _load_tut('16-vm.html')),
+    ('17-pycompiler', 'Bài 17 — PyCompiler',     _load_tut('17-pycompiler.html')),
+    ('18-felis-intro', 'Bài 18 — Felis OS giới thiệu', _load_tut('18-felis-intro.html')),
+    ('19-felis-cmds', 'Bài 19 — Felis OS commands', _load_tut('19-felis-cmds.html')),
+    ('20-felis-fs', 'Bài 20 — Felis OS filesystem', _load_tut('20-felis-fs.html')),
+    ('21-felis-editor', 'Bài 21 — Felis OS line editor', _load_tut('21-felis-editor.html')),
+    ('22-felis-keyboard', 'Bài 22 — Keyboard driver', _load_tut('22-felis-keyboard.html')),
+    ('23-felis-idt', 'Bài 23 — IDT và Interrupt', _load_tut('23-felis-idt.html')),
+    ('24-felis-build', 'Bài 24 — Build system',  _load_tut('24-felis-build.html')),
+    ('25-felis-iso', 'Bài 25 — Tạo ISO boot USB', _load_tut('25-felis-iso.html')),
+    ('26-felis-vga', 'Bài 26 — VGA driver',      _load_tut('26-felis-vga.html')),
+    ('27-felis-serial', 'Bài 27 — Serial port',  _load_tut('27-felis-serial.html')),
+    ('28-felis-memory', 'Bài 28 — Memory management', _load_tut('28-felis-memory.html')),
+    ('29-felis-newcmd', 'Bài 29 — Tạo lệnh mới', _load_tut('29-felis-newcmd.html')),
+    ('30-felis-project', 'Bài 30 — Đồ án cuối khóa', _load_tut('30-felis-project.html')),
 ]
 
 def _load_file(path):
