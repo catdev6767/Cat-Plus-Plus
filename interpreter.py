@@ -159,21 +159,36 @@ class Parser:
             self.expect('NEWLINE'); return ('listen', name, t.line)
         if t.type == 'PURR':
             self.next(); name = self.expect('IDENT').value; params = []
-            while self.peek().type == 'IDENT': params.append(self.next().value)
+            defaults = {}
+            while self.peek().type == 'IDENT':
+                pname = self.next().value
+                params.append(pname)
+                if self.peek().type == '=':
+                    self.next()
+                    defaults[pname] = self.expr()
             if self.peek().type == '(':
                 self.next()
                 if self.peek().type != ')':
-                    params.append(self.expect('IDENT').value)
-                    if self.peek().type == ':':
-                        self.next(); self.expect('IDENT').value  # bỏ qua type
+                    pname = self.expect('IDENT').value
+                    params.append(pname)
+                    if self.peek().type == '=':
+                        self.next()
+                        defaults[pname] = self.expr()
+                    elif self.peek().type == ':':
+                        self.next(); self.expect('IDENT').value
                     while self.peek().type == ',':
-                        self.next(); params.append(self.expect('IDENT').value)
-                        if self.peek().type == ':':
+                        self.next()
+                        pname = self.expect('IDENT').value
+                        params.append(pname)
+                        if self.peek().type == '=':
+                            self.next()
+                            defaults[pname] = self.expr()
+                        elif self.peek().type == ':':
                             self.next(); self.expect('IDENT').value
                 self.expect(')')
             if self.peek().type == 'IDENT' and self.peek().value == 'to':
                 self.next(); self.expect('IDENT').value
-            body = self.block(); return ('func', name, params, body, t.line)
+            body = self.block(); return ('func', name, params, defaults, body, t.line)
         if t.type == 'STRUCT':
             self.next()
             if self.peek().type == 'PACKED': self.next()
@@ -975,14 +990,20 @@ def exec_(s, env, out, rt):
                     if errname: local.define(errname, str(e))
                     for x in handler: exec_(x, local, out, rt)
         elif t == 'func':
-            name, params, body = s[1], s[2], s[3]
-            def fn(*args, _p=params, _b=body, _e=env, _rt=rt):
+            name, params, defaults, body = s[1], s[2], s[3], s[4]
+            def fn(*args, _p=params, _d=defaults, _b=body, _e=env, _rt=rt, _o=out):
                 _rt.depth += 1
                 if _rt.depth > _rt.max_depth:
                     _rt.depth -= 1
                     raise CatError(f"Meo qua sau (>{_rt.max_depth})")
                 local = Env(_e)
-                for p, a in zip(_p, args): local.define(p, a)
+                for i, p in enumerate(_p):
+                    if i < len(args):
+                        local.define(p, args[i])
+                    elif p in _d:
+                        local.define(p, eval_(_d[p], _e, _o, _rt))
+                    else:
+                        raise CatError(f"Thieu tham so '{p}'")
                 try:
                     for x in _b: exec_(x, local, out, _rt)
                 except ReturnEx as r:
