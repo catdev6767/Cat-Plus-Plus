@@ -1,0 +1,80 @@
+<p>Cat++ có thể đọc, ghi file và tương tác với hệ thống.</p>
+
+<h2>1. Đọc file</h2>
+<pre><code>paw content = read_file("/etc/hostname")
+meow content</code></pre>
+
+<h2>2. Ghi file</h2>
+<pre><code>write_file("/tmp/hello.txt", "Xin chao!")
+meow read_file("/tmp/hello.txt")</code></pre>
+
+<h2>3. Ghi thêm vào file</h2>
+<pre><code>write_file("/tmp/log.txt", "Dong 1\n")
+append_file("/tmp/log.txt", "Dong 2\n")
+append_file("/tmp/log.txt", "Dong 3\n")
+meow read_file("/tmp/log.txt")</code></pre>
+
+<h2>4. Đọc theo dòng</h2>
+<pre><code>write_file("/tmp/data.txt", "mot\nhai\nba\n")
+paw lines = read_lines("/tmp/data.txt")
+groom line of lines
+    meow line</code></pre>
+<p>Kết quả:</p>
+<pre><code>mot
+hai
+ba</code></pre>
+
+<h2>5. Ghi danh sách theo dòng</h2>
+<pre><code>write_lines("/tmp/out.txt", ["alpha", "beta", "gamma"])
+meow read_file("/tmp/out.txt")</code></pre>
+
+<h2>6. Kiểm tra file tồn tại</h2>
+<pre><code>sniff exists("/etc/passwd")
+    meow "Co file passwd"
+
+sniff is_file("/tmp")
+    meow "khong phai file"
+swat
+    meow "khong phai file"
+
+sniff is_dir("/tmp")
+    meow "/tmp la thu muc"</code></pre>
+
+<h2>7. Liệt kê thư mục</h2>
+<pre><code>paw files = list_dir("/tmp")
+groom f of files
+    meow f</code></pre>
+
+<h2>8. Xóa file, tạo thư mục</h2>
+<pre><code>make_dir("/tmp/myapp")
+write_file("/tmp/myapp/data.txt", "test")
+meow exists("/tmp/myapp/data.txt")
+remove_file("/tmp/myapp/data.txt")</code></pre>
+
+<h2>9. Biến môi trường</h2>
+<pre><code>meow env("HOME")
+meow env("USER")
+meow env("PATH")</code></pre>
+
+<h2>10. Ví dụ: đếm từ trong file</h2>
+<pre><code>write_file("/tmp/text.txt", "hello world from catpp\n")
+paw content = read_file("/tmp/text.txt")
+paw words = shred(content, " ")
+meow len(words)</code></pre>
+
+<h2>11. Ví dụ: ghi log</h2>
+<pre><code>purr log(msg)
+    paw t = timestamp()
+    append_file("/tmp/app.log", cast(str, t) + ": " + msg + "\n")
+
+log("Chuong trinh bat dau")
+log("Xu ly du lieu")
+log("Hoan thanh")
+meow read_file("/tmp/app.log")</code></pre>
+
+<h2>Bài tập</h2>
+<ol>
+<li>Viết chương trình sao chép file.</li>
+<li>Đếm số dòng, số từ, số ký tự trong file.</li>
+<li>Viết hàm tìm kiếm chuỗi trong file, in ra số dòng có chứa.</li>
+</ol>

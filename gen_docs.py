@@ -461,7 +461,12 @@ def build():
             docs_data_vi.BUILTINS = {**docs_data_vi.BUILTINS, **docs_extra_vi.BUILTINS_EXTRA}
             docs_data_en.KEYWORDS = {**docs_data_en.KEYWORDS, **docs_extra_en.KEYWORDS_EXTRA}
             docs_data_en.BUILTINS = {**docs_data_en.BUILTINS, **docs_extra_en.BUILTINS_EXTRA}
-            print(f'  + Merged extras')
+            # Merge tutorial
+            if hasattr(docs_extra_vi, 'TUTORIAL_EXTRA'):
+                docs_data_vi.TUTORIAL = list(docs_data_vi.TUTORIAL) + list(docs_extra_vi.TUTORIAL_EXTRA)
+            if hasattr(docs_extra_en, 'TUTORIAL_EXTRA'):
+                docs_data_en.TUTORIAL = list(docs_data_en.TUTORIAL) + list(docs_extra_en.TUTORIAL_EXTRA)
+            print(f'  + Merged extras: {len(docs_data_vi.KEYWORDS)} kw, {len(docs_data_vi.BUILTINS)} bi, {len(docs_data_vi.TUTORIAL)} tut')
         except Exception as e:
             print(f'  ⚠ Không merge extra: {e}')
         print('Build docs:')

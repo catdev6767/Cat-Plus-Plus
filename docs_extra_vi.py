@@ -84,3 +84,21 @@ BUILTINS_EXTRA = {
     'spawn':    {'cat':'Đa luồng','sig':'spawn(fn, ...args)','desc':'Chạy hàm ở thread mới.','ex':[]},
     'wait_all': {'cat':'Đa luồng','sig':'wait_all()','desc':'Chờ tất cả thread kết thúc.','ex':[]},
 }
+
+# ═══ Tutorial mới ═══
+import os as _os
+
+def _load_tut(name):
+    path = _os.path.join('content', 'tut', name)
+    if _os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            return f.read()
+    return '<p>(chưa có nội dung)</p>'
+
+TUTORIAL_EXTRA = [
+    ('11-oop',   'Bài 11 — OOP nâng cao',       _load_tut('11-oop.html')),
+    ('12-regex', 'Bài 12 — Regex',               _load_tut('12-regex.html')),
+    ('13-match', 'Bài 13 — match/case',          _load_tut('13-match.html')),
+    ('14-file',  'Bài 14 — File I/O',            _load_tut('14-file.html')),
+    ('15-catos', 'Bài 15 — CatOS',               _load_tut('15-catos.html')),
+]
