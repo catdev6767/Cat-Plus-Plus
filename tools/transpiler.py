@@ -16,6 +16,7 @@ class CGen:
         self.temp_counter = 0
         self.vars = {}  # name → type
         self.structs = {}  # name → [fields]
+        self.declarations = []  # global typedef/enum/struct
 
     def new_temp(self):
         self.temp_counter += 1
@@ -224,15 +225,19 @@ class CGen:
         elif t == 'struct':
             name = s[1]; fields = s[2]
             self.structs[name] = fields
-            out.append(f'typedef struct {name} {{')
+            decl = []
+            decl.append(f'typedef struct {name} {{')
             for f in fields:
-                out.append(f'    long {f};')
-            out.append(f'}} {name};')
+                decl.append(f'    long {f};')
+            decl.append(f'}} {name};')
+            self.declarations.extend(decl)
         elif t == 'enum':
             name = s[1]; members = s[2]
-            out.append(f'enum {name} {{')
-            out.append('    ' + ', '.join(members))
-            out.append(f'}};')
+            decl = []
+            decl.append(f'enum {name} {{')
+            decl.append('    ' + ', '.join(members))
+            decl.append(f'}};')
+            self.declarations.extend(decl)
         elif t == 'use':
             # use "file.cat" → include file.c
             fname = s[1].replace('.cat', '.h')
@@ -278,9 +283,10 @@ class CGen:
         header += '#include <stdio.h>\n'
         header += '#include <stdlib.h>\n'
         header += '#include "catpp_rt.h"\n\n'
-        # Functions trước main
+        # Order: header → declarations → functions → main
+        decls = '\n'.join(self.declarations)
         funcs = '\n\n'.join(self.functions)
-        return header + funcs + '\n\n' + '\n'.join(out) + '\n'
+        return header + decls + '\n\n' + funcs + '\n\n' + '\n'.join(out) + '\n'
 
 
 def transpile(code):
