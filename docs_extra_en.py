@@ -11,3 +11,7 @@ BUILTINS_EXTRA = _bi_vi
 from docs_extra_vi import TUTORIAL_EXTRA as _tut_vi
 # Tạm giữ VI — sẽ dịch sau
 TUTORIAL_EXTRA = _tut_vi
+
+from docs_extra_vi import COOKBOOK_EXTRA as _cb_vi, ERRORS_EXTRA as _err_vi
+COOKBOOK_EXTRA = _cb_vi
+ERRORS_EXTRA = _err_vi

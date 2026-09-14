@@ -311,9 +311,19 @@ def build_lang(lang_code, data_module):
         s += '<div class="sidebar-section">' + TXT['builtin'] + '</div>'
         for k in sorted(BUILTINS):
             s += '<a href="' + root + 'ref/builtin/' + k + '.html" class="sidebar-link">' + k + '</a>'
+        COOKBOOK = getattr(data_module, 'COOKBOOK', [])
+        ERRORS = getattr(data_module, 'ERRORS', [])
         s += '<div class="sidebar-section">' + TXT['spec'] + '</div>'
         for slug, title, _ in SPEC:
             s += '<a href="' + root + 'spec/' + slug + '.html" class="sidebar-link">' + title + '</a>'
+        if COOKBOOK:
+            s += '<div class="sidebar-section">Cookbook</div>'
+            for slug, title, _ in COOKBOOK:
+                s += '<a href="' + root + 'cookbook/' + slug + '.html" class="sidebar-link">' + title + '</a>'
+        if ERRORS:
+            s += '<div class="sidebar-section">Errors</div>'
+            for slug, title, _ in ERRORS:
+                s += '<a href="' + root + 'errors/' + slug + '.html" class="sidebar-link">' + title + '</a>'
         return s
 
     def page(title, body, root='', prev=None, nxt=None, bc=None):
@@ -440,7 +450,23 @@ def build_lang(lang_code, data_module):
                 prev=prev, nxt=nxt,
                 bc=[(TXT['home'], '../index.html'), (TXT['spec'], None), (title, None)]))
 
-    total = 1 + len(TUTORIAL) + len(KEYWORDS) + len(BUILTINS) + len(SPEC)
+    # Cookbook
+    COOKBOOK = getattr(data_module, 'COOKBOOK', [])
+    ERRORS = getattr(data_module, 'ERRORS', [])
+    if COOKBOOK:
+        os.makedirs(site + '/cookbook', exist_ok=True)
+        for slug, title, body in COOKBOOK:
+            with open(site + '/cookbook/' + slug + '.html', 'w', encoding='utf-8') as f:
+                f.write(page(title, '<h1>' + title + '</h1>' + body, root='../',
+                    bc=[(TXT['home'], '../index.html'), ('Cookbook', None), (title, None)]))
+    if ERRORS:
+        os.makedirs(site + '/errors', exist_ok=True)
+        for slug, title, body in ERRORS:
+            with open(site + '/errors/' + slug + '.html', 'w', encoding='utf-8') as f:
+                f.write(page(title, '<h1>' + title + '</h1>' + body, root='../',
+                    bc=[(TXT['home'], '../index.html'), ('Errors', None), (title, None)]))
+
+    total = 1 + len(TUTORIAL) + len(KEYWORDS) + len(BUILTINS) + len(SPEC) + len(COOKBOOK) + len(ERRORS)
     print('  [' + lang_code + '] ' + str(total) + ' trang')
 
 def build():
@@ -466,6 +492,15 @@ def build():
                 docs_data_vi.TUTORIAL = list(docs_data_vi.TUTORIAL) + list(docs_extra_vi.TUTORIAL_EXTRA)
             if hasattr(docs_extra_en, 'TUTORIAL_EXTRA'):
                 docs_data_en.TUTORIAL = list(docs_data_en.TUTORIAL) + list(docs_extra_en.TUTORIAL_EXTRA)
+            # Merge cookbook + errors
+            if hasattr(docs_extra_vi, 'COOKBOOK_EXTRA'):
+                docs_data_vi.COOKBOOK = list(docs_extra_vi.COOKBOOK_EXTRA)
+            if hasattr(docs_extra_en, 'COOKBOOK_EXTRA'):
+                docs_data_en.COOKBOOK = list(docs_extra_en.COOKBOOK_EXTRA)
+            if hasattr(docs_extra_vi, 'ERRORS_EXTRA'):
+                docs_data_vi.ERRORS = list(docs_extra_vi.ERRORS_EXTRA)
+            if hasattr(docs_extra_en, 'ERRORS_EXTRA'):
+                docs_data_en.ERRORS = list(docs_extra_en.ERRORS_EXTRA)
             print(f'  + Merged extras: {len(docs_data_vi.KEYWORDS)} kw, {len(docs_data_vi.BUILTINS)} bi, {len(docs_data_vi.TUTORIAL)} tut')
         except Exception as e:
             print(f'  ⚠ Không merge extra: {e}')

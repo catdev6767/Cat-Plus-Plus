@@ -1,0 +1,62 @@
+<h2>Chuỗi</h2>
+
+<h3>11. Format chuỗi với biến</h3>
+<pre><code>paw name = "Tom"
+paw age = 3
+meow "Ten: {name}, Tuoi: {age}"</code></pre>
+
+<h3>12. Tách chuỗi thành danh sách</h3>
+<pre><code>paw csv = "mot,hai,ba"
+paw items = shred(csv, ",")
+meow items
+# [mot, hai, ba]</code></pre>
+
+<h3>13. Nối danh sách thành chuỗi</h3>
+<pre><code>paw words = ["hello", "world"]
+meow weave(words, " ")
+# hello world</code></pre>
+
+<h3>14. Kiểm tra chuỗi con</h3>
+<pre><code>sniff hunt("hello world", "world")
+    meow "co"
+
+# Hoặc dùng method
+sniff "hello world".contains("world")
+    meow "co"</code></pre>
+
+<h3>15. Viết hoa chữ đầu</h3>
+<pre><code>purr capitalize(s)
+    sniff len(s) == 0
+        give s
+    paw first = s.char_at(0).upper()
+    paw rest = s.substring(1)
+    give first + rest
+
+meow capitalize("hello")   # Hello</code></pre>
+
+<h3>16. Đảo ngược chuỗi</h3>
+<pre><code>paw s = "hello"
+meow reverse_str(s)   # olleh</code></pre>
+
+<h3>17. Chuẩn hóa khoảng trắng</h3>
+<pre><code>paw s = "  hello    world  "
+meow s.trim()                     # hello    world
+meow replace_all("\\s+", s.trim(), " ")  # hello world</code></pre>
+
+<h3>18. Kiểm tra email hợp lệ</h3>
+<pre><code>purr is_email(s)
+    give match("^[\\w.]+@[\\w.]+\\.[a-z]+$", s)
+
+meow is_email("a@b.com")   # yes
+meow is_email("invalid")   # no</code></pre>
+
+<h3>19. Trích xuất số từ chuỗi</h3>
+<pre><code>paw text = "Toi co 3 meo va 5 cho"
+paw nums = find_all("[0-9]+", text)
+meow nums   # [3, 5]</code></pre>
+
+<h3>20. Pad số thành chuỗi cố định</h3>
+<pre><code>purr pad_num(n, width)
+    give pad_left(cast(str, n), width, "0")
+
+meow pad_num(5, 3)   # 005</code></pre>

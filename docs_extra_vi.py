@@ -102,3 +102,22 @@ TUTORIAL_EXTRA = [
     ('14-file',  'Bài 14 — File I/O',            _load_tut('14-file.html')),
     ('15-catos', 'Bài 15 — CatOS',               _load_tut('15-catos.html')),
 ]
+
+def _load_file(path):
+    if _os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            return f.read()
+    return '<p>(chưa có)</p>'
+
+COOKBOOK_EXTRA = [
+    ('file',       'File I/O',        _load_file('content/cookbook/file.html')),
+    ('string',     'Chuỗi',           _load_file('content/cookbook/string.html')),
+    ('list',       'Danh sách',       _load_file('content/cookbook/list.html')),
+    ('algorithm',  'Thuật toán',      _load_file('content/cookbook/algorithm.html')),
+]
+
+ERRORS_EXTRA = [
+    ('syntax',   'Lỗi cú pháp',  _load_file('content/errors/syntax.html')),
+    ('runtime',  'Lỗi runtime',  _load_file('content/errors/runtime.html')),
+    ('oop',      'Lỗi OOP',      _load_file('content/errors/oop.html')),
+]

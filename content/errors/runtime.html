@@ -1,0 +1,62 @@
+<h2>Lỗi runtime</h2>
+
+<h3>9. Biến chưa khai báo</h3>
+<pre><code>meow x</code></pre>
+<p><b>Lỗi:</b> <code>Bien chua khai bao: 'x'</code></p>
+<p><b>Sửa:</b> <code>paw x = 10</code> trước khi dùng.</p>
+
+<h3>10. Chia cho 0</h3>
+<pre><code>meow 10 / 0</code></pre>
+<p><b>Lỗi:</b> <code>Chia cho 0</code></p>
+<p><b>Sửa:</b></p>
+<pre><code>sniff divisor != 0
+    meow 10 / divisor
+swat
+    meow "khong the chia"</code></pre>
+
+<h3>11. Truy cập index ngoài phạm vi</h3>
+<pre><code>paw arr = [1, 2, 3]
+meow arr[10]</code></pre>
+<p><b>Lỗi:</b> <code>Truy cap khong hop le</code></p>
+<p><b>Sửa:</b></p>
+<pre><code>sniff i >= 0 and i < len(arr)
+    meow arr[i]</code></pre>
+
+<h3>12. Gọi hàm không tồn tại</h3>
+<pre><code>meow notafunction(5)</code></pre>
+<p><b>Lỗi:</b> <code>Bien chua khai bao: 'notafunction'</code></p>
+<p><b>Sửa:</b> Định nghĩa hàm trước khi gọi.</p>
+
+<h3>13. Sai số tham số</h3>
+<pre><code>purr add(a, b)
+    give a + b
+meow add(1)</code></pre>
+<p><b>Lỗi:</b> Runtime — <code>b</code> không có giá trị.</p>
+<p><b>Sửa:</b> <code>meow add(1, 2)</code></p>
+
+<h3>14. Đệ quy vô tận</h3>
+<pre><code>purr f(n)
+    give f(n - 1)
+meow f(5)</code></pre>
+<p><b>Lỗi:</b> <code>De quy qua sau (>500)</code></p>
+<p><b>Sửa:</b> Thêm điều kiện dừng:</p>
+<pre><code>purr f(n)
+    sniff n <= 0
+        give 0
+    give f(n - 1)</code></pre>
+
+<h3>15. Vòng lặp vô tận</h3>
+<pre><code>paw i = 0
+knead i < 5
+    meow i</code></pre>
+<p><b>Lỗi:</b> <code>Vong lap qua 1 trieu lan</code></p>
+<p><b>Sửa:</b> Thêm <code>i++</code>.</p>
+
+<h3>16. Ép kiểu sai</h3>
+<pre><code>meow cast(int, "abc")</code></pre>
+<p><b>Lỗi:</b> <code>Khong the chuyen 'abc' sang int</code></p>
+<p><b>Sửa:</b> Dùng <code>try/hiss</code>:</p>
+<pre><code>tap
+    paw n = cast(int, "abc")
+hiss e
+    meow "Khong phai so"</code></pre>
