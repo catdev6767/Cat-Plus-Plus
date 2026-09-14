@@ -30,23 +30,19 @@ def tokenize(src):
             c = line[i]
             if c in ' \t': i += 1; continue
             if c == '#': break
-            # Hex / binary / decimal
-            if c.isdigit() or (c == '0' and i + 1 < len(line) and line[i+1] in 'xXbB'):
+            if c.isdigit():
                 j = i
-                if c == '0' and i + 1 < len(line) and line[i+1] in 'xX':
+                if i+1 < len(line) and line[i+1] in 'xX':
                     j = i + 2
                     while j < len(line) and line[j] in '0123456789abcdefABCDEF': j += 1
                     toks.append(Tok('NUMBER', float(int(line[i:j], 16)), ln)); i = j; continue
-                if c == '0' and i + 1 < len(line) and line[i+1] in 'bB':
+                if i+1 < len(line) and line[i+1] in 'bB':
                     j = i + 2
                     while j < len(line) and line[j] in '01': j += 1
                     toks.append(Tok('NUMBER', float(int(line[i:j], 2)), ln)); i = j; continue
                 while j < len(line) and (line[j].isdigit() or line[j]=='.'): j += 1
-                num_str = line[i:j]
-                if '.' in num_str:
-                    toks.append(Tok('NUMBER', float(num_str), ln))
-                else:
-                    toks.append(Tok('NUMBER', int(num_str), ln))
+                ns = line[i:j]
+                toks.append(Tok('NUMBER', float(ns) if '.' in ns else int(ns), ln))
                 i = j; continue
             if c == '"':
                 j, s = i+1, ''
@@ -60,7 +56,6 @@ def tokenize(src):
                 while j < len(line) and (line[j].isalnum() or line[j]=='_'): j += 1
                 w = line[i:j]
                 toks.append(Tok(w.upper() if w in KEYWORDS else 'IDENT', w, ln)); i = j; continue
-            # 2-char operators
             two = line[i:i+2]
             if two == '<<': toks.append(Tok('SHL', '<<', ln)); i += 2; continue
             if two == '>>': toks.append(Tok('SHR', '>>', ln)); i += 2; continue
@@ -72,7 +67,6 @@ def tokenize(src):
             if two == '--': toks.append(Tok('DEC', '--', ln)); i += 2; continue
             if two == '=>': toks.append(Tok('ARROW', '=>', ln)); i += 2; continue
             if two in ('==','!=','<=','>='): toks.append(Tok(two, two, ln)); i += 2; continue
-            # 1-char operators
             if c == '&': toks.append(Tok('AMP', '&', ln)); i += 1; continue
             if c == '|': toks.append(Tok('PIPE', '|', ln)); i += 1; continue
             if c == '^': toks.append(Tok('CARET', '^', ln)); i += 1; continue
@@ -180,6 +174,22 @@ class Parser:
             if self.peek().type == 'IDENT' and self.peek().value == 'to':
                 self.next(); self.expect('IDENT').value
             body = self.block(); return ('func', name, params, body, t.line)
+        if t.type == 'STRUCT':
+            self.next()
+            if self.peek().type == 'PACKED': self.next()
+            name = self.expect('IDENT').value
+            self.expect('NEWLINE'); self.expect('INDENT')
+            fields = []; self.skip_nl()
+            while self.peek().type not in ('DEDENT','EOF'):
+                fname = self.expect('IDENT').value
+                if self.peek().type == ':': self.next(); self.expect('IDENT').value
+                self.expect('NEWLINE'); fields.append(fname); self.skip_nl()
+            if self.peek().type == 'DEDENT': self.next()
+            return ('struct', name, fields, t.line)
+        if t.type == 'VOLATILE':
+            self.next()
+            if self.peek().type == 'PAW': return self.stmt()
+            e = self.expr(); self.expect('NEWLINE'); return ('expr', e, t.line)
         if t.type == 'CAT':
             self.next(); name = self.expect('IDENT').value; parent = None
             if self.peek().type == 'KIN':
@@ -285,9 +295,29 @@ class Parser:
         if self.peek().type == 'NEVER': self.next(); return ('not', self.not_())
         return self.in_()
     def in_(self):
-        l = self.cmp()
+        l = self.bit_or()
         while self.peek().type == 'IN':
-            self.next(); l = ('in', l, self.cmp())
+            self.next(); l = ('in', l, self.bit_or())
+        return l
+    def bit_or(self):
+        l = self.bit_xor()
+        while self.peek().type == 'PIPE':
+            self.next(); l = ('|', l, self.bit_xor())
+        return l
+    def bit_xor(self):
+        l = self.bit_and()
+        while self.peek().type == 'CARET':
+            self.next(); l = ('^', l, self.bit_and())
+        return l
+    def bit_and(self):
+        l = self.shift()
+        while self.peek().type == 'AMP':
+            self.next(); l = ('&', l, self.shift())
+        return l
+    def shift(self):
+        l = self.cmp()
+        while self.peek().type in ('SHL','SHR'):
+            op = self.next().type; l = (op, l, self.cmp())
         return l
     def cmp(self):
         l = self.add()
@@ -304,6 +334,7 @@ class Parser:
         return l
     def unary(self):
         if self.peek().type == '-': self.next(); return ('neg', self.unary())
+        if self.peek().type == 'TILDE': self.next(); return ('bitnot', self.unary())
         return self.postfix()
     def postfix(self):
         e = self.primary()
@@ -343,6 +374,27 @@ class Parser:
         if t.type == 'NOD': return ('bool', True)
         if t.type == 'SHAKE': return ('bool', False)
         if t.type == 'HUNGRY': return ('null',)
+        if t.type == 'NULL': return ('num', 0)
+        if t.type == 'PTR': return ('var', 'ptr')
+        if t.type == 'CAST':
+            self.expect('(')
+            tn = self.expect('IDENT').value
+            self.expect(',')
+            v = self.expr()
+            self.expect(')')
+            return ('cast', tn, v)
+        if t.type == 'SIZEOF':
+            self.expect('(')
+            if self.peek().type == 'IDENT' and self.peek(1).type == ')':
+                nm = self.next().value; self.expect(')')
+                return ('sizeof_type', nm)
+            e = self.expr(); self.expect(')')
+            return ('sizeof', e)
+        if t.type == 'ASM':
+            self.expect('(')
+            s = self.expect('STRING').value
+            self.expect(')')
+            return ('asm', s)
         if t.type == 'ME': return ('var', 'me')
         if t.type == 'IDENT': return ('var', t.value)
         if t.type == 'MATCH': return ('var', 'match')
@@ -738,6 +790,21 @@ def eval_(n, env, out, rt):
         if isinstance(obj, list): return list_method(obj, name, args)
         if isinstance(obj, dict): return dict_method(obj, name, args)
         raise CatError(f"Khong goi duoc '{name}'")
+    if t in ('&','|','^','<<','>>','SHL','SHR'):
+        l = eval_(n[1], env, out, rt); r = eval_(n[2], env, out, rt)
+        try: a = int(l); b = int(r)
+        except (ValueError, TypeError): raise CatError("Bit op yeu cau so nguyen")
+        return {'&': a&b, '|': a|b, '^': a^b,
+                '<<': a<<b, '>>': a>>b,
+                'SHL': a<<b, 'SHR': a>>b}[t]
+    if t == 'bitnot':
+        v = eval_(n[1], env, out, rt)
+        try: return ~int(v)
+        except (ValueError, TypeError): raise CatError("~ yeu cau so nguyen")
+    if t == 'cast': return do_cast(n[1], eval_(n[2], env, out, rt))
+    if t == 'sizeof': return size_of_value(eval_(n[1], env, out, rt))
+    if t == 'sizeof_type': return size_of_type(n[1])
+    if t == 'asm': return None
     if t in ('+','-','*','/','%','==','!=','<','>','<=','>='):
         l = eval_(n[1], env, out, rt); r = eval_(n[2], env, out, rt)
         if t == '+':
@@ -760,6 +827,39 @@ def make_instance(cls, args, out, rt):
             for s in body: exec_(s, local, out, rt)
         except ReturnEx: pass
     return inst
+
+TYPE_SIZES = {'i8':1,'u8':1,'i16':2,'u16':2,'i32':4,'u32':4,
+              'i64':8,'u64':8,'int':8,'float':8,'bool':1,'ptr':8,
+              'char':1,'byte':1,'str':8}
+
+def do_cast(t, v):
+    t = t.lower()
+    if t in ('i8','i16','i32','i64','int','u8','u16','u32','u64','byte','char'):
+        try: return int(v) if v is not None else 0
+        except: return 0
+    if t == 'float':
+        try: return float(v) if v is not None else 0.0
+        except: return 0.0
+    if t == 'bool': return bool(v)
+    if t == 'str':
+        if isinstance(v, float) and v == int(v): return str(int(v))
+        return str(v)
+    if t == 'ptr':
+        try: return int(v) if v is not None else 0
+        except: return 0
+    return v
+
+def size_of_value(v):
+    if isinstance(v, bool): return 1
+    if isinstance(v, int): return 8
+    if isinstance(v, float): return 8
+    if isinstance(v, str): return len(v)
+    if isinstance(v, list): return len(v) * 8
+    if isinstance(v, dict): return len(v) * 8
+    return 8
+
+def size_of_type(n):
+    return TYPE_SIZES.get(n.lower(), 8)
 
 def call_method(inst, name, args, out, rt):
     cls = inst.cls
@@ -890,6 +990,9 @@ def exec_(s, env, out, rt):
                 _rt.depth -= 1
                 return None
             env.define(name, fn)
+        elif t == 'struct':
+            name, fields = s[1], s[2]
+            env.define(name, ClassObj(name, None, fields, {}, env))
         elif t == 'class':
             name, parent, fields, methods = s[1], s[2], s[3], s[4]
             parent_obj = env.get(parent) if parent else None
