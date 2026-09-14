@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<script>
+(function() {
+  function doRedirect() {
+    if (location.hash.length > 5) {
+      location.replace('/ide/' + location.hash);
+      return true;
+    }
+    return false;
+  }
+  if (doRedirect()) return;
+  window.addEventListener('hashchange', doRedirect);
+})();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat++ — Ngôn ngữ lập trình cú pháp tiếng mèo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
+a { color:#f97316; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+/* Navbar */
+.nav { padding:16px 0; border-bottom:1px solid #1e293b; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
+.nav-inner { display:flex; align-items:center; gap:24px; }
+.nav-logo { font-size:20px; font-weight:700; color:#f8fafc; margin-right:auto; }
+.nav-logo span { color:#f97316; }
+.nav-link { color:#94a3b8; font-size:14px; padding:8px 12px; border-radius:6px; transition:all 0.2s; }
+.nav-link:hover { color:#f97316; background:rgba(249,115,22,0.1); text-decoration:none; }
+.nav-cta { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; padding:8px 20px; border-radius:8px; font-weight:600; font-size:14px; }
+.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(249,115,22,0.4); text-decoration:none; color:#fff; }
+
+/* Hero */
+.hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#0a0e1a 60%); }
+.hero::before { content:"🐱"; position:absolute; top:40px; left:8%; font-size:80px; opacity:0.08; }
+.hero::after { content:"🐾"; position:absolute; bottom:40px; right:8%; font-size:60px; opacity:0.08; }
+.hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fbbf24 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
+.hero p { font-size:22px; color:#94a3b8; max-width:640px; margin:0 auto 40px; }
+.hero-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.btn { display:inline-flex; align-items:center; gap:10px; padding:16px 32px; border-radius:12px; font-size:16px; font-weight:600; transition:all 0.2s; cursor:pointer; border:none; }
+.btn-primary { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 8px 24px rgba(249,115,22,0.3); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(249,115,22,0.5); text-decoration:none; color:#fff; }
+.btn-secondary { background:rgba(255,255,255,0.06); color:#e2e8f0; border:1px solid rgba(255,255,255,0.1); }
+.btn-secondary:hover { background:rgba(255,255,255,0.1); text-decoration:none; color:#e2e8f0; }
+
+/* Sections */
+section { padding:80px 0; }
+h2 { font-size:40px; color:#f8fafc; margin-bottom:32px; border-left:4px solid #f97316; padding-left:20px; letter-spacing:-0.5px; }
+h3 { font-size:20px; color:#f97316; margin:24px 0 12px; }
+p { color:#cbd5e1; }
+
+/* Code block */
+pre { background:#0d1220; border:1px solid #1e293b; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
+code { font-family:ui-monospace,Consolas,monospace; }
+.kw { color:#f97316; font-weight:600; }
+.str { color:#fbbf24; }
+.num { color:#22d3ee; }
+.cmt { color:#64748b; font-style:italic; }
+.fn { color:#4ade80; }
+
+/* Grid */
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:40px; }
+.card { background:#111827; border:1px solid #1e293b; border-radius:16px; padding:28px; transition:all 0.25s; }
+.card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
+.card h3 { margin-top:0; font-size:20px; color:#f8fafc; }
+.card p { color:#94a3b8; font-size:14px; margin:0; }
+.card-icon { font-size:36px; margin-bottom:16px; display:block; }
+
+/* Stats */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; margin:48px 0; }
+.stat { background:#111827; border-radius:16px; padding:32px; text-align:center; border:1px solid #1e293b; }
+.stat .num { font-size:48px; font-weight:800; color:#f97316; display:block; line-height:1; }
+.stat .label { font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; margin-top:12px; display:block; }
+
+/* CTA section */
+.cta-box { background:linear-gradient(135deg,#1a1f2e 0%,#0d1220 100%); border:1px solid #1e293b; border-radius:20px; padding:60px; text-align:center; margin:60px 0; }
+.cta-box h2 { border:none; padding:0; margin-bottom:16px; }
+.cta-box p { font-size:18px; margin-bottom:32px; }
+
+/* Footer */
+footer { padding:60px 0 40px; text-align:center; border-top:1px solid #1e293b; color:#64748b; font-size:14px; }
+footer a { color:#94a3b8; }
+
+@media (max-width:700px) {
+  .hero h1 { font-size:48px; }
+  .hero p { font-size:18px; }
+  h2 { font-size:28px; }
+  .nav-link { display:none; }
+  .cta-box { padding:40px 20px; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="nav">
+  <div class="container nav-inner">
+    <div class="nav-logo">🐱 Cat++</div>
+    <a href="#features" class="nav-link">Tính năng</a>
+    <a href="/docs/" class="nav-link">Tài liệu</a>
+    <a href="/learn/" class="nav-link">Học</a>
+    <a href="/ide/" class="nav-cta">Mở IDE →</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="container">
+    <h1>Cat++</h1>
+    <p>Ngôn ngữ lập trình với cú pháp tiếng mèo. Dễ đọc, dễ học, chạy trong browser.</p>
+    <div class="hero-btns">
+      <a href="/ide/" class="btn btn-primary">🚀 Mở IDE ngay</a>
+      <a href="#install" class="btn btn-secondary">📦 Cài đặt</a>
+      <a href="/docs/" class="btn btn-secondary">📖 Tài liệu</a>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <h2>Cat++ là gì?</h2>
+    <p style="font-size:18px; max-width:800px;">
+      Cat++ là ngôn ngữ lập trình nhỏ, chạy hoàn toàn trong browser. Cú pháp dùng từ khóa tiếng mèo — dễ nhớ, vui vẻ, phù hợp cho người mới học lập trình.
+      Có thể transpile sang C để viết kernel OS (CatOS).
+    </p>
+
+    <h3>Ví dụ</h3>
+    <pre><code><span class="cmt"># Hello world</span>
+<span class="kw">meow</span> <span class="str">"Hello, Cat++!"</span>
+
+<span class="cmt"># Hàm với default param</span>
+<span class="kw">purr</span> <span class="fn">greet</span>(name, greeting = <span class="str">"Hello"</span>)
+    <span class="kw">give</span> greeting + <span class="str">", "</span> + name
+
+<span class="kw">meow</span> <span class="fn">greet</span>(<span class="str">"Tom"</span>)          <span class="cmt"># Hello, Tom</span>
+
+<span class="cmt"># Class với operator overload</span>
+<span class="kw">cat</span> Vec2
+    <span class="kw">paw</span> x
+    <span class="kw">paw</span> y
+    <span class="kw">purr</span> <span class="fn">new</span>(x, y)
+        me.x = x
+        me.y = y
+    <span class="kw">purr</span> <span class="fn">add</span>(o)
+        <span class="kw">give</span> Vec2(me.x + o.x, me.y + o.y)
+
+<span class="kw">paw</span> c = Vec2(<span class="num">1</span>, <span class="num">2</span>) + Vec2(<span class="num">3</span>, <span class="num">4</span>)</code></pre>
+  </div>
+</section>
+
+<section id="features" style="background:#0d1220;">
+  <div class="container">
+    <h2>Tính năng</h2>
+    <div class="grid">
+      <div class="card"><span class="card-icon">🐱</span><h3>Cú pháp tiếng mèo</h3><p>meow, paw, purr, sniff, knead... dễ nhớ, vui vẻ, gần gũi.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>Chạy trong browser</h3><p>Không cần cài đặt. Mở link là dùng được. Zero-config.</p></div>
+      <div class="card"><span class="card-icon">📝</span><h3>IDE tích hợp</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
+      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>15 bài tập tương tác. Quiz, Dashboard tiến độ, Certificate.</p></div>
+      <div class="card"><span class="card-icon">🌏</span><h3>Song ngữ VI/EN</h3><p>Toàn bộ docs có 2 ngôn ngữ. 156 trang mỗi bên.</p></div>
+      <div class="card"><span class="card-icon">💻</span><h3>Transpile sang C</h3><p>Dịch sang C code để chạy native. Viết được kernel CatOS.</p></div>
+      <div class="card"><span class="card-icon">🎨</span><h3>Theme mèo</h3><p>Dark, light, và theme mèo đêm với animation.</p></div>
+      <div class="card"><span class="card-icon">📦</span><h3>100+ builtin</h3><p>Math, string, file, regex, FFI (gọi C library).</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Thống kê</h2>
+    <div class="stats">
+      <div class="stat"><span class="num">156</span><span class="label">Trang docs</span></div>
+      <div class="stat"><span class="num">100+</span><span class="label">Hàm built-in</span></div>
+      <div class="stat"><span class="num">40</span><span class="label">Tests pass</span></div>
+      <div class="stat"><span class="num">15</span><span class="label">Bài tutorial</span></div>
+      <div class="stat"><span class="num">v1.0</span><span class="label">Phiên bản</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="install" style="background:#0d1220;">
+  <div class="container">
+    <h2>Cài đặt</h2>
+
+    <h3>Chạy trực tiếp (không cần cài)</h3>
+    <p>Mở <a href="/ide/">IDE</a> — dùng ngay trong browser.</p>
+
+    <h3>Cài trên máy</h3>
+    <pre><code><span class="cmt"># Yêu cầu: Python 3.8+</span>
+git clone https://github.com/catpp/catpp.git
+cd catpp
+python3 catpp.py
+
+<span class="cmt"># Mở: http://localhost:5000</span></code></pre>
+
+    <h3>Docker</h3>
+    <pre><code>docker build -t catpp:1.0 .
+docker run -p 5000:5000 catpp:1.0</code></pre>
+
+    <h3>CLI</h3>
+    <pre><code>python3 catpp.py repl              <span class="cmt"># REPL</span>
+python3 catpp.py run hello.cat     <span class="cmt"># Chạy file</span>
+python3 catpp.py fmt hello.cat -w  <span class="cmt"># Format</span>
+python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-box">
+      <h2>Sẵn sàng viết Cat++?</h2>
+      <p>Mở IDE, chọn một ví dụ, và bắt đầu ngay.</p>
+      <div class="hero-btns">
+        <a href="/ide/" class="btn btn-primary">🚀 Mở IDE</a>
+        <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Bài 1 — Hello Mèo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="font-size:16px; color:#f8fafc; margin-bottom:12px;">🐱 Cat++ v1.0.0</p>
+    <p>MIT License · Made with 🐱</p>
+    <p style="margin-top:16px;">
+      <a href="/ide/">IDE</a> ·
+      <a href="/docs/">Tài liệu</a> ·
+      <a href="/docs/vi/guide/catos.html">CatOS</a> ·
+      <a href="https://github.com/catpp">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+
+<script>
+// Nếu có hash base64 → chuyển sang IDE
+if (location.hash.length > 5) {
+    location.replace('/ide/' + location.hash);
+}
+</script>
+</body>
+</html>

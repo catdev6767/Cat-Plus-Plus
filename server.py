@@ -18,6 +18,52 @@ class Handler(SimpleHTTPRequestHandler):
         return mt
 
     def do_GET(self):
+        # /api/public-url — trả public URL nếu có tunnel
+        if self.path == '/api/public-url':
+            url = ''
+            # Ưu tiên theo thứ tự
+            candidates = [
+                '/tmp/catpp-url.txt',
+                '/tmp/ngrok-url.txt',
+                '/tmp/tailscale-url.txt',
+            ]
+            for path in candidates:
+                if os.path.exists(path):
+                    try:
+                        with open(path) as fh:
+                            u = fh.read().strip()
+                            if u and u.startswith('http'):
+                                url = u
+                                break
+                    except Exception:
+                        pass
+            # Kiểm tra env biến (nếu chạy qua tailscale funnel)
+            if not url:
+                url = os.environ.get('CATPP_PUBLIC_URL', '')
+            data = json.dumps({'url': url, 'has_tunnel': bool(url)}).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+        # / → landing
+        if self.path in ('/', '/index.html'):
+            self.path = '/landing.html'
+            return super().do_GET()
+        # /ide/ → IDE
+        if self.path in ('/ide', '/ide/'):
+            self.path = '/index.html'
+            return super().do_GET()
+        # Endpoint trả public URL
+        # Landing ở /
+        if self.path in ('/', '/index.html'):
+            self.path = '/landing.html'
+            return super().do_GET()
+        # /ide → IDE
+        if self.path in ('/ide', '/ide/'):
+            self.path = '/index.html'
+            return super().do_GET()
         # MD download
         if self.path.startswith('/api/docs/download-md'):
             return self._serve_text('md')

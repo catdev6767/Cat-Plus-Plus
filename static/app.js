@@ -1,3 +1,63 @@
+var _cachedPublicUrl = null;
+var _publicUrlFetched = false;
+
+function getPublicUrl(callback) {
+  if (_publicUrlFetched) {
+    callback(_cachedPublicUrl);
+    return;
+  }
+  var host = location.hostname;
+  var isLocal = (host === 'localhost' || host === '127.0.0.1' ||
+                 host === '0.0.0.0' || host === '' ||
+                 host.startsWith('192.168.') || host.startsWith('10.') ||
+                 host.startsWith('172.'));
+  if (!isLocal) {
+    _cachedPublicUrl = location.origin;
+    _publicUrlFetched = true;
+    callback(_cachedPublicUrl);
+    return;
+  }
+  fetch('/api/public-url').then(function(r){ return r.json(); }).then(function(d){
+    _cachedPublicUrl = d.url || null;
+    _publicUrlFetched = true;
+    callback(_cachedPublicUrl);
+  }).catch(function(){
+    _cachedPublicUrl = null;
+    _publicUrlFetched = true;
+    callback(null);
+  });
+}
+
+function shareLink() {
+  if (!activeTab || !editor) return;
+  try {
+    var enc = btoa(unescape(encodeURIComponent(editor.getValue())));
+    getPublicUrl(function(publicUrl) {
+      var base = publicUrl || location.origin;
+      var url = base.replace(/\/+$/, '') + '/ide/#' + enc;
+      var note = '';
+      if (!publicUrl) {
+        note = '\n\n⚠ Chưa có tunnel công khai.\n' +
+               'Link này chỉ máy bạn mở được.\n\n' +
+               'Để chia sẻ cho người khác:\n' +
+               '  cd ~/catpp && ./share.sh';
+      } else {
+        note = '\n\n✓ Link công khai — ai cũng mở được.';
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function(){
+          alert('Đã copy link:\n\n' + url + note);
+        }).catch(function(){
+          prompt('Link (Ctrl+C để copy):', url);
+        });
+      } else {
+        prompt('Link (Ctrl+C để copy):', url);
+      }
+    });
+  } catch (e) {
+    alert('Lỗi tạo link: ' + e.message);
+  }
+}
 /* Cat++ IDE v2.0 — app.js hoàn chỉnh */
 
 // ============ CONSTANTS ============
@@ -686,18 +746,25 @@ function uploadFile() {
   var input = document.getElementById('file-input');
   if (input) input.click();
 }
-function shareLink() {
-  if (!activeTab || !editor) return;
-  try {
-    var enc = btoa(unescape(encodeURIComponent(editor.getValue())));
-    var url = location.origin + '/#' + enc;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(function() { alert('Đã copy link!'); })
-        .catch(function() { prompt('Link:', url); });
-    } else {
-      prompt('Link:', url);
-    }
-  } catch (e) { alert('Không tạo được link'); }
+
+
+function finishShare(base, enc) {
+  var url = base.replace(/\/+$/, '') + '/ide/#' + enc;
+  var isLocal = base.indexOf('localhost') >= 0 || base.indexOf('127.0.0.1') >= 0;
+  var msg = url;
+  if (isLocal) {
+    msg = url + '\n\n⚠ CẢNH BÁO: Đây là link LOCAL — chỉ máy bạn mở được.\n' +
+          'Chạy ./share.sh để có link public.';
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      alert('Đã copy link:\n\n' + msg);
+    }).catch(function() {
+      prompt('Link (Ctrl+C để copy):', url);
+    });
+  } else {
+    prompt('Link (Ctrl+C để copy):', url);
+  }
 }
 
 // ============ BIND EVENTS ============
