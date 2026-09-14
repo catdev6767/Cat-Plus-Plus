@@ -109,3 +109,51 @@ body.zen .main { grid-template-rows:0 1fr 0; }
 .modal-body th,.modal-body td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
 .modal-body th { background:var(--bg-side); color:var(--fg-bright); }
 .modal-body .try-btn { display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#fff; border:none; padding:6px 12px; border-radius:3px; cursor:pointer; font-size:12px; margin-top:6px; }
+
+/* ═══ Split Editor ═══ */
+.editor-split {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    height: 100%;
+    overflow: hidden;
+}
+.editor-split.single {
+    grid-template-columns: 1fr;
+}
+.editor-split.single #editor-2,
+.editor-split.single .split-divider {
+    display: none;
+}
+.editor-split.single #editor {
+    grid-column: 1 / -1;
+}
+.split-divider {
+    background: var(--border, #3c3c3c);
+    cursor: col-resize;
+    position: relative;
+    z-index: 10;
+}
+.split-divider:hover {
+    background: var(--accent, #007acc);
+}
+.split-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -3px;
+    right: -3px;
+    height: 40px;
+    transform: translateY(-50%);
+}
+#editor, #editor-2 {
+    overflow: hidden;
+    min-width: 0;
+}
+#editor-2 {
+    border-left: none;
+}
+
+/* Nút split trên tabs */
+.tab-action.split-active {
+    color: var(--accent, #007acc) !important;
+}

@@ -98,8 +98,16 @@
     <div class="file-tree" id="file-tree"></div>
   </div>
   <div class="main" id="main-col">
-    <div class="tabs" id="tabs"></div>
-    <div id="editor"></div>
+    <div class="tabs" id="tabs">
+      <button class="tab-action" id="split-btn" title="Chia đôi editor (Ctrl+\\)">
+        <i class="fas fa-columns"></i>
+      </button>
+    </div>
+    <div class="editor-split single" id="editor-split">
+      <div id="editor"></div>
+      <div class="split-divider" id="split-divider"></div>
+      <div id="editor-2"></div>
+    </div>
     <div class="panel" id="panel">
       <div class="panel-header">
         <span class="panel-tab active">TERMINAL</span>
