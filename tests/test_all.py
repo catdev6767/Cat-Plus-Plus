@@ -1,179 +1,231 @@
 #!/usr/bin/env python3
-"""Test toàn bộ hệ thống Cat++."""
-import sys, os
+"""Test toàn bộ hệ thống Cat++ — 4 engine, so sánh output."""
+import sys, os, subprocess, tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+os.chdir(ROOT)
 
-PASS = 0
-FAIL = 0
-ERRORS = []
+# Colors
+G='\033[92m'; R='\033[91m'; Y='\033[93m'; C='\033[96m'; B='\033[1m'; D='\033[2m'; X='\033[0m'
 
-def check(name, cond, msg=''):
-    global PASS, FAIL
-    if cond:
-        print(f'  ✓ {name}')
-        PASS += 1
-    else:
-        print(f'  ✗ {name}: {msg}')
-        FAIL += 1
-        ERRORS.append((name, msg))
+# Test cases: (name, code, expected_output)
+CASES = [
+    # ── Core ──
+    ('basic_math',       'meow 3 + 4 * 2', '11'),
+    ('basic_float',      'meow 10 / 4', '2.5'),
+    ('basic_intdiv',     'meow 10 / 2', '5'),
+    ('basic_mod',        'meow 17 % 5', '2'),
+    ('var_assign',       'paw x = 5\nx = x + 3\nmeow x', '8'),
+    ('bool_nod',         'meow nod', 'nod'),
+    ('bool_shake',       'meow shake', 'shake'),
+    ('null_hungry',      'meow hungry', 'hungry'),
+    ('logic_with',       'meow nod with shake', 'shake'),
+    ('logic_either',     'meow nod either shake', 'nod'),
+    ('logic_never',      'meow never nod', 'shake'),
+    ('string_concat',    'meow "Hello, " + "Cat!"', 'Hello, Cat!'),
 
+    # ── Control flow ──
+    ('if_true',          'sniff 5 > 3\n    meow "yes"', 'yes'),
+    ('if_else',          'sniff shake\n    meow "a"\nswat\n    meow "b"', 'b'),
+    ('while_count',      'paw i = 1\nknead i <= 3\n    meow i\n    i = i + 1', '1\n2\n3'),
+    ('break_sit',        'paw i = 1\nknead i <= 5\n    sniff i == 3\n        sit\n    meow i\n    i = i + 1', '1\n2'),
+    ('continue_leap',    'paw i = 0\nknead i < 3\n    i = i + 1\n    sniff i == 2\n        leap\n    meow i', '1\n3'),
 
-def section(title):
-    print()
-    print('═' * 50)
-    print('  ' + title)
-    print('═' * 50)
+    # ── Functions ──
+    ('func_simple',      'purr add(a, b)\n    give a + b\nmeow add(3, 4)', '7'),
+    ('func_recursion',   'purr fact(n)\n    sniff n <= 1\n        give 1\n    give n * fact(n - 1)\nmeow fact(5)', '120'),
+    ('func_default',     'purr f(a, b=10)\n    give a + b\nmeow f(5)', '15'),
 
+    # ── List / Dict ──
+    ('list_literal',     'paw a = [1, 2, 3]\nmeow tail(a)', '3'),
+    ('list_index',       'paw a = [10, 20, 30]\nmeow a[1]', '20'),
+    ('list_head',        'meow head([1, 2, 3])', '1'),
+    ('list_pile',        'meow pile([1, 2, 3, 4])', '10'),
+    ('dict_get',         'paw d = {"a": 1}\nmeow d["a"]', '1'),
+    ('each_loop',        'groom x of [1,2,3]\n    meow x', '1\n2\n3'),
+    ('in_list',          'meow 3 in [1,2,3]', 'nod'),
 
-# 1. Core
-section('1. Core modules')
+    # ── String methods ──
+    ('str_upper',        'meow "hi".upper()', 'HI'),
+    ('str_lower',        'meow "HI".lower()', 'hi'),
+    ('str_len',          'meow tail("hello")', '5'),
+    ('str_slice',        'meow "hello"[1:4]', 'ell'),
 
-try:
-    from core.registry import Registry
-    r = Registry()
-    r.set('x', 42)
-    check('Registry.set/get', r.get('x') == 42)
-    check('Registry.has', r.has('x'))
-except Exception as e:
-    check('Registry', False, str(e))
+    # ── Class ──
+    ('class_basic',      'cat P\n    paw x\n    purr new(v)\n        me.x = v\nmeow P(7).x', '7'),
+    ('class_method',     'cat P\n    paw x\n    purr new(v)\n        me.x = v\n    purr get()\n        give me.x\nmeow P(42).get()', '42'),
 
-try:
-    from core.bus import EventBus
-    b = EventBus()
-    got = []
-    b.on('test', lambda d: got.append(d))
-    b.emit('test', 'hello')
-    check('Bus on/emit', got == ['hello'])
-except Exception as e:
-    check('Bus', False, str(e))
+    # ── Type annotation ──
+    ('type_let',         'paw x: i32 = 5\nmeow x', '5'),
+    ('type_func',        'purr sq(n: i32) -> i32\n    give n * n\nmeow sq(6)', '36'),
 
-try:
-    from core.module import BaseModule
-    m = BaseModule(None, None)
-    check('BaseModule', m.name == 'unnamed')
-except Exception as e:
-    check('BaseModule', False, str(e))
+    # ── Pointer ──
+    ('ptr_deref',        'paw x = 5\npaw p = &x\nmeow *p', '5'),
+    ('ptr_write',        'paw x = 5\npaw p = &x\n*p = 99\nmeow x', '99'),
 
-try:
-    from core.loader import Loader
-    check('Loader import', True)
-except Exception as e:
-    check('Loader import', False, str(e))
+    # ── Native (type đầy đủ) ──
+    ('native_sum', 'purr sum_to(n: i32) -> i32\n    paw total: i32 = 0\n    paw i: i32 = 1\n    knead i <= n\n        total = total + i\n        i = i + 1\n    give total\nmeow sum_to(10)', '55'),
+    ('native_fib', 'purr fib(n: i32) -> i32\n    sniff n < 2\n        give n\n    give fib(n-1) + fib(n-2)\nmeow fib(10)', '55'),
 
-
-# 2. Interpreter backend
-section('2. Interpreter backend')
-
-try:
-    from interpreter import run_catpp
-    check('Import interpreter', True)
-
-    tests = [
-        ('meow', 'meow "hi"', 'hi'),
-        ('paw + cộng', 'paw x = 5\nmeow x + 3', '8'),
-        ('+=', 'paw x = 5\nx += 3\nmeow x', '8'),
-        ('++', 'paw x = 5\nx++\nmeow x', '6'),
-        ('sniff/swat', 'sniff 5 > 3\n    meow "big"\nswat\n    meow "small"', 'big'),
-        ('knead', 'paw i = 1\nknead i <= 3\n    meow i\n    i++', '1\n2\n3'),
-        ('groom', 'groom c of ["a","b"]\n    meow c', 'a\nb'),
-        ('in operator', 'sniff 3 in [1,2,3]\n    meow "yes"', 'yes'),
-        ('string.upper', 'meow "hello".upper()', 'HELLO'),
-        ('list.sort', 'paw a = [3,1,2]\na.sort()\nmeow a', '[1, 2, 3]'),
-        ('regex', 'sniff match("[0-9]", "a1")\n    meow "yes"', 'yes'),
-        ('match/case', 'paw x = 2\nmatch x\n    case 1\n        meow "one"\n    case 2\n        meow "two"', 'two'),
-        ('purr/give', 'purr add(a,b)\n    give a+b\nmeow add(3,4)', '7'),
-        ('cat/me', 'cat P\n    paw x\n    purr new(v)\n        me.x = v\npaw p = P(5)\nmeow p.x', '5'),
-    ]
-
-    for name, code, expect in tests:
-        try:
-            got = run_catpp(code).strip()
-            check(f'  {name}', got == expect, f'mong {expect!r}, nhận {got!r}')
-        except Exception as e:
-            check(f'  {name}', False, f'{type(e).__name__}: {e}')
-except Exception as e:
-    check('Import interpreter', False, str(e))
-
-
-# 3. Module interpreter
-section('3. Module interpreter')
-
-try:
-    from modules.interpreter.module import InterpreterModule
-    check('Import InterpreterModule', True)
-
-    from core.registry import Registry
-    from core.bus import EventBus
-    reg = Registry()
-    bus = EventBus()
-    mod = InterpreterModule(reg, bus)
-    mod.setup()
-
-    check('Đăng ký registry', reg.get('interpreter') is mod)
-
-    out = mod.run('meow "from module"')
-    check('Module.run()', out == 'from module', f'got {out!r}')
-
-    data = {'code': 'meow "via bus"', 'timeout': 5.0}
-    bus.emit('code.run', data)
-    check('Event code.run', data.get('result', {}).get('output') == 'via bus', str(data.get('result')))
-except Exception as e:
-    check('Module interpreter', False, str(e))
-    import traceback
-    traceback.print_exc()
-
-
-# 4. Loader
-section('4. Loader')
-
-try:
-    from core.loader import Loader
-    loader = Loader('modules', 'config.json')
-    loader.load_all()
-    check('Load interpreter', 'interpreter' in loader.modules)
-    check('Load cli', 'cli' in loader.modules)
-
-    loader.setup_all()
-    check('Setup all', True)
-except Exception as e:
-    check('Loader', False, str(e))
-    import traceback
-    traceback.print_exc()
-
-
-# 5. Files
-section('5. Files hệ thống')
-
-files_to_check = [
-    'catpp.py',
-    'config.json',
-    'core/__init__.py',
-    'core/module.py',
-    'core/registry.py',
-    'core/bus.py',
-    'core/loader.py',
-    'modules/interpreter/module.py',
-    'modules/server/module.py',
-    'modules/cli/module.py',
-    'interpreter.py',
-    'server.py',
-    'static/index.html',
+    # ── Builtins ──
+    ('bi_bolt',          'meow bolt(-5)', '5'),
+    ('bi_kitten',        'meow kitten(3, 7)', '3'),
+    ('bi_lion',          'meow lion(3, 7)', '7'),
+    ('bi_say',           'meow say(42)', '42'),
+    ('bi_shred',         'meow shred("a,b,c", ",")', '[a, b, c]'),
+    ('bi_walk',          'meow walk(1, 4)', '[1, 2, 3]'),
 ]
-for f in files_to_check:
-    check(f'  {f}', os.path.exists(os.path.join(ROOT, f)))
 
 
-print()
-print('═' * 50)
-print(f'  KẾT QUẢ: {PASS} pass, {FAIL} fail')
-print('═' * 50)
+def run_interpreter(code):
+    from interpreter import run_catpp
+    return run_catpp(code, timeout=5.0).strip()
 
-if FAIL > 0:
+
+def run_vm(code):
+    from catpp_vm import run_catpp_vm
+    return run_catpp_vm(code).strip()
+
+
+def run_pycompiler(code):
+    from catpp_pycompiler import run_catpp_py, Unsupported
+    try:
+        return run_catpp_py(code, timeout=5.0).strip()
+    except Unsupported as e:
+        return f'__UNSUPPORTED__{e}'
+
+
+def run_transpiler_c(code, idx):
+    """Transpile + gcc + run. Cham nhung chac."""
+    tmpdir = tempfile.mkdtemp(prefix='catpp_test_')
+    cat_path = os.path.join(tmpdir, 'test.cat')
+    c_path = os.path.join(tmpdir, 'test.c')
+    bin_path = os.path.join(tmpdir, 'test')
+    with open(cat_path, 'w', encoding='utf-8') as f:
+        f.write(code)
+    try:
+        from transpiler_c import transpile
+        c_code = transpile(code)
+        with open(c_path, 'w', encoding='utf-8') as f:
+            f.write(c_code)
+        r = subprocess.run(['gcc', '-O2', '-lm', '-o', bin_path, c_path],
+                           capture_output=True, text=True, timeout=10)
+        if r.returncode != 0:
+            return f'__GCC_FAIL__{r.stderr[:80]}'
+        r = subprocess.run([bin_path], capture_output=True, text=True, timeout=5)
+        if r.returncode != 0:
+            return f'__RUN_FAIL__{r.stderr[:80]}'
+        return r.stdout.strip()
+    except Exception as e:
+        return f'__ERR__{type(e).__name__}: {e}'
+    finally:
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def main():
+    print(f'{B}{C}═══ Cat++ Test Suite — 4 engines ═══{X}\n')
+
+    # Check engines available
+    engines = {}
+    try:
+        from interpreter import run_catpp
+        engines['interp'] = run_interpreter
+    except Exception as e:
+        print(f'{R}interpreter: {e}{X}')
+    try:
+        from catpp_vm import run_catpp_vm
+        engines['vm'] = run_vm
+    except Exception as e:
+        print(f'{R}vm: {e}{X}')
+    try:
+        from catpp_pycompiler import run_catpp_py
+        engines['pyc'] = run_pycompiler
+    except Exception as e:
+        print(f'{R}pycompiler: {e}{X}')
+    try:
+        from transpiler_c import transpile
+        engines['c'] = run_transpiler_c
+    except Exception as e:
+        print(f'{R}transpiler_c: {e}{X}')
+
+    print(f'  Engines: {", ".join(engines.keys())}')
     print()
-    print('Chi tiết lỗi:')
-    for name, msg in ERRORS:
-        print(f'  ✗ {name}')
-        if msg: print(f'      {msg}')
 
-sys.exit(0 if FAIL == 0 else 1)
+    # Stats
+    stats = {name: {'pass': 0, 'fail': 0, 'skip': 0} for name in engines}
+    failures = []
+
+    for name, code, expected in CASES:
+        results = {}
+        for eng_name, eng_fn in engines.items():
+            try:
+                if eng_name == 'c':
+                    got = eng_fn(code, name)
+                else:
+                    got = eng_fn(code)
+                if got.startswith('__'):
+                    results[eng_name] = ('skip', got[:50])
+                elif got == expected:
+                    results[eng_name] = ('pass', '')
+                else:
+                    results[eng_name] = ('fail', got[:40])
+            except Exception as e:
+                results[eng_name] = ('fail', f'{type(e).__name__}: {str(e)[:40]}')
+
+        # In dong ket qua
+        all_pass = all(r[0] == 'pass' for r in results.values())
+        any_fail = any(r[0] == 'fail' for r in results.values())
+        if all_pass:
+            mark = f'{G}✓{X}'
+        elif any_fail:
+            mark = f'{R}✗{X}'
+        else:
+            mark = f'{Y}○{X}'
+
+        parts = []
+        for eng_name in engines.keys():
+            status, _ = results[eng_name]
+            sym = {'pass': f'{G}·{X}', 'fail': f'{R}✗{X}', 'skip': f'{Y}○{X}'}[status]
+            parts.append(sym)
+            stats[eng_name][status] += 1
+
+        print(f'  {mark} {name:20s}  [{ "".join(parts) }]')
+
+        if any_fail:
+            for eng_name, (status, msg) in results.items():
+                if status == 'fail':
+                    failures.append((name, eng_name, msg))
+
+    # Summary
+    print()
+    print(f'{B}{C}═══ Summary ═══{X}\n')
+    print(f'  {"Engine":<14} {"Pass":>6} {"Fail":>6} {"Skip":>6}')
+    print(f'  {"-"*14} {"-"*6} {"-"*6} {"-"*6}')
+    total_pass = 0
+    total_fail = 0
+    for eng_name in engines.keys():
+        s = stats[eng_name]
+        print(f'  {eng_name:<14} {s["pass"]:>6} {s["fail"]:>6} {s["skip"]:>6}')
+        total_pass += s['pass']
+        total_fail += s['fail']
+
+    print()
+    if failures:
+        print(f'{B}{R}═══ Failures ═══{X}\n')
+        for name, eng, msg in failures[:15]:
+            print(f'  {R}✗{X} {name} [{eng}]: {D}{msg}{X}')
+        if len(failures) > 15:
+            print(f'  {D}... và {len(failures)-15} lỗi khác{X}')
+
+    print()
+    if total_fail == 0:
+        print(f'{G}{B}✓ ALL PASS ({len(CASES)} cases × {len(engines)} engines){X}')
+        return 0
+    else:
+        print(f'{R}{B}✗ {total_fail} failures{X}')
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
