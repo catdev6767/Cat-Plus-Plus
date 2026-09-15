@@ -45,6 +45,12 @@ OP_HALT           = 'HALT'
 OP_ADDR           = 'ADDR'
 OP_DEREF          = 'DEREF'
 OP_DEREF_SET      = 'DEREF_SET'
+OP_BUILD_DICT     = 'BUILD_DICT'
+OP_IN             = 'IN'
+OP_SLICE          = 'SLICE'
+OP_ITER_BEGIN     = 'ITER_BEGIN'
+OP_ITER_CHECK     = 'ITER_CHECK'
+OP_ITER_END       = 'ITER_END'
 
 
 class Unsupported(Exception):
@@ -248,6 +254,18 @@ class Compiler:
         elif t == 'while':
             self.compile_while(stmt, line)
 
+        elif t == 'each':
+            name = stmt[1]; expr = stmt[2]; body = stmt[3]
+            self.compile_expr(expr)
+            self.emit(OP_ITER_BEGIN, name, line)
+            loop_start = len(self.code)
+            jump_end = self.emit(OP_ITER_CHECK, None, line)
+            for s in body:
+                self.compile_stmt(s)
+            self.emit(OP_JUMP, loop_start, line)
+            self.patch(jump_end, len(self.code))
+            self.emit(OP_ITER_END, None, line)
+
         elif t == 'stop':
             if not self.loop_stack:
                 raise Unsupported("stop ngoai vong lap")
@@ -360,6 +378,24 @@ class Compiler:
             for item in items:
                 self.compile_expr(item)
             self.emit(OP_BUILD_LIST, len(items))
+        elif t == 'dict':
+            pairs = expr[1]
+            for k, v in pairs:
+                self.compile_expr(k)
+                self.compile_expr(v)
+            self.emit(OP_BUILD_DICT, len(pairs))
+        elif t == 'in':
+            self.compile_expr(expr[1])
+            self.compile_expr(expr[2])
+            self.emit(OP_IN)
+        elif t == 'slice':
+            obj = expr[1]; lo = expr[2]; hi = expr[3]
+            self.compile_expr(obj)
+            if lo: self.compile_expr(lo)
+            else: self.emit(OP_CONST, None)
+            if hi: self.compile_expr(hi)
+            else: self.emit(OP_CONST, None)
+            self.emit(OP_SLICE)
         elif t == 'lambda':
             params = expr[1]
             body = expr[2]
@@ -443,6 +479,51 @@ class Ptr:
         raise NameError(f"Bien chua khai bao: '{self.name}'")
 
 
+def _eval_const_ast(node, env):
+    """Eval don gian cho default value — chi ho tro literal + var."""
+    t = node[0]
+    if t == 'num': return node[1]
+    if t == 'str': return node[1]
+    if t == 'bool': return node[1]
+    if t == 'null': return None
+    if t == 'neg': return -_eval_const_ast(node[1], env)
+    if t == 'list': return [_eval_const_ast(x, env) for x in node[1]]
+    if t == 'dict':
+        d = {}
+        for k, v in node[1]:
+            d[_eval_const_ast(k, env)] = _eval_const_ast(v, env)
+        return d
+    if t == 'var': return env.get(node[1])
+    raise TypeError(f"Default phuc tap chua ho tro: {t}")
+
+
+def _builtin_method(obj, name, args):
+    """Method cho str/list/dict — giong interpreter."""
+    if isinstance(obj, str):
+        if name == 'upper': return obj.upper()
+        if name == 'lower': return obj.lower()
+        if name == 'trim': return obj.strip()
+        if name == 'length' or name == 'len': return len(obj)
+        if name == 'contains': return args[0] in obj
+        if name == 'split': return obj.split(args[0] if args else ' ')
+        if name == 'replace': return obj.replace(args[0], args[1])
+    if isinstance(obj, list):
+        if name == 'push': obj.append(args[0]); return obj
+        if name == 'pop': return obj.pop() if obj else None
+        if name == 'length' or name == 'len': return len(obj)
+        if name == 'first': return obj[0] if obj else None
+        if name == 'last': return obj[-1] if obj else None
+        if name == 'contains': return args[0] in obj
+        if name == 'sum': return sum(obj)
+    if isinstance(obj, dict):
+        if name == 'get': return obj.get(args[0])
+        if name == 'keys': return list(obj.keys())
+        if name == 'values': return list(obj.values())
+        if name == 'has': return args[0] in obj
+        if name == 'size' or name == 'len': return len(obj)
+    raise AttributeError(f"'{name}' khong ho tro cho {type(obj).__name__}")
+
+
 class Env:
     def __init__(self, parent=None):
         self.vars = {}
@@ -479,6 +560,7 @@ class VM:
         self.env = Env()
         self.output = []
         self.call_stack = []
+        self.iter_stack = []
         # Load builtins từ interpreter
         try:
             from interpreter import make_builtins
@@ -650,16 +732,22 @@ class VM:
                     raise NameError(f"Ham chua dinh nghia: '{fname}'")
                 fn = self.functions[fname]
                 params = fn['params']
-                if argc != len(params):
-                    raise TypeError(f"'{fname}' can {len(params)} tham so, nhan {argc}")
-                # Pop args (từ phải sang trái)
+                defaults = fn.get('defaults', {})
+                if argc > len(params):
+                    raise TypeError(f"'{fname}' can toi da {len(params)} tham so, nhan {argc}")
+                if argc < len(params):
+                    missing = params[argc:]
+                    for p in missing:
+                        if p not in defaults:
+                            raise TypeError(f"'{fname}' thieu tham so '{p}'")
                 args = []
                 for _ in range(argc):
                     args.insert(0, stack.pop())
-                # Tạo Env con — có parent = env hiện tại (cho global access)
                 new_env = Env(parent=env)
                 for p, a in zip(params, args):
                     new_env.define(p, a)
+                for p in params[argc:]:
+                    new_env.define(p, _eval_const_ast(defaults[p], env))
                 self.call_stack.append({
                     'return_pc': pc,
                     'saved_env': env,
@@ -766,7 +854,9 @@ class VM:
                     args.insert(0, stack.pop())
                 obj = stack.pop()
                 if not isinstance(obj, Instance):
-                    raise TypeError(f"'{mname}' chi goi tren instance")
+                    # Fallback builtin methods (str/list/dict)
+                    stack.append(_builtin_method(obj, mname, args))
+                    continue
                 cc, mm = obj.cls.find_method(mname)
                 if mm is None:
                     raise AttributeError(f"Method '{mname}' khong ton tai")
@@ -910,6 +1000,47 @@ class VM:
                 if not isinstance(p, Ptr):
                     raise TypeError("Khong phai con tro")
                 p.set(value)
+
+            elif op == OP_BUILD_DICT:
+                n_pairs = ins.arg
+                d = {}
+                for _ in range(n_pairs):
+                    v = stack.pop(); k = stack.pop()
+                    d[k] = v
+                stack.append(d)
+
+            elif op == OP_IN:
+                container = stack.pop()
+                needle = stack.pop()
+                try:
+                    stack.append(needle in container)
+                except TypeError:
+                    stack.append(False)
+
+            elif op == OP_SLICE:
+                hi = stack.pop()
+                lo = stack.pop()
+                obj = stack.pop()
+                a = 0 if lo is None else int(lo)
+                b = len(obj) if hi is None else int(hi)
+                stack.append(obj[a:b])
+
+            elif op == OP_ITER_BEGIN:
+                lst = stack.pop()
+                if not isinstance(lst, list):
+                    raise TypeError(f"groom chi ho tro list, nhan {type(lst).__name__}")
+                self.iter_stack.append({'list': lst, 'idx': 0, 'name': ins.arg})
+
+            elif op == OP_ITER_CHECK:
+                it = self.iter_stack[-1]
+                if it['idx'] >= len(it['list']):
+                    pc = ins.arg
+                else:
+                    env.define(it['name'], it['list'][it['idx']])
+                    it['idx'] += 1
+
+            elif op == OP_ITER_END:
+                self.iter_stack.pop()
 
             elif op == OP_HALT:
                 break
