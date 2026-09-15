@@ -213,17 +213,26 @@ class Compiler:
 
         elif t == 'op_assign':
             target, op, rhs = stmt[1], stmt[2], stmt[3]
-            if target[0] != 'var':
-                raise Unsupported("op_assign chi ho tro bien")
-            name = target[1]
-            self.emit(OP_LOAD, name, line)
-            self.compile_expr(rhs)
             op_map = {'+=': OP_ADD, '-=': OP_SUB, '*=': OP_MUL,
                       '/=': OP_DIV, '%=': OP_MOD}
             if op not in op_map:
                 raise Unsupported(f"Toan tu '{op}' chua ho tro")
-            self.emit(op_map[op], None, line)
-            self.emit(OP_STORE, name, line)
+            if target[0] == 'deref':
+                # *p += x  ->  *p = *p + x
+                self.compile_expr(target[1])  # ptr
+                self.compile_expr(target[1])  # ptr (lan 2)
+                self.emit(OP_DEREF)           # ptr, *p
+                self.compile_expr(rhs)
+                self.emit(op_map[op], None, line)
+                self.emit(OP_DEREF_SET)
+            elif target[0] == 'var':
+                name = target[1]
+                self.emit(OP_LOAD, name, line)
+                self.compile_expr(rhs)
+                self.emit(op_map[op], None, line)
+                self.emit(OP_STORE, name, line)
+            else:
+                raise Unsupported("op_assign chi ho tro bien hoac *ptr")
 
         elif t == 'print':
             self.compile_expr(stmt[1])
