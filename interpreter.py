@@ -199,7 +199,14 @@ class Parser:
                 if self.peek().type in ('NEWLINE',):
                     raise CatError("Thieu return type sau '->'", self.peek().line)
                 self.next()
-            body = self.block(); return ('func', name, params, defaults, body, t.line)
+            return_type = None
+            if self.peek().type == 'ARROW_R':
+                self.next()
+                if self.peek().type == 'NEWLINE':
+                    raise CatError("Thieu return type sau '->'", self.peek().line)
+                return_type = self.next().value
+            body = self.block()
+            return ('func', name, params, defaults, body, t.line, {}, return_type)
         if t.type == 'STRUCT':
             self.next()
             if self.peek().type == 'PACKED': self.next()
