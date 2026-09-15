@@ -281,6 +281,19 @@ class Parser:
             return ('use', path_tok.value, t.line)
         if t.type == 'SIT': self.next(); self.expect('NEWLINE'); return ('stop', t.line)
         if t.type == 'LEAP': self.next(); self.expect('NEWLINE'); return ('skip', t.line)
+        if t.type == '*':
+            save = self.pos
+            target_expr = self.unary()
+            nt = self.peek()
+            if nt.type == '=':
+                self.next(); e = self.expr(); self.expect('NEWLINE')
+                return ('assign_target', target_expr, e, t.line)
+            elif nt.type == 'OP_ASSIGN':
+                op = self.next().value
+                e = self.expr(); self.expect('NEWLINE')
+                return ('op_assign', target_expr, op, e, t.line)
+            self.pos = save
+
         if t.type in ('IDENT','ME'):
             save = self.pos
             target = self.parse_target()
@@ -368,6 +381,15 @@ class Parser:
     def unary(self):
         if self.peek().type == '-': self.next(); return ('neg', self.unary())
         if self.peek().type == 'TILDE': self.next(); return ('bitnot', self.unary())
+        if self.peek().type == 'AMP':
+            self.next()
+            t = self.next()
+            if t.type != 'IDENT':
+                raise CatError("& chi ho tro ten bien", t.line)
+            return ('addr', ('var', t.value))
+        if self.peek().type == '*':
+            self.next()
+            return ('deref', self.unary())
         return self.postfix()
     def postfix(self):
         e = self.primary()
@@ -487,6 +509,22 @@ class EnumObj:
     def __init__(self, name, members):
         self.name = name; self.members = members
         self.values = {m: f"{name}.{m}" for m in members}
+
+class Ptr:
+    def __init__(self, env, name):
+        self.env = env
+        self.name = name
+    def get(self):
+        return self.env.get(self.name)
+    def set(self, value):
+        e = self.env
+        while e:
+            if self.name in e.vars:
+                e.vars[self.name] = value
+                return
+            e = e.parent
+        raise CatError(f"Bien chua khai bao: '{self.name}'")
+
 
 class ReturnEx(Exception):
     def __init__(self, v): self.v = v
@@ -834,6 +872,16 @@ def eval_(n, env, out, rt):
         v = eval_(n[1], env, out, rt)
         try: return ~int(v)
         except (ValueError, TypeError): raise CatError("~ yeu cau so nguyen")
+    if t == 'addr':
+        inner = n[1]
+        if inner[0] != 'var':
+            raise CatError("& chi ho tro bien")
+        return Ptr(env, inner[1])
+    if t == 'deref':
+        p = eval_(n[1], env, out, rt)
+        if not isinstance(p, Ptr):
+            raise CatError("Khong phai con tro")
+        return p.get()
     if t == 'cast': return do_cast(n[1], eval_(n[2], env, out, rt))
     if t == 'sizeof': return size_of_value(eval_(n[1], env, out, rt))
     if t == 'sizeof_type': return size_of_type(n[1])
@@ -910,6 +958,11 @@ def call_method(inst, name, args, out, rt):
 
 def get_target_value(target, env, out, rt):
     """Đọc giá trị hiện tại của target để tính toán += -= ..."""
+    if target[0] == 'deref':
+        p = eval_(target[1], env, out, rt)
+        if not isinstance(p, Ptr):
+            raise CatError("Khong phai con tro")
+        return p.get()
     if target[0] == 'var':
         return env.get(target[1])
     elif target[0] == 'index':
@@ -925,6 +978,12 @@ def get_target_value(target, env, out, rt):
     raise CatError("Target khong hop le")
 
 def assign_to(target, value, env, out, rt):
+    if target[0] == 'deref':
+        p = eval_(target[1], env, out, rt)
+        if not isinstance(p, Ptr):
+            raise CatError("Khong phai con tro")
+        p.set(value)
+        return
     if target[0] == 'var': env.set(target[1], value)
     elif target[0] == 'index':
         obj = eval_(target[1], env, out, rt)
@@ -1085,6 +1144,7 @@ def fmt(v):
     if isinstance(v, ClassObj): return f"<cat {v.name}>"
     if isinstance(v, EnumObj): return f"<litter {v.name}>"
     if callable(v): return '<purr>'
+    if isinstance(v, Ptr): return f'<ptr {v.name}>'
     return str(v)
 
 def run_catpp(code, timeout=5.0, read_input=None):

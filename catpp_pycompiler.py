@@ -195,6 +195,10 @@ class PyCompiler:
     def compile_expr(self, e):
         t = e[0]
 
+        if t == 'addr':
+            raise Unsupported("PyCompiler khong ho tro &x")
+        if t == 'deref':
+            raise Unsupported("PyCompiler khong ho tro *p")
         if t == 'num':
             return repr(e[1])
         if t == 'str':

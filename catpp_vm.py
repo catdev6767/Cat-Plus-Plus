@@ -42,6 +42,9 @@ OP_JUMP_IF_FALSE  = 'JUMP_IF_FALSE'
 OP_CALL           = 'CALL'
 OP_RETURN         = 'RETURN'
 OP_HALT           = 'HALT'
+OP_ADDR           = 'ADDR'
+OP_DEREF          = 'DEREF'
+OP_DEREF_SET      = 'DEREF_SET'
 
 
 class Unsupported(Exception):
@@ -192,9 +195,12 @@ class Compiler:
             # me.x = value hoặc obj.field = value
             target = stmt[1]
             value = stmt[2]
-            if target[0] == 'dot':
-                # obj.field = value
-                self.compile_expr(target[1])  # obj
+            if target[0] == 'deref':
+                self.compile_expr(target[1])
+                self.compile_expr(value)
+                self.emit(OP_DEREF_SET, None, line)
+            elif target[0] == 'dot':
+                self.compile_expr(target[1])
                 self.compile_expr(value)
                 self.emit(OP_SET_FIELD, target[2], line)
             elif target[0] == 'index':
@@ -280,7 +286,15 @@ class Compiler:
     def compile_expr(self, expr):
         t = expr[0]
 
-        if t == 'num':
+        if t == 'addr':
+            inner = expr[1]
+            if inner[0] != 'var':
+                raise Unsupported("& chi ho tro bien")
+            self.emit(OP_ADDR, inner[1])
+        elif t == 'deref':
+            self.compile_expr(expr[1])
+            self.emit(OP_DEREF)
+        elif t == 'num':
             self.emit(OP_CONST, expr[1])
         elif t == 'str':
             self.emit(OP_CONST, expr[1])
@@ -402,6 +416,22 @@ class Instance:
             c = c.parent
         for f in all_fields:
             self.data[f] = None
+
+
+class Ptr:
+    def __init__(self, env, name):
+        self.env = env
+        self.name = name
+    def get(self):
+        return self.env.get(self.name)
+    def set(self, value):
+        e = self.env
+        while e:
+            if self.name in e.vars:
+                e.vars[self.name] = value
+                return
+            e = e.parent
+        raise NameError(f"Bien chua khai bao: '{self.name}'")
 
 
 class Env:
@@ -855,6 +885,22 @@ class VM:
                     stack.append(obj[idx])
                 except Exception as e:
                     raise IndexError(f"Index lỗi: {e}")
+
+            elif op == OP_ADDR:
+                stack.append(Ptr(env, ins.arg))
+
+            elif op == OP_DEREF:
+                p = stack.pop()
+                if not isinstance(p, Ptr):
+                    raise TypeError("Khong phai con tro")
+                stack.append(p.get())
+
+            elif op == OP_DEREF_SET:
+                value = stack.pop()
+                p = stack.pop()
+                if not isinstance(p, Ptr):
+                    raise TypeError("Khong phai con tro")
+                p.set(value)
 
             elif op == OP_HALT:
                 break
