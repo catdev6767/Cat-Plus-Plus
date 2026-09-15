@@ -148,10 +148,16 @@ class Parser:
         t = self.peek()
         if t.type == 'PAW':
             self.next(); name = self.expect('IDENT').value
+            type_name = None
+            if self.peek().type == ':':
+                self.next()
+                if self.peek().type in ('NEWLINE', '=', ','):
+                    raise CatError("Thieu type sau ':'", self.peek().line)
+                type_name = self.next().value
             if self.peek().type == '=':
                 self.next(); e = self.expr(); self.expect('NEWLINE')
-                return ('let', name, e, t.line)
-            self.expect('NEWLINE'); return ('expr', ('var', name), t.line)
+                return ('let', name, e, t.line, type_name)
+            self.expect('NEWLINE'); return ('let', name, ('null',), t.line, type_name)
         if t.type == 'MEOW':
             self.next(); e = self.expr(); self.expect('NEWLINE'); return ('print', e, t.line)
         if t.type == 'LISTEN':
