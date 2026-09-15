@@ -88,15 +88,18 @@ void catpp_init(void) {
     vga_clear();
 }
 
+void (*g_out_hook)(char) = 0;
+
 void catpp_putc(char c) {
+    if (g_out_hook) { g_out_hook(c); return; }
     vga_putc(c);
     serial_putc(c);
 }
 
 void catpp_print_str(const char* s) {
     if (!s) {
-        vga_putc('('); vga_putc('n'); vga_putc('u'); vga_putc('l'); vga_putc('l'); vga_putc(')');
-        vga_putc('\n');
+        catpp_putc('('); catpp_putc('n'); catpp_putc('u'); catpp_putc('l'); catpp_putc('l'); catpp_putc(')');
+        catpp_putc('\n');
         return;
     }
     while (*s) {

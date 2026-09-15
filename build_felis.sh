@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 echo "🐱 Felis OS build v0.2"
 echo ""
 
-CFLAGS="-m32 -ffreestanding -fno-pic -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Wall -Wno-unused-function -O2 -DCATPP_FREESTANDING"
+CFLAGS="-m32 -ffreestanding -fno-pic -fno-stack-protector -fno-builtin -nostdlib -nostdinc -mno-sse -mno-sse2 -mno-mmx -mno-80387 -mno-fp-ret-in-387 -Wall -Wno-unused-function -O2 -DCATPP_FREESTANDING"
 CFLAGS="$CFLAGS -I libc -I runtime -I kernel"
 
 echo "Compile:"
