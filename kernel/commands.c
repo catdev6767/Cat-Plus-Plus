@@ -1,4 +1,4 @@
-/* Kitty OS — Shell commands */
+/* FelisOS — Shell commands */
 #include "catpp_rt.h"
 #include "utils.h"
 
@@ -90,7 +90,7 @@ static void cmd_cd(char* arg) {
 
 /* ═══ HELP ═══ */
 static void cmd_help(void) {
-    catpp_print_str("Kitty OS Shell v0.2");
+    catpp_print_str("FelisOS Shell v0.2 (Cat++)");
     catpp_print_str("Commands:");
     catpp_print_str("  help              Hien thi tro giup");
     catpp_print_str("  clear             Xoa man hinh");
@@ -117,6 +117,16 @@ static void cmd_help(void) {
     catpp_print_str("  reboot            Khoi dong lai");
     catpp_print_str("  halt              Dung CPU");
     catpp_print_str("  exit              Thoat shell");
+    catpp_print_str("  --- Pipe & Redirect ---");
+    catpp_print_str("  cmd > FILE        Redirect ghi file");
+    catpp_print_str("  cmd >> FILE       Redirect append");
+    catpp_print_str("  cmd1 | cmd2       Pipe");
+    catpp_print_str("  head N            N dong dau");
+    catpp_print_str("  tail N            N dong cuoi");
+    catpp_print_str("  grep PATTERN      Loc dong");
+    catpp_print_str("  --- Cat++ scripts ---");
+    catpp_print_str("  run FILE.cat      Chay file Cat++");
+    catpp_print_str("  boot              Chay SysCat (init)");
 }
 
 /* ═══ SYSTEM ═══ */
@@ -126,14 +136,16 @@ void cmd_clear(void) {
 }
 
 static void cmd_info(void) {
-    catpp_print_str("Kitty OS v0.2");
-    catpp_print_str("Kernel: C freestanding");
-    catpp_print_str("CPU: i386 32-bit");
-    catpp_print_str("Shell: full line editor");
-    catpp_print_str("FS: RAM (64 files, 2KB each)");
+    catpp_print_str("FelisOS v0.2 (Kitty kernel)");
+    catpp_print_str("  Kernel:  Kitty (C freestanding, i386)");
+    catpp_print_str("  Init:    SysCat");
+    catpp_print_str("  Shell:   sh.cat (Cat++ interpreter)");
+    catpp_print_str("  FS:      RAM (64 files, 2KB each)");
+    catpp_print_str("  Commands: 30");
 }
 
-static void cmd_uname(void) { catpp_print_str("Kitty"); }
+static void cmd_uname(void) { catpp_print_str("FelisOS"); }
+static void cmd_uname_long(void) { catpp_print_str("FelisOS 0.2 Kitty i386 SysCat"); }
 static void cmd_whoami(void) { catpp_print_str("cat"); }
 
 static void cmd_date(void) {
@@ -300,6 +312,8 @@ const char* shell_commands[] = {
     "write","append","wc","sleep","reboot","halt","exit", 0
 };
 
+static void cmd_run(char* arg);
+static void cmd_boot(void);
 static void cmd_head(char* arg);
 static void cmd_tail(char* arg);
 static void cmd_grep(char* arg);
@@ -340,6 +354,8 @@ int shell_execute(char* cmdline) {
     if (strcmp(cmdline, "write") == 0)   { cmd_write(arg);return 0; }
     if (strcmp(cmdline, "append") == 0)  { cmd_append(arg);return 0; }
     if (strcmp(cmdline, "wc") == 0)      { cmd_wc(arg);   return 0; }
+    if (strcmp(cmdline, "run") == 0)     { cmd_run(arg);  return 0; }
+    if (strcmp(cmdline, "boot") == 0)    { cmd_boot();    return 0; }
     if (strcmp(cmdline, "head") == 0)    { cmd_head(arg); return 0; }
     if (strcmp(cmdline, "tail") == 0)    { cmd_tail(arg); return 0; }
     if (strcmp(cmdline, "grep") == 0)    { cmd_grep(arg); return 0; }
@@ -357,7 +373,7 @@ int shell_get_prompt(char* buf) {
     char path[200];
     fs_path_of(g_cwd, path, sizeof(path));
     if (path[0] == '/' && path[1] == 0) {
-        strcpy(buf, "kitty:/");
+        strcpy(buf, "felis:/");
     } else {
         strcpy(buf, "kitty:");
         strcat(buf, path);
@@ -506,6 +522,25 @@ static void cmd_grep(char* arg) {
         }
         i = j + 1;
     }
+}
+
+/* ═══ cmd_run — chạy file Cat++ ═══ */
+extern int catpp_run(const char* source);
+
+static void cmd_run(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: run FILE.cat"); return; }
+    int idx = fs_resolve(g_cwd, arg);
+    if (idx < 0) { catpp_print_str("File khong ton tai"); return; }
+    int sz = fs_file_size(idx);
+    const char* data = fs_read(arg, &sz);
+    if (!data) { catpp_print_str("Khong doc duoc"); return; }
+    catpp_run(data);
+}
+
+/* ═══ cmd_boot — chạy SysCat ═══ */
+#include "boot_cat.h"
+static void cmd_boot(void) {
+    catpp_run(SysCat_src);
 }
 
 /* Public init */
