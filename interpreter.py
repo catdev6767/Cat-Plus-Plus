@@ -188,6 +188,11 @@ class Parser:
                 self.expect(')')
             if self.peek().type == 'IDENT' and self.peek().value == 'to':
                 self.next(); self.expect('IDENT').value
+            if self.peek().type == 'ARROW_R':
+                self.next()
+                if self.peek().type in ('NEWLINE',):
+                    raise CatError("Thieu return type sau '->'", self.peek().line)
+                self.next()
             body = self.block(); return ('func', name, params, defaults, body, t.line)
         if t.type == 'STRUCT':
             self.next()
