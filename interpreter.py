@@ -164,14 +164,28 @@ class Parser:
             self.next(); name = self.expect('IDENT').value
             self.expect('NEWLINE'); return ('listen', name, t.line)
         if t.type == 'PURR':
-            self.next(); name = self.expect('IDENT').value; params = []
+            self.next(); name = self.expect('IDENT').value
+            params = []
             defaults = {}
+            param_types = {}
+
+            # Params ngoai ngoac: purr f a b
             while self.peek().type == 'IDENT':
                 pname = self.next().value
                 params.append(pname)
                 if self.peek().type == '=':
                     self.next()
                     defaults[pname] = self.expr()
+                elif self.peek().type == ':':
+                    self.next()
+                    if self.peek().type in ('NEWLINE', '=', ',', ')'):
+                        raise CatError("Thieu type sau ':'", self.peek().line)
+                    param_types[pname] = self.next().value
+                    if self.peek().type == '=':
+                        self.next()
+                        defaults[pname] = self.expr()
+
+            # Params trong ngoac: purr f(a, b)
             if self.peek().type == '(':
                 self.next()
                 if self.peek().type != ')':
@@ -181,7 +195,13 @@ class Parser:
                         self.next()
                         defaults[pname] = self.expr()
                     elif self.peek().type == ':':
-                        self.next(); self.expect('IDENT').value
+                        self.next()
+                        if self.peek().type in ('NEWLINE', '=', ',', ')'):
+                            raise CatError("Thieu type sau ':'", self.peek().line)
+                        param_types[pname] = self.next().value
+                        if self.peek().type == '=':
+                            self.next()
+                            defaults[pname] = self.expr()
                     while self.peek().type == ',':
                         self.next()
                         pname = self.expect('IDENT').value
@@ -190,23 +210,26 @@ class Parser:
                             self.next()
                             defaults[pname] = self.expr()
                         elif self.peek().type == ':':
-                            self.next(); self.expect('IDENT').value
+                            self.next()
+                            if self.peek().type in ('NEWLINE', '=', ',', ')'):
+                                raise CatError("Thieu type sau ':'", self.peek().line)
+                            param_types[pname] = self.next().value
+                            if self.peek().type == '=':
+                                self.next()
+                                defaults[pname] = self.expr()
                 self.expect(')')
-            if self.peek().type == 'IDENT' and self.peek().value == 'to':
-                self.next(); self.expect('IDENT').value
-            if self.peek().type == 'ARROW_R':
-                self.next()
-                if self.peek().type in ('NEWLINE',):
-                    raise CatError("Thieu return type sau '->'", self.peek().line)
-                self.next()
+
+            # Return type: -> i32
             return_type = None
             if self.peek().type == 'ARROW_R':
                 self.next()
                 if self.peek().type == 'NEWLINE':
                     raise CatError("Thieu return type sau '->'", self.peek().line)
                 return_type = self.next().value
+
             body = self.block()
-            return ('func', name, params, defaults, body, t.line, {}, return_type)
+            return ('func', name, params, defaults, body, t.line, param_types, return_type)
+
         if t.type == 'STRUCT':
             self.next()
             if self.peek().type == 'PACKED': self.next()
