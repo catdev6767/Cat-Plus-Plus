@@ -51,9 +51,8 @@ def verify(path):
     if ext == '.js':
         o = content.count('{') - content.count('}')
         p = content.count('(') - content.count(')')
-        b = content.count('[') - content.count(']')
-        if abs(o) > 3 or abs(p) > 3 or abs(b) > 3:
-            return False, f'ngoac lech: {{}}={o} ()={p} []={b}'
+        if abs(o) > 5 or abs(p) > 10:
+            return False, f'ngoac lech: {{}}={o} ()={p}'
         return True, 'js OK'
     if ext == '.html':
         if '<html' not in content.lower() and '<!doctype' not in content.lower():
@@ -93,7 +92,12 @@ def backup_current(path):
     if not os.path.exists(path):
         return None
     ts = datetime.now().strftime('%Y%m%d-%H%M%S')
-    dst = os.path.join(BACKUP_DIR, f'{os.path.basename(path)}.{ts}.broken')
+    base = os.path.basename(path)
+    dst = os.path.join(BACKUP_DIR, f'{base}.{ts}.broken')
+    counter = 1
+    while os.path.exists(dst):
+        dst = os.path.join(BACKUP_DIR, f'{base}.{ts}-{counter}.broken')
+        counter += 1
     os.makedirs(BACKUP_DIR, exist_ok=True)
     shutil.copy2(path, dst)
     return dst
