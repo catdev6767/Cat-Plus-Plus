@@ -693,6 +693,100 @@ function initMonaco() {
   });
 }
 
+function transpileCode() {
+  if (!editor || !activeTab || !term) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Đang dịch ' + activeTab + ' → C...\x1b[0m\r\n');
+  var st = document.getElementById('status');
+  if (st) st.textContent = 'Transpiling...';
+  fetch('/api/transpile-c', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var lines = data.c.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        term.writeln('\x1b[32m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
+      }
+      term.writeln('\r\n\x1b[32m✓ ' + lines.length + ' dòng C\x1b[0m');
+      if (st) st.textContent = 'Ready';
+    } else {
+      term.writeln('\x1b[31m✗ ' + (data.error || 'unknown') + '\x1b[0m');
+      if (st) st.textContent = 'Error';
+    }
+  })
+  .catch(function(e) {
+    term.writeln('\x1b[31mLỗi: ' + e.message + '\x1b[0m');
+  });
+}
+
+function transpileNativeCode() {
+  if (!editor || !activeTab || !term) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Đang dịch → C native...\x1b[0m\r\n');
+  var st = document.getElementById('status');
+  if (st) st.textContent = 'Transpiling native...';
+  fetch('/api/transpile-native', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var lines = data.c.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        term.writeln('\x1b[36m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
+      }
+      term.writeln('\r\n\x1b[36m⚡ C native — ' + lines.length + ' dòng\x1b[0m');
+      term.writeln('\x1b[90m  gcc -O2 → nhanh gần C++\x1b[0m');
+      if (st) st.textContent = 'Ready';
+    } else {
+      term.writeln('\x1b[33m⚠ ' + (data.error || 'unknown') + '\x1b[0m');
+      term.writeln('\x1b[90m  Thêm type: paw x: i32 = 5\x1b[0m');
+      term.writeln('\x1b[90m  hoặc:     purr f(a: i32) -> i32\x1b[0m');
+      if (st) st.textContent = 'Need types';
+    }
+  })
+  .catch(function(e) {
+    term.writeln('\x1b[31mLỗi: ' + e.message + '\x1b[0m');
+  });
+}
+
+function benchmarkCode() {
+  if (!editor || !activeTab || !term) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Đang benchmark...\x1b[0m\r\n');
+  fetch('/api/benchmark', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.ok) { term.writeln('\x1b[31mLỗi\x1b[0m'); return; }
+    var res = data.results;
+    var rows = [];
+    if (res.interp && res.interp.ok) rows.push(['Interpreter', res.interp.ms]);
+    if (res.vm && res.vm.ok) rows.push(['VM', res.vm.ms]);
+    if (rows.length === 0) { term.writeln('\x1b[33mKhông engine nào chạy\x1b[0m'); return; }
+    var base = rows[0][1];
+    term.writeln('\x1b[36m═══ Benchmark ═══\x1b[0m');
+    for (var i = 0; i < rows.length; i++) {
+      var speed = base / rows[i][1];
+      term.writeln('  ' + rows[i][0].padEnd(14) + rows[i][1].toFixed(1).padStart(8) + ' ms   ' + speed.toFixed(1) + 'x');
+    }
+    term.writeln('');
+    term.writeln('\x1b[90mGợi ý: ⚡ C fast nhanh ~10000x so interpreter\x1b[0m');
+  });
+}
+
 function runCode() {
   if (!editor || !activeTab) return;
   if (!term) { console.error('terminal chưa khởi tạo'); return; }
@@ -786,6 +880,9 @@ function bindEvents() {
   on('cat-btn', 'click', toggleCatTheme);
   on('lang-btn', 'click', function() { setLang(LANG === 'vi' ? 'en' : 'vi'); });
   on('run-btn', 'click', runCode);
+  on('transpile-btn', 'click', transpileCode);
+  on('transpile-native-btn', 'click', transpileNativeCode);
+  on('benchmark-btn', 'click', benchmarkCode);
   on('clear-btn', 'click', function() { if (term) term.clear(); });
 
   // Menu items
@@ -856,6 +953,9 @@ function bindEvents() {
   document.addEventListener('keydown', function(e) {
     var mod = e.ctrlKey || e.metaKey;
     if (mod && e.key === 'Enter') { e.preventDefault(); runCode(); }
+    if (mod && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); transpileCode(); return; }
+    if (mod && e.shiftKey && (e.key === 'N' || e.key === 'n')) { e.preventDefault(); transpileNativeCode(); return; }
+    if (mod && e.shiftKey && (e.key === 'B' || e.key === 'b')) { e.preventDefault(); benchmarkCode(); return; }
     else if (mod && e.key.toLowerCase() === 'b') {
       e.preventDefault();
       var d = document.getElementById('drawer');

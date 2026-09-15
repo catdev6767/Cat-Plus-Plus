@@ -142,6 +142,51 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
+        if self.path == '/api/transpile-c':
+            n = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(n) or b'{}')
+            try:
+                from transpiler_c import transpile
+                c_code = transpile(body.get('code', ''))
+                self._json({'ok': True, 'c': c_code})
+            except Exception as e:
+                self._json({'ok': False, 'error': f'{type(e).__name__}: {e}'})
+            return
+        if self.path == '/api/transpile-native':
+            n = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(n) or b'{}')
+            try:
+                from transpiler_c_native import transpile, Unsupported
+                try:
+                    c_code = transpile(body.get('code', ''))
+                    self._json({'ok': True, 'c': c_code, 'native': True})
+                except Unsupported as e:
+                    self._json({'ok': False, 'error': f'Cần type annotation: {e}', 'need_types': True})
+            except Exception as e:
+                self._json({'ok': False, 'error': f'{type(e).__name__}: {e}'})
+            return
+        if self.path == '/api/benchmark':
+            n = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(n) or b'{}')
+            code = body.get('code', '')
+            results = {}
+            import time
+            try:
+                from interpreter import run_catpp
+                t0 = time.perf_counter()
+                run_catpp(code, timeout=30)
+                results['interp'] = {'ms': (time.perf_counter()-t0)*1000, 'ok': True}
+            except Exception as e:
+                results['interp'] = {'ok': False, 'err': str(e)[:80]}
+            try:
+                from catpp_vm import run_catpp_vm
+                t0 = time.perf_counter()
+                run_catpp_vm(code)
+                results['vm'] = {'ms': (time.perf_counter()-t0)*1000, 'ok': True}
+            except Exception as e:
+                results['vm'] = {'ok': False, 'err': str(e)[:80]}
+            self._json({'ok': True, 'results': results})
+            return
         if self.path == '/api/run':
             ip = self.client_address[0]
             now = time.time()

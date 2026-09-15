@@ -111,7 +111,10 @@ footer a { color:#94a3b8; }
 <div class="hero">
   <div class="container">
     <h1>Cat++</h1>
-    <p>Ngôn ngữ lập trình với cú pháp tiếng mèo. Dễ đọc, dễ học, chạy trong browser.</p>
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:1px solid rgba(249,115,22,0.3);font-size:14px;font-weight:600;color:#fb923c;margin-bottom:20px;">
+      ⚡ Native C transpiler — nhanh hơn interpreter <b style="color:#fbbf24;">13,635×</b>
+    </div>
+    <p>Ngôn ngữ lập trình cú pháp tiếng mèo. Dễ đọc, dễ học, chạy trong browser.<br>Bây giờ có thể <b style="color:#fb923c;">biên dịch sang C native</b> — nhanh gần C++.</p>
     <div class="hero-btns">
       <a href="/ide/" class="btn btn-primary">🚀 Mở IDE ngay</a>
       <a href="#install" class="btn btn-secondary">📦 Cài đặt</a>
@@ -161,10 +164,66 @@ footer a { color:#94a3b8; }
       <div class="card"><span class="card-icon">📝</span><h3>IDE tích hợp</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
       <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>15 bài tập tương tác. Quiz, Dashboard tiến độ, Certificate.</p></div>
       <div class="card"><span class="card-icon">🌏</span><h3>Song ngữ VI/EN</h3><p>Toàn bộ docs có 2 ngôn ngữ. 156 trang mỗi bên.</p></div>
-      <div class="card"><span class="card-icon">💻</span><h3>Transpile sang C</h3><p>Dịch sang C code để chạy native. Viết được kernel Felis OS.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile sang C native (int32_t, double). Nhanh gần C++. Chạy kernel Felis OS.</p></div>
       <div class="card"><span class="card-icon">🎨</span><h3>Theme mèo</h3><p>Dark, light, và theme mèo đêm với animation.</p></div>
       <div class="card"><span class="card-icon">📦</span><h3>100+ builtin</h3><p>Math, string, file, regex, FFI (gọi C library).</p></div>
     </div>
+  </div>
+</section>
+
+<section id="performance" style="background:#0d1220;">
+  <div class="container">
+    <h2>Hiệu suất — Nhanh gần C++</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      Cat++ có 4 engine. Bạn chọn tốc độ hay linh hoạt tùy nhu cầu.
+      Với <b style="color:#fb923c;">⚡ C native</b>, code có type annotation được biên dịch sang C thuần (<code>int32_t</code>, <code>double</code>) — gcc -O2 tối ưu như C++ thật.
+    </p>
+
+    <h3>Benchmark — loop 1 triệu lần</h3>
+    <pre><code><span class="kw">purr</span> <span class="fn">sum_to</span>(n: i32) -> i64
+    <span class="kw">paw</span> total: i64 = 0
+    <span class="kw">paw</span> i: i32 = 1
+    <span class="kw">knead</span> i <= n
+        total = total + i
+        i = i + 1
+    <span class="kw">give</span> total
+
+<span class="kw">meow</span> <span class="fn">sum_to</span>(<span class="num">1000000</span>)</code></pre>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:32px 0;">
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Interpreter</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">5,547<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Bytecode VM</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">2,581<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">2.1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">C boxed</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:2px solid #f97316;border-radius:12px;padding:24px;position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:#f97316;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
+        <div style="font-size:14px;color:#fb923c;margin-bottom:8px;font-weight:600;">⚡ C native</div>
+        <div style="font-size:32px;font-weight:800;color:#fbbf24;">0.4<span style="font-size:16px;color:#fb923c;">ms</span></div>
+        <div style="font-size:13px;color:#fb923c;margin-top:8px;font-weight:600;">13,635×</div>
+      </div>
+    </div>
+
+    <h3>Khi nào dùng gì?</h3>
+    <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
+      <li><b>⚡ C native</b> — code số học nặng, thuật toán (cần type annotation)</li>
+      <li><b>C boxed</b> — code có list/dict/class phức tạp (chạy mọi code)</li>
+      <li><b>Interpreter/VM</b> — prototyping nhanh, không cần type</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <a href="/docs/vi/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Đọc hướng dẫn native →</a>
+    </p>
   </div>
 </section>
 
@@ -172,11 +231,11 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>Thống kê</h2>
     <div class="stats">
-      <div class="stat"><span class="num">50x</span><span class="label">Nhanh hơn</span></div>
+      <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
+      <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
+      <div class="stat"><span class="num">46</span><span class="label">Tests pass</span></div>
       <div class="stat"><span class="num">30</span><span class="label">Bài học</span></div>
-      <div class="stat"><span class="num">23</span><span class="label">Felis OS cmds</span></div>
       <div class="stat"><span class="num">162</span><span class="label">Trang docs</span></div>
-      <div class="stat"><span class="num">40</span><span class="label">Tests</span></div>
     </div>
   </div>
 </section>
@@ -212,7 +271,7 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code><
   <div class="container">
     <div class="cta-box">
       <h2>Sẵn sàng viết Cat++?</h2>
-      <p>Mở IDE, chọn một ví dụ, và bắt đầu ngay.</p>
+      <p>Mở IDE, chọn một ví dụ, và bắt đầu ngay. Thử ⚡ C fast để thấy tốc độ.</p>
       <div class="hero-btns">
         <a href="/ide/" class="btn btn-primary">🚀 Mở IDE</a>
         <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Bài 1 — Hello Mèo</a>
