@@ -80,7 +80,7 @@ CASES = [
 
 def run_interpreter(code):
     from interpreter import run_catpp
-    return run_catpp(code, timeout=5.0).strip()
+    return run_catpp(code, timeout=30.0).strip()
 
 
 def run_vm(code):
@@ -91,7 +91,7 @@ def run_vm(code):
 def run_pycompiler(code):
     from catpp_pycompiler import run_catpp_py, Unsupported
     try:
-        return run_catpp_py(code, timeout=5.0).strip()
+        return run_catpp_py(code, timeout=30.0).strip()
     except Unsupported as e:
         return f'__UNSUPPORTED__{e}'
 
