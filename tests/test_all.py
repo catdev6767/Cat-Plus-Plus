@@ -65,6 +65,7 @@ CASES = [
 
     # ── Native (type đầy đủ) ──
     ('native_sum', 'purr sum_to(n: i32) -> i32\n    paw total: i32 = 0\n    paw i: i32 = 1\n    knead i <= n\n        total = total + i\n        i = i + 1\n    give total\nmeow sum_to(10)', '55'),
+    ('native_sum64', 'purr sum_to(n: i32) -> i64\n    paw total: i64 = 0\n    paw i: i32 = 1\n    knead i <= n\n        total = total + i\n        i = i + 1\n    give total\nmeow sum_to(1000000)', '500000500000'),
     ('native_fib', 'purr fib(n: i32) -> i32\n    sniff n < 2\n        give n\n    give fib(n-1) + fib(n-2)\nmeow fib(10)', '55'),
 
     # ── Builtins ──
