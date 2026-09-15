@@ -1,4 +1,4 @@
-/* Felis OS — IRQ stubs (assembly) */
+/* Kitty OS — IRQ stubs (assembly) */
 
 .section .text
 

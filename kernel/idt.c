@@ -1,4 +1,4 @@
-/* Felis OS — IDT + IRQ setup */
+/* Kitty OS — IDT + IRQ setup */
 #include <stdint.h>
 
 struct idt_entry {
@@ -40,7 +40,9 @@ void idt_init(void) {
     for (unsigned i = 0; i < sizeof(idt); i++) p[i] = 0;
 
     /* IRQ1 = keyboard → interrupt 33 (32 + 1) */
-    idt_set_gate(33, (uint32_t)irq1_stub, 0x08, 0x8E);
+    uint16_t cs_val;
+    __asm__ volatile("mov %%cs, %0" : "=r"(cs_val));
+    idt_set_gate(33, (uint32_t)irq1_stub, cs_val, 0x8E);
 
     idt_load((uint32_t)&idtp);
 

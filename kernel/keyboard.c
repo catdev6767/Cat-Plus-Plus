@@ -1,4 +1,4 @@
-/* Felis OS — Full keyboard driver */
+/* Kitty OS — Full keyboard driver */
 #include "catpp_rt.h"
 
 #define KBD_DATA 0x60

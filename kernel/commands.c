@@ -1,4 +1,4 @@
-/* Felis OS — Shell commands */
+/* Kitty OS — Shell commands */
 #include "catpp_rt.h"
 #include "utils.h"
 
@@ -90,7 +90,7 @@ static void cmd_cd(char* arg) {
 
 /* ═══ HELP ═══ */
 static void cmd_help(void) {
-    catpp_print_str("Felis OS Shell v0.2");
+    catpp_print_str("Kitty OS Shell v0.2");
     catpp_print_str("Commands:");
     catpp_print_str("  help              Hien thi tro giup");
     catpp_print_str("  clear             Xoa man hinh");
@@ -126,14 +126,14 @@ void cmd_clear(void) {
 }
 
 static void cmd_info(void) {
-    catpp_print_str("Felis OS v0.2");
+    catpp_print_str("Kitty OS v0.2");
     catpp_print_str("Kernel: C freestanding");
     catpp_print_str("CPU: i386 32-bit");
     catpp_print_str("Shell: full line editor");
     catpp_print_str("FS: RAM (64 files, 2KB each)");
 }
 
-static void cmd_uname(void) { catpp_print_str("Felis"); }
+static void cmd_uname(void) { catpp_print_str("Kitty"); }
 static void cmd_whoami(void) { catpp_print_str("cat"); }
 
 static void cmd_date(void) {
@@ -357,9 +357,9 @@ int shell_get_prompt(char* buf) {
     char path[200];
     fs_path_of(g_cwd, path, sizeof(path));
     if (path[0] == '/' && path[1] == 0) {
-        strcpy(buf, "felis:/");
+        strcpy(buf, "kitty:/");
     } else {
-        strcpy(buf, "felis:");
+        strcpy(buf, "kitty:");
         strcat(buf, path);
     }
     return 0;

@@ -1,0 +1,24 @@
+┌──────────────────────────────────────────────────────────────┐
+│                    Felis OS v0.2                             │
+│                                                              │
+│  Type 'help' for commands.                                   │
+│                                                              │
+│  felis$ help                                                 │
+│  Felis OS Shell v0.2                                         │
+│  Commands:                                                   │
+│    help              Hien thi tro giup                       │
+│    clear             Xoa man hinh                            │
+│    info              Thong tin he thong                      │
+│    ls                Liet ke file                            │
+│    cat FILE          Doc file                                │
+│    ...                                                       │
+│                                                              │
+│  felis$ ls                                                   │
+│         readme.txt (49 B)                                    │
+│                                                              │
+│  felis$ cat readme.txt                                       │
+│  Welcome to Felis OS!                                        │
+│  This is a RAM filesystem.                                   │
+│                                                              │
+│  felis$ _                                                    │
+└──────────────────────────────────────────────────────────────┘

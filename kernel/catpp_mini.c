@@ -1,4 +1,4 @@
-/* Felis OS — Mini Cat++ evaluator.
+/* Kitty OS — Mini Cat++ evaluator.
    Hỗ trợ: số, chuỗi, biến, + - * / %, == != < > <= >=,
            meow, paw, sniff/swat, knead, stop, skip */
 #include <stdint.h>

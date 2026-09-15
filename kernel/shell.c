@@ -1,4 +1,4 @@
-/* Felis OS — Shell với line editor */
+/* Kitty OS — Shell với line editor */
 #include "catpp_rt.h"
 #include "utils.h"
 
@@ -169,7 +169,7 @@ static void hist_next(void) {
 }
 
 static void print_prompt(void) {
-    char buf[128];
+    char buf[256];
     shell_get_prompt(buf);
     int i = 0;
     while (buf[i]) catpp_putc(buf[i++]);
@@ -206,7 +206,7 @@ void shell_run(void) {
     idt_init();
     extern void cmd_clear(void);
     cmd_clear();
-    catpp_print_str("Felis OS v0.2");
+    catpp_print_str("Kitty OS v0.2");
     catpp_print_str("Type 'help' for commands.");
     catpp_print_str("");
     while (1) {
