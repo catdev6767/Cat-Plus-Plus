@@ -163,8 +163,8 @@ void fb_draw_panel(void) {
     /* Đường kẻ dưới panel */
     fb_rect(0, PANEL_HEIGHT - 1, fb_w, 1, 0x00555555);
 
-    /* Đặt text bắt đầu từ dưới panel */
-    text_area_y0 = PANEL_HEIGHT + 4;
+    /* Text bắt đầu ngay dưới panel */
+    text_area_y0 = PANEL_HEIGHT + 8;
 }
 
 /* In chữ lên panel — không ảnh hưởng cursor chính */
