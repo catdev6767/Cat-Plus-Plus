@@ -153,32 +153,33 @@ void fb_puts(const char* s) {
 void fb_draw_panel(void) {
     if (!fb_on) return;
 
-    /* Nền panel */
+    /* Top panel 24px đen */
     fb_rect(0, 0, fb_w, PANEL_HEIGHT, PANEL_BG);
 
-    /* Menu bên trái */
-    fb_puts_panel("Applications", 12, 4, PANEL_FG);
-    fb_puts_panel("Places",       110, 4, PANEL_FG);
-    fb_puts_panel("System",       170, 4, PANEL_FG);
+    /* Chữ scale 2x cho dễ đọc */
+    uint32_t old_scale = font_scale;
+    font_scale = 2;  /* 16x16 — chỉ cho panel */
 
-    /* Bên phải — giả lập */
-    fb_puts_panel("felis@den", fb_w - 130, 4, PANEL_FG);
-    fb_puts_panel("[12:00]",   fb_w - 60,  4, PANEL_FG);
+    /* Bên trái — 3 mục menu */
+    fb_puts_panel("Activities", 12, 4, 0x00FFFFFF);
+    fb_puts_panel("Places",     160, 4, 0x00CCCCCC);
+    fb_puts_panel("System",     240, 4, 0x00CCCCCC);
 
-    /* Đường kẻ dưới panel */
-    fb_rect(0, PANEL_HEIGHT - 1, fb_w, 1, 0x00555555);
+    /* Bên phải */
+    fb_puts_panel("felis@den", fb_w - 200, 4, 0x00FFFFFF);
+    fb_puts_panel("12:00",     fb_w - 70, 4, 0x00FFFFFF);
 
-    /* Text bắt đầu ngay dưới panel */
-    text_area_y0 = PANEL_HEIGHT + 8;
+    font_scale = old_scale;
 }
 
 /* In chữ lên panel — không ảnh hưởng cursor chính */
 void fb_puts_panel(const char* s, int x, int y, uint32_t color) {
     if (!fb_on) return;
     int cur = x;
+    uint32_t cw = 8 * font_scale;
     while (s && *s) {
         fb_char_at(*s++, cur, y, color, PANEL_BG);
-        cur += 8;  /* scale=1 cho panel */
+        cur += cw;
     }
 }
 
