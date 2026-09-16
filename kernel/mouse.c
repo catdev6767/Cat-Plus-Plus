@@ -5,7 +5,7 @@
 #define PS2_STATUS 0x64
 #define PS2_CMD    0x64
 
-extern void catpp_print_str(const char* s);
+extern void serial_print_str(const char* s);
 
 static inline uint8_t inb(uint16_t port) {
     uint8_t r; __asm__ volatile("inb %1, %0" : "=a"(r) : "Nd"(port)); return r;
@@ -52,10 +52,10 @@ static uint8_t mouse_read(void) {
 }
 
 void mouse_init(void) {
-    catpp_print_str("[mouse] init start");
+    serial_print_str("[mouse] init start");
     mouse_wait_write();
     outb(PS2_CMD, 0xA8);
-    catpp_print_str("[mouse] A8 sent");
+    serial_print_str("[mouse] A8 sent");
 
     mouse_wait_write();
     outb(PS2_CMD, 0x20);
@@ -79,62 +79,97 @@ void mouse_init(void) {
         mouse_x = screen_w / 2;
         mouse_y = screen_h / 2;
     }
-    catpp_print_str("[mouse] init done");
+    serial_print_str("[mouse] init done");
 }
 
 /* ─── IRQ12 handler ─── */
-static int mouse_first = 1;
+static int mouse_irq_count = 0;
 
 void mouse_handler(void) {
-    uint8_t status = inb(PS2_STATUS);
-    if (!(status & 0x20)) return;
+    /* Đọc hết mọi byte có sẵn trong FIFO */
+    while (1) {
+        uint8_t status = inb(PS2_STATUS);
+        if (!(status & 0x01)) break;   /* OBF clear = hết data */
+        if (!(status & 0x20)) break;   /* không phải từ mouse */
 
-    if (mouse_first) {
-        catpp_print_str("[mouse] IRQ12 fired!");
-        mouse_first = 0;
-    }
+        int8_t b = (int8_t)inb(PS2_DATA);
+        mouse_irq_count++;
 
-    int8_t b = (int8_t)inb(PS2_DATA);
+        switch (mouse_cycle) {
+            case 0:
+                mouse_buf[0] = b;
+                if (!(b & 0x08)) break;
+                mouse_cycle = 1;
+                break;
+            case 1:
+                mouse_buf[1] = b;
+                mouse_cycle = 2;
+                break;
+            case 2: {
+                mouse_buf[2] = b;
+                mouse_cycle = 0;
 
-    switch (mouse_cycle) {
-        case 0:
-            mouse_buf[0] = b;
-            if (!(b & 0x08)) break;
-            mouse_cycle = 1;
-            break;
-        case 1:
-            mouse_buf[1] = b;
-            mouse_cycle = 2;
-            break;
-        case 2: {
-            mouse_buf[2] = b;
-            mouse_cycle = 0;
+                uint8_t flags = (uint8_t)mouse_buf[0];
+                int8_t dx = mouse_buf[1];
+                int8_t dy = mouse_buf[2];
 
-            uint8_t flags = (uint8_t)mouse_buf[0];
-            int8_t dx = mouse_buf[1];
-            int8_t dy = mouse_buf[2];
+                int new_x = mouse_x + (int)dx;
+                int new_y = mouse_y - (int)dy;
 
-            int new_x = mouse_x + (int)dx;
-            int new_y = mouse_y - (int)dy;
+                if (new_x < 0) new_x = 0;
+                if (new_y < 0) new_y = 0;
+                if (new_x > screen_w - 1) new_x = screen_w - 1;
+                if (new_y > screen_h - 1) new_y = screen_h - 1;
 
-            if (new_x < 0) new_x = 0;
-            if (new_y < 0) new_y = 0;
-            if (new_x > screen_w - 1) new_x = screen_w - 1;
-            if (new_y > screen_h - 1) new_y = screen_h - 1;
+                mouse_buttons = flags & 0x07;
 
-            mouse_buttons = flags & 0x07;
+                /* Log tọa độ: "dx,dy->x,y" */
+                {
+                    static int log_count = 0;
+                    log_count++;
+                    if (log_count <= 10 || log_count % 20 == 0) {
+                        char b[40];
+                        int o = 0;
+                        b[o++] = '[';
+                        /* dx */
+                        int v = (int)dx;
+                        if (v < 0) { b[o++] = '-'; v = -v; }
+                        b[o++] = '0' + (v/10)%10;
+                        b[o++] = '0' + v%10;
+                        b[o++] = ',';
+                        /* dy */
+                        v = (int)dy;
+                        if (v < 0) { b[o++] = '-'; v = -v; }
+                        b[o++] = '0' + (v/10)%10;
+                        b[o++] = '0' + v%10;
+                        b[o++] = '-'; b[o++] = '>';
+                        /* x */
+                        v = new_x;
+                        b[o++] = '0' + (v/100)%10;
+                        b[o++] = '0' + (v/10)%10;
+                        b[o++] = '0' + v%10;
+                        b[o++] = ',';
+                        /* y */
+                        v = new_y;
+                        b[o++] = '0' + (v/100)%10;
+                        b[o++] = '0' + (v/10)%10;
+                        b[o++] = '0' + v%10;
+                        b[o++] = ']'; b[o] = 0;
+                        serial_print_str(b);
+                    }
+                }
 
-            /* Di chuyển cursor */
-            if (g_mouse_visible && (new_x != mouse_x || new_y != mouse_y)) {
-                fb_cursor_hide();
-                mouse_x = new_x;
-                mouse_y = new_y;
-                fb_cursor_show(mouse_x, mouse_y);
-            } else {
-                mouse_x = new_x;
-                mouse_y = new_y;
+                if (g_mouse_visible && (new_x != mouse_x || new_y != mouse_y)) {
+                    fb_cursor_hide();
+                    mouse_x = new_x;
+                    mouse_y = new_y;
+                    fb_cursor_show(mouse_x, mouse_y);
+                } else {
+                    mouse_x = new_x;
+                    mouse_y = new_y;
+                }
+                break;
             }
-            break;
         }
     }
 }
@@ -151,6 +186,8 @@ void mouse_hide(void) {
     g_mouse_visible = 0;
     fb_cursor_hide();
 }
+
+int mouse_is_visible(void) { return g_mouse_visible; }
 
 int mouse_get_x(void) { return mouse_x; }
 int mouse_get_y(void) { return mouse_y; }

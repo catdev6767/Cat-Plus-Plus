@@ -89,6 +89,12 @@ static void serial_putc(char c) {
     outb(COM1, c);
 }
 
+/* Print chỉ ra serial — không dùng cho màn hình */
+void serial_print_str(const char* s) {
+    while (*s) serial_putc(*s++);
+}
+
+
 /* ═══ Public API ═══ */
 void catpp_init(void) {
     serial_init();
@@ -114,8 +120,7 @@ void catpp_print_str(const char* s) {
         catpp_putc(*s);
         s++;
     }
-    vga_putc('\n');
-    serial_putc('\n');
+    catpp_putc('\n');
 }
 
 void catpp_print(long v) {

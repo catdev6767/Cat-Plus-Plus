@@ -104,7 +104,7 @@ void fb_char_at(char ch, uint32_t x, uint32_t y, uint32_t fg, uint32_t bg) {
 }
 
 /* ═══ In ký tự với wrap + scroll ═══ */
-void fb_putc(char c) {
+static void _fb_putc_inner(char c) {
     if (!fb_on) return;
     /* Không cho text ghi đè panel */
     if ((int)cur_y < text_area_y0) cur_y = text_area_y0;
@@ -143,6 +143,19 @@ void fb_putc(char c) {
         cur_y -= shift;
     }
     /* shell_cursor_update(); tắt để test */
+}
+
+void fb_putc(char c) {
+    extern int mouse_is_visible(void);
+    extern void mouse_hide(void);
+    extern void mouse_show(void);
+    int mvis = 0;
+    if (fb_on) {
+        mvis = mouse_is_visible();
+        if (mvis) mouse_hide();
+    }
+    _fb_putc_inner(c);
+    if (mvis) mouse_show();
 }
 
 void fb_puts(const char* s) {
