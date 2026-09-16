@@ -3,8 +3,10 @@
 __attribute__((section(".multiboot")))
 const unsigned long multiboot_header[] = {
     0x1BADB002,         /* magic */
-    0x2,                /* flags: chỉ mem info, KHÔNG video */
-    0xE4524FFC,         /* checksum = -(magic + 0x2) */
+    0x6,                /* flags: align(1) + mem info(2) + video(4) */
+    0xE4524FF8,         /* checksum = -(0x1BADB002 + 0x6) */
+    /* Fields khi flag bit 2 = 1 */
+    0, 0, 0, 0, 0,      /* header_addr, load, load_end, bss_end, entry (không dùng cho ELF) */
     0,                  /* mode_type: 0 = linear graphics */
     1024, 768, 32,      /* width, height, depth */
 };
@@ -77,7 +79,12 @@ void kmain(uint32_t mbi_addr, uint32_t magic) {
         catpp_print_str("[DBG] fb_bpp=");
         print_hex(mbi->framebuffer_bpp);
 
-        int has_fb = 0;
+        int has_fb = (mbi->flags & (1 << 12)) != 0
+                     && mbi->framebuffer_addr != 0
+                     && mbi->framebuffer_width > 0
+                     && mbi->framebuffer_height > 0
+                     && (mbi->framebuffer_bpp == 24 || mbi->framebuffer_bpp == 32)
+                     && (mbi->framebuffer_type == 0 || mbi->framebuffer_type == 1);
         if (has_fb) {
             fb_init(mbi->framebuffer_addr, mbi->framebuffer_pitch,
                     mbi->framebuffer_width, mbi->framebuffer_height,
