@@ -386,7 +386,7 @@ int shell_execute(char* cmdline) {
     if (strcmp(cmdline, "mv") == 0)      { cmd_mv(arg);   return 0; }
     if (strcmp(cmdline, "stat") == 0)    { cmd_stat(arg); return 0; }
     if (strcmp(cmdline, "find") == 0)    { cmd_find(arg); return 0; }
-    if (strcmp(cmdline, "du") == 0)      { cmd_du(arg);   return 0; }
+    if (strcmp(cmdline, "du") == 0)      { cmd_du();      return 0; }
     if (strcmp(cmdline, "export") == 0)  { cmd_export(arg); return 0; }
     if (strcmp(cmdline, "env") == 0)     { cmd_env();     return 0; }
     if (strcmp(cmdline, "unset") == 0)   { cmd_unset(arg);return 0; }
