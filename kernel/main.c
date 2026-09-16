@@ -62,26 +62,15 @@ static void print_hex(uint32_t v) {
 void kmain(uint32_t mbi_addr, uint32_t magic) {
     catpp_init();
 
-    catpp_print_str("[DBG] magic=");
-    print_hex(magic);
-    catpp_print_str("[DBG] mbi=");
-    print_hex(mbi_addr);
+    extern void fb_clear_all(void);
+    extern void fb_draw_dock(void);
+    extern void mouse_show(void);
+    extern void mouse_hide(void);
+    extern int tty_get(void);
+    extern void tty_switch(int n);
 
     if (magic == 0x2BADB002) {
         struct mb_info* mbi = (struct mb_info*)mbi_addr;
-        catpp_print_str("[DBG] flags=");
-        print_hex(mbi->flags);
-        catpp_print_str("[DBG] fb_type=");
-        print_hex(mbi->framebuffer_type);
-        catpp_print_str("[DBG] fb_addr_lo=");
-        print_hex((uint32_t)mbi->framebuffer_addr);
-        catpp_print_str("[DBG] fb_w=");
-        print_hex(mbi->framebuffer_width);
-        catpp_print_str("[DBG] fb_h=");
-        print_hex(mbi->framebuffer_height);
-        catpp_print_str("[DBG] fb_bpp=");
-        print_hex(mbi->framebuffer_bpp);
-
         int has_fb = (mbi->flags & (1 << 12)) != 0
                      && mbi->framebuffer_addr != 0
                      && mbi->framebuffer_width > 0
@@ -92,18 +81,25 @@ void kmain(uint32_t mbi_addr, uint32_t magic) {
             fb_init(mbi->framebuffer_addr, mbi->framebuffer_pitch,
                     mbi->framebuffer_width, mbi->framebuffer_height,
                     mbi->framebuffer_bpp);
-            catpp_print_str("[Kitty] Framebuffer OK");
-            fb_draw_panel();
             mouse_init();
-            catpp_print_str("[Kitty] Mouse OK");
-        } else {
-            catpp_print_str("[Kitty] Khong co framebuffer, dung VGA text");
         }
-    } else {
-        catpp_print_str("[Kitty] Magic sai, khong co multiboot info");
     }
 
     commands_init();
-    shell_run();
-    while (1) __asm__ volatile("hlt");
+
+    /* Boot vào GUI mode */
+    fb_clear_all();
+    fb_draw_panel();
+    fb_draw_dock();
+    mouse_show();
+
+    while (1) {
+        if (tty_get() == 1) {
+            mouse_hide();
+            shell_run();
+            mouse_show();
+            tty_switch(0);
+        }
+        __asm__ volatile("hlt");
+    }
 }
