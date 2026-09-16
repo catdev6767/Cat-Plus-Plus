@@ -19,6 +19,7 @@ static uint32_t bg_color = 0x00000000;
 
 /* Forward decls */
 void fb_clear(void);
+static void shell_cursor_update(void);
 void fb_pixel(uint32_t x, uint32_t y, uint32_t color);
 
 void fb_init(uint64_t addr, uint32_t pitch, uint32_t width,
@@ -110,6 +111,7 @@ void fb_putc(char c) {
                 fb_pixel(x, y, bg_color);
         cur_y -= shift;
     }
+    shell_cursor_update();
 }
 
 void fb_puts(const char* s) {
@@ -215,4 +217,63 @@ void fb_cursor_move(int old_x, int old_y, int new_x, int new_y) {
     draw_cursor_pixels(new_x, new_y);
     cursor_last_x = new_x;
     cursor_last_y = new_y;
+}
+
+
+/* ═══ Shell cursor (dấu _ nhấp nháy) ═══ */
+static int shell_cur_visible = 0;
+static int shell_cur_x = 0;
+static int shell_cur_y = 0;
+static uint32_t shell_cur_bg[8][2];  /* 8 pixel ngang, 2 pixel dọc */
+
+static void shell_cursor_save(void) {
+    for (int j = 0; j < 2; j++)
+        for (int i = 0; i < 8; i++) {
+            uint32_t px = 0;
+            uint32_t xx = shell_cur_x + i, yy = shell_cur_y + j;
+            if (xx < fb_w && yy < fb_h) {
+                if (fb_bpp == 32) {
+                    px = *(uint32_t*)(fb_ptr + yy * fb_pitch + xx * 4);
+                } else {
+                    uint8_t* p = fb_ptr + yy * fb_pitch + xx * 3;
+                    px = (p[2] << 16) | (p[1] << 8) | p[0];
+                }
+            }
+            shell_cur_bg[j][i] = px;
+        }
+}
+
+static void shell_cursor_restore(void) {
+    for (int j = 0; j < 2; j++)
+        for (int i = 0; i < 8; i++)
+            fb_pixel(shell_cur_x + i, shell_cur_y + j, shell_cur_bg[j][i]);
+}
+
+void fb_shell_cursor_hide(void) {
+    if (shell_cur_visible) {
+        shell_cursor_restore();
+        shell_cur_visible = 0;
+    }
+}
+
+void fb_shell_cursor_show(void) {
+    if (!fb_on) return;
+    shell_cur_x = cur_x;
+    shell_cur_y = cur_y + 6;
+    if (shell_cur_x + 8 > (int)fb_w) return;
+    if (shell_cur_y + 2 > (int)fb_h) return;
+    shell_cursor_save();
+    for (int j = 0; j < 2; j++)
+        for (int i = 0; i < 8; i++)
+            fb_pixel(shell_cur_x + i, shell_cur_y + j, 0x00FFFFFF);
+    shell_cur_visible = 1;
+}
+
+/* Gọi cuối fb_putc — cập nhật shell cursor */
+static void shell_cursor_update(void) {
+    if (shell_cur_visible) {
+        shell_cursor_restore();
+        shell_cur_visible = 0;
+    }
+    fb_shell_cursor_show();
 }

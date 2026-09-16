@@ -8,6 +8,11 @@
 #define VGA_HEIGHT 25
 #define VGA_MEM    ((volatile uint16_t*)0xB8000)
 
+/* Framebuffer API (kernel/fb.c) */
+extern int  fb_is_active(void);
+extern void fb_putc(char c);
+extern void fb_clear(void);
+
 /* ═══ VGA ═══ */
 static size_t   vga_row = 0;
 static size_t   vga_col = 0;
@@ -18,6 +23,8 @@ static inline uint16_t vga_entry(char c, uint8_t color) {
 }
 
 static void vga_clear(void) {
+    if (fb_is_active()) { fb_clear(); vga_row = 0; vga_col = 0; return; }
+    /* fb disabled */
     for (size_t y = 0; y < VGA_HEIGHT; y++)
         for (size_t x = 0; x < VGA_WIDTH; x++)
             VGA_MEM[y * VGA_WIDTH + x] = vga_entry(' ', vga_color);
@@ -92,7 +99,8 @@ void (*g_out_hook)(char) = 0;
 
 void catpp_putc(char c) {
     if (g_out_hook) { g_out_hook(c); return; }
-    vga_putc(c);
+    if (fb_is_active()) fb_putc(c);
+    else vga_putc(c);
     serial_putc(c);
 }
 
@@ -103,8 +111,7 @@ void catpp_print_str(const char* s) {
         return;
     }
     while (*s) {
-        vga_putc(*s);
-        serial_putc(*s);
+        catpp_putc(*s);
         s++;
     }
     vga_putc('\n');
