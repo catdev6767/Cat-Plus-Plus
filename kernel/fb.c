@@ -194,94 +194,6 @@ void fb_set_colors(uint32_t fg, uint32_t bg) {
 }
 
 
-/* ═══ Mouse cursor 8x8 ═══ */
-static const unsigned char cursor_bitmap[8] = {
-    0x80,  /* X....... */
-    0xC0,  /* XX...... */
-    0xE0,  /* XXX..... */
-    0xF0,  /* XXXX.... */
-    0xF8,  /* XXXXX... */
-    0xE0,  /* XXX..... */
-    0xC0,  /* XX...... */
-    0x80,  /* X....... */
-};
-
-/* Lưu background 8x8 pixel để restore khi cursor di chuyển */
-static uint32_t cursor_bg[8][8];
-static int cursor_last_x = -1;
-static int cursor_last_y = -1;
-
-/* Lưu vùng 8x8 vào buffer */
-static void save_region(int x, int y) {
-    for (int j = 0; j < 8; j++) {
-        for (int i = 0; i < 8; i++) {
-            uint32_t px = 0x00000000;
-            uint32_t xx = x + i, yy = y + j;
-            if (xx < fb_w && yy < fb_h) {
-                if (fb_bpp == 32) {
-                    px = *(uint32_t*)(fb_ptr + yy * fb_pitch + xx * 4);
-                } else {
-                    uint8_t* p = fb_ptr + yy * fb_pitch + xx * 3;
-                    px = (p[2] << 16) | (p[1] << 8) | p[0];
-                }
-            }
-            cursor_bg[j][i] = px;
-        }
-    }
-}
-
-/* Khôi phục vùng từ buffer */
-static void restore_region(int x, int y) {
-    for (int j = 0; j < 8; j++) {
-        for (int i = 0; i < 8; i++) {
-            fb_pixel(x + i, y + j, cursor_bg[j][i]);
-        }
-    }
-}
-
-/* Vẽ cursor tại (x, y) */
-static void draw_cursor_pixels(int x, int y) {
-    for (int j = 0; j < 8; j++) {
-        unsigned char bits = cursor_bitmap[j];
-        for (int i = 0; i < 8; i++) {
-            if (bits & (0x80 >> i)) {
-                /* Viền trắng, trong đen */
-                int edge = (i == 0 || j == 0 || i == 7 || j == 7);
-                uint32_t color = edge ? 0x00FFFFFF : 0x00000000;
-                fb_pixel(x + i, y + j, color);
-            }
-        }
-    }
-}
-
-void fb_cursor_draw(int x, int y) {
-    if (!fb_on) return;
-    if (x + 8 >= (int)fb_w) x = fb_w - 8;
-    if (y + 8 >= (int)fb_h) y = fb_h - 8;
-    save_region(x, y);
-    draw_cursor_pixels(x, y);
-    cursor_last_x = x;
-    cursor_last_y = y;
-}
-
-void fb_cursor_move(int old_x, int old_y, int new_x, int new_y) {
-    if (!fb_on) return;
-    /* Restore vị trí cũ */
-    if (cursor_last_x >= 0 && cursor_last_y >= 0)
-        restore_region(cursor_last_x, cursor_last_y);
-    /* Clamp */
-    if (new_x < 0) new_x = 0;
-    if (new_y < 0) new_y = 0;
-    if (new_x + 8 >= (int)fb_w) new_x = fb_w - 9;
-    if (new_y + 8 >= (int)fb_h) new_y = fb_h - 9;
-    /* Save + vẽ vị trí mới */
-    save_region(new_x, new_y);
-    draw_cursor_pixels(new_x, new_y);
-    cursor_last_x = new_x;
-    cursor_last_y = new_y;
-}
-
-
 /* ═══ Shell cursor (dấu _ nhấp nháy) ═══ */
 static int shell_cur_visible = 0;
 static int shell_cur_x = 0;
@@ -338,4 +250,70 @@ static void shell_cursor_update(void) {
         shell_cur_visible = 0;
     }
     fb_shell_cursor_show();
+}
+
+
+/* ═══ Mouse cursor 12x12 arrow ═══ */
+static const uint8_t cursor_arrow[12] = {
+    0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC,
+    0xFE, 0xF0, 0xD8, 0x8C, 0x04, 0x00,
+};
+
+static uint32_t cursor_bg[12][12];
+static int cursor_visible = 0;
+static int cursor_x = 0, cursor_y = 0;
+
+static void cursor_save(void) {
+    for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; i++) {
+            uint32_t px = 0;
+            uint32_t xx = cursor_x + i, yy = cursor_y + j;
+            if (xx < fb_w && yy < fb_h) {
+                if (fb_bpp == 32) {
+                    px = *(uint32_t*)(fb_ptr + yy * fb_pitch + xx * 4);
+                } else {
+                    uint8_t* p = fb_ptr + yy * fb_pitch + xx * 3;
+                    px = (p[2] << 16) | (p[1] << 8) | p[0];
+                }
+            }
+            cursor_bg[j][i] = px;
+        }
+}
+
+static void cursor_restore(void) {
+    for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; i++)
+            fb_pixel(cursor_x + i, cursor_y + j, cursor_bg[j][i]);
+}
+
+static void cursor_draw(void) {
+    for (int j = 0; j < 12; j++) {
+        uint8_t bits = cursor_arrow[j];
+        for (int i = 0; i < 12; i++) {
+            if (bits & (0x80 >> i)) {
+                int edge = (i == 0 || j == 0);
+                uint32_t col = edge ? 0x00000000 : 0x00FFFFFF;
+                fb_pixel(cursor_x + i, cursor_y + j, col);
+            }
+        }
+    }
+}
+
+void fb_cursor_show(int x, int y) {
+    if (!fb_on) return;
+    if (x + 12 > (int)fb_w) x = fb_w - 12;
+    if (y + 12 > (int)fb_h) y = fb_h - 12;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    cursor_x = x;
+    cursor_y = y;
+    cursor_save();
+    cursor_draw();
+    cursor_visible = 1;
+}
+
+void fb_cursor_hide(void) {
+    if (!fb_on || !cursor_visible) return;
+    cursor_restore();
+    cursor_visible = 0;
 }

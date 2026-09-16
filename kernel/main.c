@@ -45,6 +45,8 @@ extern void fb_init(uint64_t addr, uint32_t pitch, uint32_t width,
 extern int fb_is_active(void);
 extern void fb_draw_panel(void);
 extern void mouse_init(void);
+extern void mouse_show(void);
+extern void mouse_hide(void);
 
 static void print_hex(uint32_t v) {
     char buf[11];

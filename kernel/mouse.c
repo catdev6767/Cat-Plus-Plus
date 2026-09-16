@@ -1,4 +1,4 @@
-/* Kitty kernel — PS/2 Mouse driver */
+/* Kitty kernel — PS/2 Mouse driver + cursor overlay */
 #include <stdint.h>
 
 #define PS2_DATA   0x60
@@ -11,7 +11,6 @@ static inline uint8_t inb(uint16_t port) {
 static inline void outb(uint16_t port, uint8_t val) {
     __asm__ volatile("outb %0, %1" : : "a"(val), "Nd"(port));
 }
-static inline void io_wait(void) { outb(0x80, 0); }
 
 /* Mouse state */
 static volatile int mouse_x = 400;
@@ -19,17 +18,18 @@ static volatile int mouse_y = 300;
 static volatile uint8_t mouse_buttons = 0;
 static volatile int mouse_cycle = 0;
 static volatile int8_t mouse_buf[3];
-static int screen_w = 800;
-static int screen_h = 600;
+static int screen_w = 1024;
+static int screen_h = 768;
+static int g_mouse_visible = 0;
 
 /* External fb API */
 extern int  fb_is_active(void);
 extern uint32_t fb_width(void);
 extern uint32_t fb_height(void);
-extern void fb_cursor_draw(int x, int y);
-extern void fb_cursor_move(int old_x, int old_y, int new_x, int new_y);
+extern void fb_cursor_show(int x, int y);
+extern void fb_cursor_hide(void);
 
-/* ─── PS/2 mouse command helpers ─── */
+/* ─── PS/2 helpers ─── */
 static void mouse_wait_write(void) {
     for (int i = 0; i < 100000; i++)
         if (!(inb(PS2_STATUS) & 2)) return;
@@ -50,51 +50,44 @@ static uint8_t mouse_read(void) {
 }
 
 void mouse_init(void) {
-    /* Enable auxiliary device (mouse) */
     mouse_wait_write();
     outb(PS2_CMD, 0xA8);
 
-    /* Read config byte */
     mouse_wait_write();
     outb(PS2_CMD, 0x20);
     mouse_wait_read();
     uint8_t cfg = inb(PS2_DATA);
-    cfg |= 0x02;   /* enable IRQ12 */
-    cfg &= ~0x20;  /* enable mouse clock */
+    cfg |= 0x02;
+    cfg &= ~0x20;
     mouse_wait_write();
     outb(PS2_CMD, 0x60);
     mouse_wait_write();
     outb(PS2_DATA, cfg);
 
-    /* Set defaults */
     mouse_write(0xF6);
     mouse_read();
-
-    /* Enable data reporting */
     mouse_write(0xF4);
     mouse_read();
 
-    /* Get screen size from fb if available */
     if (fb_is_active()) {
         screen_w = (int)fb_width();
         screen_h = (int)fb_height();
         mouse_x = screen_w / 2;
         mouse_y = screen_h / 2;
     }
-    fb_cursor_draw(mouse_x, mouse_y);
 }
 
-/* ─── IRQ12 handler — đọc 3 byte ─── */
+/* ─── IRQ12 handler ─── */
 void mouse_handler(void) {
     uint8_t status = inb(PS2_STATUS);
-    if (!(status & 0x20)) return;   /* không phải từ mouse */
+    if (!(status & 0x20)) return;
 
     int8_t b = (int8_t)inb(PS2_DATA);
 
     switch (mouse_cycle) {
         case 0:
             mouse_buf[0] = b;
-            if (!(b & 0x08)) break;   /* bit 3 luôn = 1 */
+            if (!(b & 0x08)) break;
             mouse_cycle = 1;
             break;
         case 1:
@@ -109,30 +102,42 @@ void mouse_handler(void) {
             int8_t dx = mouse_buf[1];
             int8_t dy = mouse_buf[2];
 
-            if (flags & 0x40) { /* X overflow */ }
-            else if (flags & 0x10) mouse_x += (int)dx - 256;  /* negative */
-            else mouse_x += (int)dx;
+            int new_x = mouse_x + (int)dx;
+            int new_y = mouse_y - (int)dy;
 
-            if (flags & 0x80) { /* Y overflow */ }
-            else if (flags & 0x20) mouse_y -= ((int)dy - 256);
-            else mouse_y -= (int)dy;
-
-            /* Clamp */
-            if (mouse_x < 0) mouse_x = 0;
-            if (mouse_y < 0) mouse_y = 0;
-            if (mouse_x > screen_w - 1) mouse_x = screen_w - 1;
-            if (mouse_y > screen_h - 1) mouse_y = screen_h - 1;
+            if (new_x < 0) new_x = 0;
+            if (new_y < 0) new_y = 0;
+            if (new_x > screen_w - 1) new_x = screen_w - 1;
+            if (new_y > screen_h - 1) new_y = screen_h - 1;
 
             mouse_buttons = flags & 0x07;
 
-            int new_x = mouse_x;
-            int new_y = mouse_y;
-            if (dx != 0 || dy != 0) {
-                fb_cursor_move(mouse_x - dx, mouse_y + dy, new_x, new_y);
+            /* Di chuyển cursor */
+            if (g_mouse_visible && (new_x != mouse_x || new_y != mouse_y)) {
+                fb_cursor_hide();
+                mouse_x = new_x;
+                mouse_y = new_y;
+                fb_cursor_show(mouse_x, mouse_y);
+            } else {
+                mouse_x = new_x;
+                mouse_y = new_y;
             }
             break;
         }
     }
+}
+
+/* Public */
+void mouse_show(void) {
+    if (!fb_is_active()) return;
+    g_mouse_visible = 1;
+    fb_cursor_show(mouse_x, mouse_y);
+}
+
+void mouse_hide(void) {
+    if (!g_mouse_visible) return;
+    g_mouse_visible = 0;
+    fb_cursor_hide();
 }
 
 int mouse_get_x(void) { return mouse_x; }
