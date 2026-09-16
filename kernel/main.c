@@ -12,6 +12,7 @@ const unsigned long multiboot_header[] = {
 };
 
 extern void shell_run(void);
+extern void idt_init(void);
 extern void commands_init(void);
 
 #include <stdint.h>
@@ -61,6 +62,7 @@ static void print_hex(uint32_t v) {
 
 void kmain(uint32_t mbi_addr, uint32_t magic) {
     catpp_init();
+    idt_init();   /* BẮT BUỘC — enable IDT + STI + unmask IRQ */
 
     extern void fb_clear_all(void);
     extern void fb_draw_dock(void);

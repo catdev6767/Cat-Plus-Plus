@@ -5,6 +5,8 @@
 #define PS2_STATUS 0x64
 #define PS2_CMD    0x64
 
+extern void catpp_print_str(const char* s);
+
 static inline uint8_t inb(uint16_t port) {
     uint8_t r; __asm__ volatile("inb %1, %0" : "=a"(r) : "Nd"(port)); return r;
 }
@@ -50,8 +52,10 @@ static uint8_t mouse_read(void) {
 }
 
 void mouse_init(void) {
+    catpp_print_str("[mouse] init start");
     mouse_wait_write();
     outb(PS2_CMD, 0xA8);
+    catpp_print_str("[mouse] A8 sent");
 
     mouse_wait_write();
     outb(PS2_CMD, 0x20);
@@ -75,12 +79,20 @@ void mouse_init(void) {
         mouse_x = screen_w / 2;
         mouse_y = screen_h / 2;
     }
+    catpp_print_str("[mouse] init done");
 }
 
 /* ─── IRQ12 handler ─── */
+static int mouse_first = 1;
+
 void mouse_handler(void) {
     uint8_t status = inb(PS2_STATUS);
     if (!(status & 0x20)) return;
+
+    if (mouse_first) {
+        catpp_print_str("[mouse] IRQ12 fired!");
+        mouse_first = 0;
+    }
 
     int8_t b = (int8_t)inb(PS2_DATA);
 
