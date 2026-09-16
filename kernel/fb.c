@@ -14,11 +14,21 @@ static uint32_t cur_x = 0;
 static uint32_t cur_y = 0;
 
 /* Màu mặc định (0x00RRGGBB) */
-static uint32_t fg_color = 0x00FFFFFF;
-static uint32_t bg_color = 0x00000000;
+static uint32_t fg_color = 0x00FFFFFF;  /* trắng */
+static uint32_t bg_color = 0x00300A24;  /* tím Ubuntu 10.10 */
+static uint32_t font_scale = 2;  /* scale 8x8 -> 16x16 */
+
+/* ═══ GUI panel ═══ */
+#define PANEL_HEIGHT 24
+#define PANEL_BG     0x001A1A1A  /* xám đậm */
+#define PANEL_FG     0x00EEEEEE  /* gần trắng */
+static int text_area_y0 = 0;   /* dòng text bắt đầu từ đây */
+
 
 /* Forward decls */
 void fb_clear(void);
+void fb_draw_panel(void);
+void fb_puts_panel(const char* s, int x, int y, uint32_t color);
 static void shell_cursor_update(void);
 void fb_pixel(uint32_t x, uint32_t y, uint32_t color);
 
@@ -33,7 +43,16 @@ void fb_init(uint64_t addr, uint32_t pitch, uint32_t width,
     fb_h = height;
     fb_on = 1;
 
-    fb_clear();
+    /* Clear toàn bộ trước */
+    for (uint32_t y = 0; y < fb_h; y++)
+        for (uint32_t x = 0; x < fb_w; x++)
+            fb_pixel(x, y, bg_color);
+
+    /* Vẽ panel + reserve text area */
+    text_area_y0 = PANEL_HEIGHT + 4;
+    fb_draw_panel();
+    cur_x = 0;
+    cur_y = text_area_y0;
 }
 
 int fb_is_active(void) { return fb_on; }
@@ -67,11 +86,14 @@ void fb_char_at(char ch, uint32_t x, uint32_t y, uint32_t fg, uint32_t bg) {
     if (!fb_on) return;
     if (ch < 32 || ch > 127) ch = '?';
     const unsigned char* g = font8x8[ch - 32];
+    uint32_t sc = font_scale;
     for (int row = 0; row < 8; row++) {
         unsigned char bits = g[row];
         for (int col = 0; col < 8; col++) {
             uint32_t color = (bits & (0x80 >> col)) ? fg : bg;
-            fb_pixel(x + col, y + row, color);
+            for (uint32_t dy = 0; dy < sc; dy++)
+                for (uint32_t dx = 0; dx < sc; dx++)
+                    fb_pixel(x + col*sc + dx, y + row*sc + dy, color);
         }
     }
 }
@@ -79,26 +101,30 @@ void fb_char_at(char ch, uint32_t x, uint32_t y, uint32_t fg, uint32_t bg) {
 /* ═══ In ký tự với wrap + scroll ═══ */
 void fb_putc(char c) {
     if (!fb_on) return;
+    /* Không cho text ghi đè panel */
+    if ((int)cur_y < text_area_y0) cur_y = text_area_y0;
+    uint32_t sc = font_scale;
+    uint32_t cw = 8 * sc;   /* char width  */
+    uint32_t chh = 8 * sc;  /* char height */
 
     if (c == '\n') {
         cur_x = 0;
-        cur_y += 8;
+        cur_y += chh;
     } else if (c == '\r') {
         cur_x = 0;
     } else if (c == '\b') {
-        if (cur_x >= 8) cur_x -= 8;
-        fb_rect(cur_x, cur_y, 8, 8, bg_color);
+        if (cur_x >= cw) cur_x -= cw;
     } else if (c == '\t') {
-        cur_x = (cur_x + 32) & ~31u;
+        cur_x = (cur_x + cw*4) & ~((cw*4) - 1);
     } else {
         fb_char_at(c, cur_x, cur_y, fg_color, bg_color);
-        cur_x += 8;
-        if (cur_x + 8 > fb_w) { cur_x = 0; cur_y += 8; }
+        cur_x += cw;
+        if (cur_x + cw > fb_w) { cur_x = 0; cur_y += chh; }
     }
 
     /* Scroll */
-    if (cur_y + 8 > fb_h) {
-        uint32_t shift = 8;
+    if (cur_y + chh > fb_h) {
+        uint32_t shift = chh;
         uint32_t bytes_per_row = fb_w * (fb_bpp / 8);
         for (uint32_t y = 0; y < fb_h - shift; y++) {
             uint8_t* dst = fb_ptr + y * fb_pitch;
@@ -111,19 +137,55 @@ void fb_putc(char c) {
                 fb_pixel(x, y, bg_color);
         cur_y -= shift;
     }
-    shell_cursor_update();
+    /* shell_cursor_update(); tắt để test */
 }
 
 void fb_puts(const char* s) {
     while (s && *s) fb_putc(*s++);
 }
 
+/* Vẽ top panel Ubuntu 10.10 style */
+void fb_draw_panel(void) {
+    if (!fb_on) return;
+
+    /* Nền panel */
+    fb_rect(0, 0, fb_w, PANEL_HEIGHT, PANEL_BG);
+
+    /* Menu bên trái */
+    fb_puts_panel("Applications", 12, 4, PANEL_FG);
+    fb_puts_panel("Places",       110, 4, PANEL_FG);
+    fb_puts_panel("System",       170, 4, PANEL_FG);
+
+    /* Bên phải — giả lập */
+    fb_puts_panel("felis@den", fb_w - 130, 4, PANEL_FG);
+    fb_puts_panel("[12:00]",   fb_w - 60,  4, PANEL_FG);
+
+    /* Đường kẻ dưới panel */
+    fb_rect(0, PANEL_HEIGHT - 1, fb_w, 1, 0x00555555);
+
+    /* Đặt text bắt đầu từ dưới panel */
+    text_area_y0 = PANEL_HEIGHT + 4;
+}
+
+/* In chữ lên panel — không ảnh hưởng cursor chính */
+void fb_puts_panel(const char* s, int x, int y, uint32_t color) {
+    if (!fb_on) return;
+    int cur = x;
+    while (s && *s) {
+        fb_char_at(*s++, cur, y, color, PANEL_BG);
+        cur += 8;  /* scale=1 cho panel */
+    }
+}
+
 void fb_clear(void) {
     if (!fb_on) return;
-    for (uint32_t y = 0; y < fb_h; y++)
+    /* Clear từ dưới panel trở xuống */
+    int y0 = text_area_y0 > 0 ? text_area_y0 : 0;
+    for (uint32_t y = y0; y < fb_h; y++)
         for (uint32_t x = 0; x < fb_w; x++)
             fb_pixel(x, y, bg_color);
-    cur_x = 0; cur_y = 0;
+    cur_x = 0;
+    cur_y = (y0 > 0) ? (uint32_t)y0 : 0;
 }
 
 void fb_set_colors(uint32_t fg, uint32_t bg) {

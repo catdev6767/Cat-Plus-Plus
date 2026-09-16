@@ -43,6 +43,7 @@ struct mb_info {
 extern void fb_init(uint64_t addr, uint32_t pitch, uint32_t width,
                     uint32_t height, uint8_t bpp);
 extern int fb_is_active(void);
+extern void fb_draw_panel(void);
 extern void mouse_init(void);
 
 static void print_hex(uint32_t v) {
@@ -90,6 +91,7 @@ void kmain(uint32_t mbi_addr, uint32_t magic) {
                     mbi->framebuffer_width, mbi->framebuffer_height,
                     mbi->framebuffer_bpp);
             catpp_print_str("[Kitty] Framebuffer OK");
+            fb_draw_panel();
             mouse_init();
             catpp_print_str("[Kitty] Mouse OK");
         } else {
