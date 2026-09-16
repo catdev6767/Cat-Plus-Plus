@@ -21,13 +21,18 @@ static uint32_t font_scale = 2;  /* scale 8x8 -> 16x16 */
 /* ═══ GUI panel ═══ */
 #define PANEL_HEIGHT 24
 #define PANEL_BG     0x001A1A1A  /* xám đậm */
+#define DOCK_WIDTH   64
+#define DOCK_BG      0x00151515
 #define PANEL_FG     0x00EEEEEE  /* gần trắng */
-static int text_area_y0 = 0;   /* dòng text bắt đầu từ đây */
+static int text_area_y0 = 0;
+static int text_area_x0 = 0;   /* dòng text bắt đầu từ đây */
 
 
 /* Forward decls */
 void fb_clear(void);
 void fb_draw_panel(void);
+void fb_draw_dock(void);
+void fb_clear_all(void);
 void fb_puts_panel(const char* s, int x, int y, uint32_t color);
 static void shell_cursor_update(void);
 void fb_pixel(uint32_t x, uint32_t y, uint32_t color);
@@ -316,4 +321,42 @@ void fb_cursor_hide(void) {
     if (!fb_on || !cursor_visible) return;
     cursor_restore();
     cursor_visible = 0;
+}
+
+
+void fb_clear_all(void) {
+    if (!fb_on) return;
+    for (uint32_t y = 0; y < fb_h; y++)
+        for (uint32_t x = 0; x < fb_w; x++)
+            fb_pixel(x, y, bg_color);
+    cur_x = 0;
+    cur_y = 0;
+}
+
+
+void fb_draw_dock(void) {
+    if (!fb_on) return;
+
+    /* Dock trái 64px */
+    fb_rect(0, PANEL_HEIGHT, DOCK_WIDTH, fb_h - PANEL_HEIGHT, DOCK_BG);
+    fb_rect(DOCK_WIDTH - 1, PANEL_HEIGHT, 1, fb_h - PANEL_HEIGHT, 0x00333333);
+
+    int ix = 16;
+    int iy = PANEL_HEIGHT + 16;
+    uint32_t cols[] = {0x00E95420, 0x00FFFFFF, 0x00FFAA00,
+                       0x0066AAFF, 0x00AA66FF, 0x00FF6666};
+    for (int i = 0; i < 6; i++) {
+        fb_rect(ix, iy, 32, 32, cols[i]);
+        fb_rect(ix + 2, iy + 2, 28, 28, 0x00222222);
+        fb_rect(ix + 4, iy + 4, 6, 6, cols[i]);
+        iy += 48;
+        if (iy + 32 > (int)fb_h - 40) break;
+    }
+    /* Nút Ubuntu logo */
+    fb_rect(ix, PANEL_HEIGHT + 4, 32, 8, 0x00E95420);
+
+    text_area_y0 = PANEL_HEIGHT + 8;
+    text_area_x0 = DOCK_WIDTH + 12;
+    cur_x = text_area_x0;
+    cur_y = text_area_y0;
 }
