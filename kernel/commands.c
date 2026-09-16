@@ -127,6 +127,17 @@ static void cmd_help(void) {
     catpp_print_str("  --- Cat++ scripts ---");
     catpp_print_str("  run FILE.cat      Chay file Cat++");
     catpp_print_str("  boot              Chay SysCat (init)");
+    catpp_print_str("  --- File ops ---");
+    catpp_print_str("  cp SRC DST        Copy file");
+    catpp_print_str("  mv SRC DST        Move/rename");
+    catpp_print_str("  stat FILE         Info file");
+    catpp_print_str("  find [DIR]        List de quy");
+    catpp_print_str("  du                Tong dung luong");
+    catpp_print_str("  --- Env vars ---");
+    catpp_print_str("  export NAME=val   Dat bien");
+    catpp_print_str("  env               Xem bien");
+    catpp_print_str("  unset NAME        Xoa bien");
+    catpp_print_str("  $NAME, $?         Expand trong lenh");
 }
 
 /* ═══ SYSTEM ═══ */
@@ -314,6 +325,15 @@ const char* shell_commands[] = {
 
 static void cmd_run(char* arg);
 static void cmd_boot(void);
+static void cmd_cp(char* arg);
+static void cmd_mv(char* arg);
+static void cmd_stat(char* arg);
+static void cmd_find(char* arg);
+static void cmd_du(void);
+static void cmd_export(char* arg);
+static void cmd_env(void);
+static void cmd_unset(char* arg);
+static const char* expand_vars(const char* src);
 static void cmd_head(char* arg);
 static void cmd_tail(char* arg);
 static void cmd_grep(char* arg);
@@ -325,6 +345,14 @@ int shell_execute(char* cmdline) {
     int len = strlen(cmdline);
     while (len > 0 && cmdline[len-1] == ' ') cmdline[--len] = 0;
     if (len == 0) return 0;
+
+    /* Expand $VAR */
+    const char* expanded = expand_vars(cmdline);
+    if (expanded != cmdline) {
+        int k = 0;
+        while (expanded[k] && k < 255) { cmdline[k] = expanded[k]; k++; }
+        cmdline[k] = 0;
+    }
 
     /* Check redirect + pipe trước */
     if (parse_redirect_pipe(cmdline)) return 0;
@@ -354,6 +382,14 @@ int shell_execute(char* cmdline) {
     if (strcmp(cmdline, "write") == 0)   { cmd_write(arg);return 0; }
     if (strcmp(cmdline, "append") == 0)  { cmd_append(arg);return 0; }
     if (strcmp(cmdline, "wc") == 0)      { cmd_wc(arg);   return 0; }
+    if (strcmp(cmdline, "cp") == 0)      { cmd_cp(arg);   return 0; }
+    if (strcmp(cmdline, "mv") == 0)      { cmd_mv(arg);   return 0; }
+    if (strcmp(cmdline, "stat") == 0)    { cmd_stat(arg); return 0; }
+    if (strcmp(cmdline, "find") == 0)    { cmd_find(arg); return 0; }
+    if (strcmp(cmdline, "du") == 0)      { cmd_du(arg);   return 0; }
+    if (strcmp(cmdline, "export") == 0)  { cmd_export(arg); return 0; }
+    if (strcmp(cmdline, "env") == 0)     { cmd_env();     return 0; }
+    if (strcmp(cmdline, "unset") == 0)   { cmd_unset(arg);return 0; }
     if (strcmp(cmdline, "run") == 0)     { cmd_run(arg);  return 0; }
     if (strcmp(cmdline, "boot") == 0)    { cmd_boot();    return 0; }
     if (strcmp(cmdline, "head") == 0)    { cmd_head(arg); return 0; }
@@ -541,6 +577,202 @@ static void cmd_run(char* arg) {
 #include "boot_cat.h"
 static void cmd_boot(void) {
     catpp_run(SysCat_src);
+}
+
+/* ═══ ENV VARS ═══ */
+#define ENV_MAX  32
+#define ENV_NLEN 32
+#define ENV_VLEN 128
+
+static char g_env_names[ENV_MAX][ENV_NLEN];
+static char g_env_vals[ENV_MAX][ENV_VLEN];
+static int  g_env_count = 0;
+static int  g_last_exit = 0;
+
+static int env_find(const char* name) {
+    for (int i = 0; i < g_env_count; i++)
+        if (strcmp(g_env_names[i], name) == 0) return i;
+    return -1;
+}
+
+static void env_set(const char* name, const char* val) {
+    int i = env_find(name);
+    if (i < 0) {
+        if (g_env_count >= ENV_MAX) return;
+        i = g_env_count++;
+    }
+    int j;
+    for (j = 0; name[j] && j < ENV_NLEN-1; j++) g_env_names[i][j] = name[j];
+    g_env_names[i][j] = 0;
+    for (j = 0; val[j] && j < ENV_VLEN-1; j++) g_env_vals[i][j] = val[j];
+    g_env_vals[i][j] = 0;
+}
+
+static const char* env_get(const char* name) {
+    if (strcmp(name, "?") == 0) {
+        static char buf[8];
+        int n = g_last_exit;
+        int i = 6; buf[7] = 0;
+        buf[6] = '0' + (n % 10);
+        return buf + 6;
+    }
+    int i = env_find(name);
+    if (i < 0) return "";
+    return g_env_vals[i];
+}
+
+/* Expand $VAR trong string. Trả về static buffer. */
+static char g_expand_buf[512];
+static const char* expand_vars(const char* src) {
+    int o = 0;
+    for (int i = 0; src[i] && o < 510; i++) {
+        if (src[i] == '$' && (src[i+1] == '_' || (src[i+1] >= 'a' && src[i+1] <= 'z') ||
+                              (src[i+1] >= 'A' && src[i+1] <= 'Z') || src[i+1] == '?')) {
+            char name[32]; int ni = 0;
+            i++;
+            while (src[i] && ni < 31 && (src[i] == '_' || (src[i] >= 'a' && src[i] <= 'z') ||
+                   (src[i] >= 'A' && src[i] <= 'Z') || (src[i] >= '0' && src[i] <= '9'))) {
+                name[ni++] = src[i++];
+            }
+            if (src[i] == '?') { name[0] = '?'; name[1] = 0; ni = 1; i++; }
+            else i--;
+            name[ni] = 0;
+            const char* v = env_get(name);
+            while (*v && o < 510) g_expand_buf[o++] = *v++;
+        } else {
+            g_expand_buf[o++] = src[i];
+        }
+    }
+    g_expand_buf[o] = 0;
+    return g_expand_buf;
+}
+
+static void cmd_export(char* arg) {
+    if (!arg || !*arg) {
+        for (int i = 0; i < g_env_count; i++) {
+            char b[200];
+            strcpy(b, g_env_names[i]);
+            strcat(b, "=");
+            strcat(b, g_env_vals[i]);
+            catpp_print_str(b);
+        }
+        return;
+    }
+    char* eq = arg;
+    while (*eq && *eq != '=') eq++;
+    if (!*eq) { catpp_print_str("Dung: export NAME=value"); return; }
+    *eq = 0;
+    env_set(arg, eq+1);
+    *eq = '=';
+    char b[200];
+    strcpy(b, arg);
+    catpp_print_str(b);
+}
+
+static void cmd_env(void) { cmd_export(0); }
+static void cmd_unset(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: unset NAME"); return; }
+    int i = env_find(arg);
+    if (i < 0) { catpp_print_str("Khong co bien do"); return; }
+    for (int k = i; k < g_env_count-1; k++) {
+        strcpy(g_env_names[k], g_env_names[k+1]);
+        strcpy(g_env_vals[k], g_env_vals[k+1]);
+    }
+    g_env_count--;
+}
+
+/* ═══ FILE OPS ═══ */
+static void cmd_cp(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: cp SRC DST"); return; }
+    char* dst = arg;
+    while (*dst && *dst != ' ') dst++;
+    if (!*dst) { catpp_print_str("Thieu DST"); return; }
+    *dst = 0; dst++; while (*dst == ' ') dst++;
+    int sz = 0;
+    const char* data = fs_read(arg, &sz);
+    if (!data) { catpp_print_str("SRC khong ton tai"); return; }
+    fs_write(dst, data, sz);
+    catpp_print_str("Da copy");
+}
+
+static void cmd_mv(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: mv SRC DST"); return; }
+    char* dst = arg;
+    while (*dst && *dst != ' ') dst++;
+    if (!*dst) { catpp_print_str("Thieu DST"); return; }
+    *dst = 0; dst++; while (*dst == ' ') dst++;
+    int sz = 0;
+    const char* data = fs_read(arg, &sz);
+    if (!data) { catpp_print_str("SRC khong ton tai"); return; }
+    fs_write(dst, data, sz);
+    fs_delete(arg);
+    catpp_print_str("Da move");
+}
+
+static void cmd_stat(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: stat FILE"); return; }
+    int idx = fs_resolve(g_cwd, arg);
+    if (idx < 0) { catpp_print_str("Khong ton tai"); return; }
+    char b[200];
+    strcpy(b, "Name: "); strcat(b, fs_get_name(idx));
+    catpp_print_str(b);
+    strcpy(b, "Type: "); strcat(b, fs_is_dir(idx) ? "directory" : "file");
+    catpp_print_str(b);
+    if (!fs_is_dir(idx)) {
+        strcpy(b, "Size: ");
+        int sz = fs_file_size(idx);
+        char num[16]; int j = 15; num[15] = 0;
+        if (sz == 0) num[--j] = '0';
+        while (sz > 0) { num[--j] = '0' + (sz % 10); sz /= 10; }
+        strcat(b, &num[j]); strcat(b, " B");
+        catpp_print_str(b);
+    }
+    char path[200];
+    fs_path_of(idx, path, sizeof(path));
+    strcpy(b, "Path: "); strcat(b, path);
+    catpp_print_str(b);
+}
+
+static void find_recursive(int parent, const char* prefix, int depth) {
+    if (depth > 4) return;
+    int children[64];
+    int n = fs_list_children(parent, children, 64);
+    for (int i = 0; i < n; i++) {
+        int idx = children[i];
+        const char* name = fs_get_name(idx);
+        if (!name) continue;
+        char path[200];
+        fs_join(path, prefix, name, sizeof(path));
+        catpp_print_str(path);
+        if (fs_is_dir(idx)) find_recursive(idx, path, depth + 1);
+    }
+}
+
+static void cmd_find(char* arg) {
+    int start = g_cwd;
+    if (arg && *arg) {
+        start = fs_resolve(g_cwd, arg);
+        if (start < 0) { catpp_print_str("Khong ton tai"); return; }
+        if (!fs_is_dir(start)) { catpp_print_str(arg); return; }
+    }
+    char base[200];
+    fs_path_of(start, base, sizeof(base));
+    find_recursive(start, base, 0);
+}
+
+static void cmd_du(void) {
+    int total = 0;
+    int total_all = fs_count_files();
+    for (int i = 0; i < total_all; i++) {
+        if (!fs_is_dir(i)) total += fs_file_size(i);
+    }
+    char b[64];
+    strcpy(b, "Total: ");
+    char num[16]; int j = 15; num[15] = 0;
+    if (total == 0) num[--j] = '0';
+    while (total > 0) { num[--j] = '0' + (total % 10); total /= 10; }
+    strcat(b, &num[j]); strcat(b, " B");
+    catpp_print_str(b);
 }
 
 /* Public init */
