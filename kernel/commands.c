@@ -333,6 +333,19 @@ static void cmd_du(void);
 static void cmd_export(char* arg);
 static void cmd_env(void);
 static void cmd_unset(char* arg);
+static void cmd_order(char* arg);
+static void cmd_unique(char* arg);
+static void cmd_carve(char* arg);
+static void cmd_swap(char* arg);
+static void cmd_count(char* arg);
+static void cmd_chirp(char* arg);
+static void cmd_belly(void);
+static void cmd_tag(void);
+static void cmd_den(void);
+static void cmd_locate(char* arg);
+static void cmd_prowl(void);
+static void cmd_scratch(void);
+static void cmd_purr_cmd(void);
 static const char* expand_vars(const char* src);
 static void cmd_head(char* arg);
 static void cmd_tail(char* arg);
@@ -382,6 +395,22 @@ int shell_execute(char* cmdline) {
     if (strcmp(cmdline, "write") == 0)   { cmd_write(arg);return 0; }
     if (strcmp(cmdline, "append") == 0)  { cmd_append(arg);return 0; }
     if (strcmp(cmdline, "wc") == 0)      { cmd_wc(arg);   return 0; }
+    /* Text processing — tên mèo */
+    if (strcmp(cmdline, "order") == 0)   { cmd_order(arg);  return 0; }
+    if (strcmp(cmdline, "unique") == 0)  { cmd_unique(arg); return 0; }
+    if (strcmp(cmdline, "carve") == 0)   { cmd_carve(arg);  return 0; }
+    if (strcmp(cmdline, "swap") == 0)    { cmd_swap(arg);   return 0; }
+    if (strcmp(cmdline, "count") == 0)   { cmd_count(arg);  return 0; }
+    if (strcmp(cmdline, "chirp") == 0)   { cmd_chirp(arg);  return 0; }
+    /* Utility — tên mèo */
+    if (strcmp(cmdline, "belly") == 0)   { cmd_belly();      return 0; }
+    if (strcmp(cmdline, "tag") == 0)     { cmd_tag();        return 0; }
+    if (strcmp(cmdline, "den") == 0)     { cmd_den();        return 0; }
+    if (strcmp(cmdline, "locate") == 0)  { cmd_locate(arg); return 0; }
+    if (strcmp(cmdline, "prowl") == 0)   { cmd_prowl();      return 0; }
+    /* Easter egg */
+    if (strcmp(cmdline, "scratch") == 0) { cmd_scratch();    return 0; }
+    if (strcmp(cmdline, "purr") == 0)    { cmd_purr_cmd();   return 0; }
     if (strcmp(cmdline, "cp") == 0)      { cmd_cp(arg);   return 0; }
     if (strcmp(cmdline, "mv") == 0)      { cmd_mv(arg);   return 0; }
     if (strcmp(cmdline, "stat") == 0)    { cmd_stat(arg); return 0; }
@@ -773,6 +802,219 @@ static void cmd_du(void) {
     while (total > 0) { num[--j] = '0' + (total % 10); total /= 10; }
     strcat(b, &num[j]); strcat(b, " B");
     catpp_print_str(b);
+}
+
+/* ═══ TEXT PROCESSING — tên mèo ═══ */
+
+static const char* get_text_input(int* size_out) {
+    if (g_use_pipe_in && g_pipe_input) {
+        *size_out = g_pipe_input_size;
+        return g_pipe_input;
+    }
+    *size_out = 0;
+    return 0;
+}
+
+static int line_eq(const char* a, int alen, const char* b, int blen) {
+    if (alen != blen) return 0;
+    for (int i = 0; i < alen; i++) if (a[i] != b[i]) return 0;
+    return 1;
+}
+
+/* order — sắp xếp dòng */
+static void cmd_order(char* arg) {
+    (void)arg;
+    int size = 0;
+    const char* data = get_text_input(&size);
+    if (!data) { catpp_print_str("order: can pipe"); return; }
+    #define MAX_ORD 128
+    static int st[MAX_ORD], ln[MAX_ORD];
+    int n = 0, i = 0;
+    while (i < size && n < MAX_ORD) {
+        int j = i;
+        while (j < size && data[j] != '\n') j++;
+        st[n] = i; ln[n] = j - i; n++;
+        i = j + 1;
+    }
+    for (int a = 0; a < n-1; a++)
+        for (int b = 0; b < n-1-a; b++) {
+            int m = ln[b] < ln[b+1] ? ln[b] : ln[b+1];
+            int cmp = 0;
+            for (int k = 0; k < m; k++) {
+                if (data[st[b]+k] < data[st[b+1]+k]) { cmp = -1; break; }
+                if (data[st[b]+k] > data[st[b+1]+k]) { cmp = 1; break; }
+            }
+            if (cmp == 0) cmp = ln[b] - ln[b+1];
+            if (cmp > 0) {
+                int t = st[b]; st[b] = st[b+1]; st[b+1] = t;
+                t = ln[b]; ln[b] = ln[b+1]; ln[b+1] = t;
+            }
+        }
+    for (int k = 0; k < n; k++) {
+        for (int m = 0; m < ln[k]; m++) catpp_putc(data[st[k]+m]);
+        catpp_putc('\n');
+    }
+}
+
+/* unique — loại dòng trùng liền nhau */
+static void cmd_unique(char* arg) {
+    (void)arg;
+    int size = 0;
+    const char* data = get_text_input(&size);
+    if (!data) { catpp_print_str("unique: can pipe"); return; }
+    int i = 0, ps = -1, pl = -1;
+    while (i < size) {
+        int j = i;
+        while (j < size && data[j] != '\n') j++;
+        int len = j - i;
+        if (ps < 0 || !line_eq(data+i, len, data+ps, pl)) {
+            for (int m = 0; m < len; m++) catpp_putc(data[i+m]);
+            catpp_putc('\n');
+        }
+        ps = i; pl = len;
+        i = j + 1;
+    }
+}
+
+/* carve -d X -f N */
+static void cmd_carve(char* arg) {
+    char delim = '\t';
+    int field = 1;
+    if (arg) {
+        char* p = arg;
+        while (*p) {
+            if (p[0]=='-'&&p[1]=='d'&&p[2]==' ') { delim = p[3]; p += 4; }
+            else if (p[0]=='-'&&p[1]=='f'&&p[2]==' ') {
+                field = 0; p += 3;
+                while (*p >= '0' && *p <= '9') { field = field*10 + (*p-'0'); p++; }
+            } else p++;
+        }
+    }
+    int size = 0;
+    const char* data = get_text_input(&size);
+    if (!data) { catpp_print_str("carve: can pipe"); return; }
+    int i = 0;
+    while (i < size) {
+        int j = i;
+        while (j < size && data[j] != '\n') j++;
+        int cf = 1, fs = i;
+        for (int k = i; k <= j; k++) {
+            if (k == j || data[k] == delim) {
+                if (cf == field) {
+                    for (int m = fs; m < k; m++) catpp_putc(data[m]);
+                    catpp_putc('\n');
+                    break;
+                }
+                cf++;
+                fs = k + 1;
+            }
+        }
+        i = j + 1;
+    }
+}
+
+/* swap OLD NEW — đổi ký tự */
+static void cmd_swap(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: swap OLD NEW"); return; }
+    char old_c = arg[0];
+    char new_c = (arg[1] == ' ') ? arg[2] : (arg[1] ? arg[1] : arg[0]);
+    int size = 0;
+    const char* data = get_text_input(&size);
+    if (!data) { catpp_print_str("swap: can pipe"); return; }
+    for (int i = 0; i < size; i++) {
+        char ch = data[i];
+        if (ch == old_c) ch = new_c;
+        catpp_putc(ch);
+    }
+}
+
+/* count N — in 1..N */
+static void cmd_count(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: count N"); return; }
+    int n = 0;
+    while (*arg >= '0' && *arg <= '9') { n = n*10 + (*arg - '0'); arg++; }
+    for (int i = 1; i <= n; i++) {
+        char buf[16]; int j = 15; buf[15] = 0;
+        int x = i;
+        if (x == 0) buf[--j] = '0';
+        while (x > 0) { buf[--j] = '0' + (x % 10); x /= 10; }
+        catpp_print_str(&buf[j]);
+    }
+}
+
+/* chirp [TEXT] — in lặp (giới hạn 100) */
+static void cmd_chirp(char* arg) {
+    const char* text = (arg && *arg) ? arg : "chirp";
+    for (int i = 0; i < 100; i++) catpp_print_str(text);
+    catpp_print_str("... (da in 100 lan)");
+}
+
+/* ═══ UTILITY — tên mèo ═══ */
+
+/* belly — thông tin bộ nhớ */
+static void cmd_belly(void) {
+    catpp_print_str("-- Belly (RAM) --");
+    catpp_print_str("Total: 128 MB");
+    catpp_print_str("Kernel: ~50 KB");
+    catpp_print_str("Free: ~127 MB");
+}
+
+/* tag — thông tin phiên */
+static void cmd_tag(void) {
+    catpp_print_str("Tag: purr@felis");
+    catpp_print_str("UID: 0 (root-cat)");
+    catpp_print_str("Shell: Purrminal v0.1");
+}
+
+/* den — tên máy */
+static void cmd_den(void) {
+    catpp_print_str("felis-den");
+}
+
+/* locate NAME — tìm lệnh có trong PATH */
+static void cmd_locate(char* arg) {
+    if (!arg || !*arg) { catpp_print_str("Dung: locate NAME"); return; }
+    const char* cmds[] = {"help","clear","info","uname","whoami","date","uptime","mem",
+        "echo","history","ls","cd","pwd","cat","touch","mkdir","rm","rmdir","write",
+        "append","wc","sleep","reboot","halt","exit","cp","mv","stat","find","du",
+        "export","env","unset","order","unique","carve","swap","count","chirp",
+        "belly","tag","den","locate","prowl","scratch","purr","run","boot","mew",
+        "head","tail","grep",0};
+    for (int i = 0; cmds[i]; i++) {
+        if (strcmp(arg, cmds[i]) == 0) {
+            catpp_print_str("found: /bin/");
+            catpp_print_str(arg);
+            return;
+        }
+    }
+    catpp_print_str("Khong tim thay");
+}
+
+/* prowl — xem process (giả lập, chưa có process table) */
+static void cmd_prowl(void) {
+    catpp_print_str("PID  NAME");
+    catpp_print_str("1    SysCat");
+    catpp_print_str("2    sh.cat");
+    catpp_print_str("3    Purrminal");
+    catpp_print_str("(chua co process table thuc)");
+}
+
+/* scratch — vẽ ASCII mèo */
+static void cmd_scratch(void) {
+    catpp_print_str("  ^._.^");
+    catpp_print_str(" ( o.o )");
+    catpp_print_str("  > ^ <");
+    catpp_print_str(" /     |");
+    catpp_print_str("(_______|");
+    catpp_print_str("Meow~");
+}
+
+/* purr — easter egg */
+static void cmd_purr_cmd(void) {
+    catpp_print_str("purrrrrrrrrrrrrrr...");
+    catpp_print_str("    ^._.^   zZZz");
+    catpp_print_str("   ( -.- )");
+    catpp_print_str("    > ^ <");
 }
 
 /* Public init */
