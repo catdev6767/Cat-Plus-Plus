@@ -1,4 +1,4 @@
-/* Kitty OS — IDT + IRQ setup */
+/* FelisOS — IDT + IRQ setup */
 #include <stdint.h>
 
 struct idt_entry {
@@ -19,6 +19,7 @@ struct idt_ptr idtp;
 
 extern void idt_load(uint32_t idtp_addr);
 extern void irq1_stub(void);
+extern void irq12_stub(void);
 
 static inline void outb(uint16_t port, uint8_t val) {
     __asm__ volatile("outb %0, %1" : : "a"(val), "Nd"(port));
@@ -43,6 +44,8 @@ void idt_init(void) {
     uint16_t cs_val;
     __asm__ volatile("mov %%cs, %0" : "=r"(cs_val));
     idt_set_gate(33, (uint32_t)irq1_stub, cs_val, 0x8E);
+    /* IRQ12 = mouse = int 0x2C (44) */
+    idt_set_gate(44, (uint32_t)irq12_stub, cs_val, 0x8E);
 
     idt_load((uint32_t)&idtp);
 
@@ -51,7 +54,10 @@ void idt_init(void) {
     outb(0x21, 0x20); outb(0xA1, 0x28);
     outb(0x21, 0x04); outb(0xA1, 0x02);
     outb(0x21, 0x01); outb(0xA1, 0x01);
-    outb(0x21, 0xFD); outb(0xA1, 0xFF);
+    /* PIC: IRQ0 timer + IRQ1 keyboard + IRQ2 cascade (master),
+       IRQ12 mouse (slave) */
+    outb(0x21, 0xF8);   /* master: unmask IRQ0, IRQ1, IRQ2 */
+    outb(0xA1, 0xEF);   /* slave: unmask IRQ12 (bit 4) */
 
     __asm__ volatile("sti");
 }

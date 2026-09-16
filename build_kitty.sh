@@ -9,7 +9,7 @@ CFLAGS="-m32 -ffreestanding -fno-pic -fno-stack-protector -fno-builtin -nostdlib
 CFLAGS="$CFLAGS -I libc -I runtime -I kernel"
 
 echo "Compile:"
-for f in entry.s irq.s idt.c keyboard.c string.c fs.c commands.c shell.c utils.c main.c; do
+for f in entry.s irq.s idt.c keyboard.c string.c fs.c commands.c shell.c utils.c main.c catpp_mini.c fb.c mouse.c; do
     base="${f%.*}"
     out=$(echo "$base" | tr '/' '_')
     gcc $CFLAGS -c "kernel/$f" -o "kernel/$out.o"
@@ -26,7 +26,7 @@ ld -m elf_i386 -T kernel/linker.ld -nostdlib \
    kernel/entry.o kernel/irq.o kernel/rt.o \
    kernel/idt.o kernel/keyboard.o kernel/string.o \
    kernel/fs.o kernel/commands.o kernel/shell.o \
-   kernel/utils.o kernel/main.o \
+   kernel/utils.o kernel/main.o kernel/catpp_mini.o kernel/fb.o kernel/mouse.o \
    $GCC_LIB \
    -o kernel/kitty.elf
 
