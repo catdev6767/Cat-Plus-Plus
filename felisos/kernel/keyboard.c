@@ -1,5 +1,9 @@
 /* FelisOS — Full keyboard driver */
 #include "catpp_rt.h"
+extern int purrminal_handle_key(char c);
+extern int appmenu_handle_key(char c);
+extern int appmenu_is_active(void);
+extern int appmenu_is_active(void);
 
 #define KBD_DATA 0x60
 
@@ -94,8 +98,26 @@ void keyboard_handler(void) {
         if (caps && map_lower[sc] >= 'a' && map_lower[sc] <= 'z')
             c = shift ? map_lower[sc] : map_upper[sc];
         if (c) {
-            int n = (kbuf_head + 1) % KBUF_SIZE;
-            if (n != kbuf_tail) { kbuf[kbuf_head] = (unsigned char)c; kbuf_head = n; }
+            extern int tty_get(void);
+            extern volatile int g_pending_click;
+            extern volatile int g_click_x;
+            extern volatile int g_click_y;
+            extern int mouse_get_x(void);
+            extern int mouse_get_y(void);
+            if (tty_get() == 0) {
+                if (appmenu_is_active()) {
+                    appmenu_handle_key(c);
+                } else if (c == 10) {
+                    g_click_x = mouse_get_x();
+                    g_click_y = mouse_get_y();
+                    g_pending_click = 1;
+                } else {
+                    purrminal_handle_key(c);
+                }
+            } else {
+                int n = (kbuf_head + 1) % KBUF_SIZE;
+                if (n != kbuf_tail) { kbuf[kbuf_head] = (unsigned char)c; kbuf_head = n; }
+            }
         }
     }
 }

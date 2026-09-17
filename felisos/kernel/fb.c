@@ -35,6 +35,8 @@ void fb_draw_dock(void);
 void fb_clear_all(void);
 void fb_puts_at(const char* s, int x, int y, uint32_t color);
 void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
+void fb_char_at_scale(char ch, int x, int y, uint32_t fg, uint32_t bg, int scale);
+void fb_puts_scale(const char* s, int x, int y, uint32_t fg, uint32_t bg, int scale);
 void fb_puts_panel(const char* s, int x, int y, uint32_t color);
 void fb_cursor_forget(void);
 static void shell_cursor_update(void);
@@ -348,6 +350,32 @@ void fb_cursor_hide(void) {
 
 
 /* In chu tai (x, y) voi mau fg + bg */
+/* Vẽ ký tự với scale tùy ý */
+void fb_char_at_scale(char ch, int x, int y, uint32_t fg, uint32_t bg, int scale) {
+    if (!fb_on) return;
+    if (ch < 32 || ch > 127) ch = '?';
+    const unsigned char* g = font8x8[ch - 32];
+    for (int row = 0; row < 8; row++) {
+        unsigned char bits = g[row];
+        for (int col = 0; col < 8; col++) {
+            uint32_t color = (bits & (0x80 >> col)) ? fg : bg;
+            for (int dy = 0; dy < scale; dy++)
+                for (int dx = 0; dx < scale; dx++)
+                    fb_pixel(x + col*scale + dx, y + row*scale + dy, color);
+        }
+    }
+}
+
+/* Chuỗi có scale */
+void fb_puts_scale(const char* s, int x, int y, uint32_t fg, uint32_t bg, int scale) {
+    if (!fb_on) return;
+    int cur = x;
+    while (s && *s) {
+        fb_char_at_scale(*s++, cur, y, fg, bg, scale);
+        cur += 8 * scale;
+    }
+}
+
 void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg) {
     if (!fb_on) return;
     int cur = x;
@@ -379,7 +407,7 @@ void fb_draw_dock(void) {
     fb_rect(DOCK_WIDTH - 1, PANEL_HEIGHT, 1, fb_h - PANEL_HEIGHT, 0x00333333);
 
     int ix = 16;
-    int iy = PANEL_HEIGHT + 16;
+    int iy = PANEL_HEIGHT + 30;
     uint32_t cols[] = {0x00E95420, 0x00FFFFFF, 0x00FFAA00,
                        0x0066AAFF, 0x00AA66FF, 0x00FF6666};
     for (int i = 0; i < 6; i++) {
@@ -387,9 +415,19 @@ void fb_draw_dock(void) {
         fb_rect(ix + 2, iy + 2, 28, 28, 0x00222222);
         fb_rect(ix + 4, iy + 4, 6, 6, cols[i]);
         iy += 48;
-        if (iy + 32 > (int)fb_h - 40) break;
+        if (iy + 32 > (int)fb_h - 60) break;
     }
-    /* Nút Ubuntu logo */
+
+    /* ═══ Nút MENU — icon thứ 7, ở dưới cùng dock ═══ */
+    int menu_y = fb_h - 56;
+    fb_rect(ix, menu_y, 32, 32, 0x00FF6600);       /* viền cam */
+    fb_rect(ix + 2, menu_y + 2, 28, 28, 0x00111111); /* nền đen */
+    /* 3 gạch ngang — icon menu */
+    fb_rect(ix + 7, menu_y + 9,  18, 3, 0x00FF6600);
+    fb_rect(ix + 7, menu_y + 14, 18, 3, 0x00FF6600);
+    fb_rect(ix + 7, menu_y + 19, 18, 3, 0x00FF6600);
+
+    /* Nút Ubuntu logo đầu dock */
     fb_rect(ix, PANEL_HEIGHT + 4, 32, 8, 0x00E95420);
 
     text_area_y0 = PANEL_HEIGHT + 8;
