@@ -21,7 +21,7 @@ static uint32_t font_scale = 2;  /* scale 8x8 -> 16x16 */
 /* ═══ GUI panel ═══ */
 #define PANEL_HEIGHT 24
 #define PANEL_BG     0x001A1A1A  /* xám đậm */
-#define DOCK_WIDTH   64
+#define DOCK_WIDTH   160
 #define DOCK_BG      0x00151515
 #define PANEL_FG     0x00EEEEEE  /* gần trắng */
 static int text_area_y0 = 0;

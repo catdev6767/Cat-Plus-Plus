@@ -252,9 +252,9 @@ void purrminal_open(void) {
     int fw = (int)fb_width();
     int fh = (int)fb_height();
 
-    g_purr.x = fw / 4;
+    g_purr.x = 180;
     g_purr.y = 80;
-    g_purr.w = fw / 2;
+    g_purr.w = fw - 200;
     g_purr.h = fh - 200;
     g_purr.norm_x = g_purr.x;
     g_purr.norm_y = g_purr.y;
