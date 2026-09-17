@@ -33,6 +33,8 @@ void fb_clear(void);
 void fb_draw_panel(void);
 void fb_draw_dock(void);
 void fb_clear_all(void);
+void fb_puts_at(const char* s, int x, int y, uint32_t color);
+void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
 void fb_puts_panel(const char* s, int x, int y, uint32_t color);
 static void shell_cursor_update(void);
 void fb_pixel(uint32_t x, uint32_t y, uint32_t color);
@@ -337,6 +339,20 @@ void fb_cursor_hide(void) {
     cursor_visible = 0;
 }
 
+
+/* In chu tai (x, y) voi mau fg + bg */
+void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg) {
+    if (!fb_on) return;
+    int cur = x;
+    while (s && *s) {
+        fb_char_at(*s++, cur, y, fg, bg);
+        cur += 8;
+    }
+}
+
+void fb_puts_at(const char* s, int x, int y, uint32_t color) {
+    fb_puts_at_color(s, x, y, color, 0x000000);
+}
 
 void fb_clear_all(void) {
     if (!fb_on) return;

@@ -47,6 +47,7 @@ extern int fb_is_active(void);
 extern void fb_draw_panel(void);
 extern void mouse_init(void);
 extern void mouse_show(void);
+extern void purrminal_open(void);
 extern void mouse_hide(void);
 
 static void print_hex(uint32_t v) {
@@ -93,6 +94,7 @@ void kmain(uint32_t mbi_addr, uint32_t magic) {
     fb_clear_all();
     fb_draw_panel();
     fb_draw_dock();
+    purrminal_open();
     mouse_show();
 
     while (1) {
