@@ -36,6 +36,7 @@ void fb_clear_all(void);
 void fb_puts_at(const char* s, int x, int y, uint32_t color);
 void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
 void fb_puts_panel(const char* s, int x, int y, uint32_t color);
+void fb_cursor_forget(void);
 static void shell_cursor_update(void);
 void fb_pixel(uint32_t x, uint32_t y, uint32_t color);
 
@@ -331,6 +332,12 @@ void fb_cursor_show(int x, int y) {
     cursor_save();
     cursor_draw();
     cursor_visible = 1;
+}
+
+void fb_cursor_forget(void) {
+    /* Quên cursor mà không restore background cũ.
+       Dùng sau khi clear màn hình. */
+    cursor_visible = 0;
 }
 
 void fb_cursor_hide(void) {
