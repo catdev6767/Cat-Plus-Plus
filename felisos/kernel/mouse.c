@@ -24,6 +24,11 @@ static int screen_w = 1024;
 static int screen_h = 768;
 static int g_mouse_visible = 0;
 
+/* Pending click — main loop sẽ xử lý */
+volatile int g_pending_click = 0;
+volatile int g_click_x = 0;
+volatile int g_click_y = 0;
+
 /* External fb API */
 extern int  fb_is_active(void);
 extern uint32_t fb_width(void);
@@ -121,7 +126,16 @@ void mouse_handler(void) {
                 if (new_x > screen_w - 1) new_x = screen_w - 1;
                 if (new_y > screen_h - 1) new_y = screen_h - 1;
 
-                mouse_buttons = flags & 0x07;
+                uint8_t new_buttons = flags & 0x07;
+                uint8_t old_buttons = mouse_buttons;
+
+                /* Set pending click — main loop xử lý */
+                if ((new_buttons & 0x01) && !(old_buttons & 0x01)) {
+                    g_click_x = new_x;
+                    g_click_y = new_y;
+                    g_pending_click = 1;
+                }
+                mouse_buttons = new_buttons;
 
                 /* Log tọa độ: "dx,dy->x,y" */
                 {

@@ -13,7 +13,6 @@ extern void fb_draw_dock(void);
 extern int  mouse_is_visible(void);
 extern void mouse_hide(void);
 extern void mouse_show(void);
-extern void fb_cursor_forget(void);
 extern int shell_execute(char* cmdline);
 extern void (*g_out_hook)(char);
 extern void cmd_clear_internal(void);
@@ -234,9 +233,7 @@ int purrminal_handle_click(int mx, int my) {
 /* Redraw toàn desktop + cửa sổ (gọi khi resize) */
 static void purrminal_redraw(void) {
     int mvis = mouse_is_visible();
-
-    /* Quên cursor — không restore pixels cũ */
-    if (mvis) fb_cursor_forget();
+    if (mvis) mouse_hide();
 
     fb_clear_all();
     fb_draw_panel();

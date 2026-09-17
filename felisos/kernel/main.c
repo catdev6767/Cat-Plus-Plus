@@ -47,6 +47,10 @@ extern int fb_is_active(void);
 extern void fb_draw_panel(void);
 extern void mouse_init(void);
 extern void mouse_show(void);
+extern volatile int g_pending_click;
+extern volatile int g_click_x;
+extern volatile int g_click_y;
+extern int purrminal_handle_click(int mx, int my);
 extern void purrminal_open(void);
 extern void mouse_hide(void);
 
