@@ -7,6 +7,12 @@ extern uint32_t fb_height(void);
 extern void fb_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color);
 extern void fb_char_at(char ch, uint32_t x, uint32_t y, uint32_t fg, uint32_t bg);
 extern void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
+extern void fb_clear_all(void);
+extern void fb_draw_panel(void);
+extern void fb_draw_dock(void);
+extern int  mouse_is_visible(void);
+extern void mouse_hide(void);
+extern void mouse_show(void);
 extern int shell_execute(char* cmdline);
 extern void (*g_out_hook)(char);
 extern void cmd_clear_internal(void);
@@ -167,6 +173,8 @@ int purrminal_handle_key(char c) {
 }
 
 /* ═══ Click ═══ */
+extern void serial_print_str(const char* s);
+
 int purrminal_handle_click(int mx, int my) {
     Window* w = &g_purr;
     if (!w->visible) return 0;
@@ -220,6 +228,24 @@ int purrminal_handle_click(int mx, int my) {
 }
 
 /* ═══ Init ═══ */
+/* Redraw toàn desktop + cửa sổ (gọi khi resize) */
+static void purrminal_redraw(void) {
+    int mvis = mouse_is_visible();
+    if (mvis) mouse_hide();
+
+    fb_clear_all();
+    fb_draw_panel();
+    fb_draw_dock();
+
+    window_draw(&g_purr);
+    window_clear(&g_purr);
+
+    window_puts(&g_purr, "FelisOS Purrminal v0.2\n");
+    purr_prompt();
+
+    if (mvis) mouse_show();
+}
+
 void purrminal_open(void) {
     int fw = (int)fb_width();
     int fh = (int)fb_height();
