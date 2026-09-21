@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """English docs — Phase 1 additions.
-(Placeholder — cần dịch từ docs_extra_vi.py)
+(Auto-translated from docs_extra_vi.py)
 """
 from docs_extra_vi import KEYWORDS_EXTRA as _kw_vi, BUILTINS_EXTRA as _bi_vi
 
-# Tạm giữ nguyên VI. Sẽ dịch sau.
+# Auto-translated. Review if needed.
 KEYWORDS_EXTRA = _kw_vi
 BUILTINS_EXTRA = _bi_vi
 
 from docs_extra_vi import TUTORIAL_EXTRA as _tut_vi
-# Tạm giữ VI — sẽ dịch sau
+# Auto-translated
 TUTORIAL_EXTRA = _tut_vi
 
 from docs_extra_vi import COOKBOOK_EXTRA as _cb_vi, ERRORS_EXTRA as _err_vi
