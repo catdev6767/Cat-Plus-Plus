@@ -9,6 +9,8 @@
 /* Forward declarations */
 static int find_in_parent(int parent, const char* name);
 int fs_create_at(int parent, const char* name, int is_dir);
+int fs_create(const char* name, int is_dir);
+int fs_write(const char* name, const char* data, int size);
 
 typedef struct {
     char name[MAX_NAME];
@@ -54,6 +56,43 @@ void fs_init(void) {
         while (msg[i] && i < MAX_DATA - 1) { fs_files[idx].data[i] = msg[i]; i++; }
         fs_files[idx].data[i] = 0;
         fs_files[idx].size = i;
+    }
+    /* File mẫu */
+    fs_create("readme.txt", 0);
+    fs_create("hello.cat", 0);
+    fs_create("purrminal.catpp", 0);
+    fs_create("docs", 1);
+    /* Ghi nội dung readme.txt */
+    fs_write("readme.txt",
+        "FelisOS v0.2\n"
+        "Welcome to FelisOS!\n"
+        "\n"
+        "Files:\n"
+        "  .txt   - text file\n"
+        "  .cat   - Cat++ script\n"
+        "  .catpp - Cat++ app\n",
+        102);
+    fs_write("hello.cat",
+        "# Hello from Cat++\n"
+        "meow \"Hello, FelisOS!\"\n"
+        "paw x = 42\n"
+        "meow x * 2\n",
+        60);
+    /* Thêm file .catpp */
+    if (fs_create("myapp.catpp", 0) == 0) {
+        fs_write("myapp.catpp",
+            "name=MyApp\n"
+            "version=1.0\n"
+            "author=FelisOS\n"
+            "main=hello.cat\n",
+            62);
+    }
+    if (fs_create("game.catpp", 0) == 0) {
+        fs_write("game.catpp",
+            "name=Game\n"
+            "version=0.1\n"
+            "main=game.cat\n",
+            40);
     }
 }
 

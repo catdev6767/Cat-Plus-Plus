@@ -1,23 +1,23 @@
-<h2>Native Transpiler — Nhanh gần C++</h2>
+<h2>Native Transpiler — Fast near C++</h2>
 
-<p>Cat++ có 2 transpiler sang C:</p>
+<p>Cat++ has 2 transpilers to C:</p>
 <ul>
-<li><strong>→ C</strong> (boxed) — dùng <code>Value</code> động, chạy mọi code, chậm hơn</li>
-<li><strong>⚡ C fast</strong> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <strong>nhanh gần C++</strong>, yêu cầu type annotation</li>
+<li><sin>→ C</sin> (boxed) — use <code>Value</code>dynamic, all code running, slower</li>
+<li><sin>⚡ C fast</sin> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <sin>fast close to C++</sin>, request type annotation</li>
 </ul>
 
 <h2>Benchmark</h2>
-<p>Loop 1 triệu lần, <code>sum_to(1000000)</code>:</p>
+<p>Loop 1 million times,<code>sum_to(1000000)</code>:</p>
 <table>
 <tr><th>Engine</th><th>Run only</th><th>Speedup</th></tr>
 <tr><td>Interpreter</td><td>5547ms</td><td>1x</td></tr>
 <tr><td>VM</td><td>2581ms</td><td>2.1x</td></tr>
 <tr><td>C boxed</td><td>27ms</td><td>205x</td></tr>
-<tr><td><strong>C native</strong></td><td><strong>0.4ms</strong></td><td><strong>13635x</strong></td></tr>
+<tr><td><sin>C native</sin></td><td><sin>0.4ms</sin></td><td><sin>13635x</sin></td></tr>
 </table>
 
-<h2>Cách dùng</h2>
-<p>Thêm type annotation cho biến và hàm:</p>
+<h2>How to use</h2>
+<p>Add type annotation for variable and function:</p>
 <pre><code>purr sum_to(n: i32) -> i64
     paw total: i64 = 0
     paw i: i32 = 1
@@ -28,7 +28,7 @@
 
 meow sum_to(1000000)</code></pre>
 
-<p>Ấn <strong>⚡ C fast</strong> (Ctrl+Shift+N) để xem C code native.</p>
+<p>Ấn <sin>⚡ C fast</sin>(Ctrl+Shift+N) to view C code native.</p>
 
 <h2>Type mapping</h2>
 <table>
@@ -42,23 +42,23 @@ meow sum_to(1000000)</code></pre>
 <tr><td>str</td><td>char*</td><td>—</td></tr>
 </table>
 
-<h2>Cảnh báo overflow</h2>
-<p><strong>i32</strong> chỉ chứa được tối đa ~2.1 tỷ. Khi accumulate số lớn, dùng <strong>i64</strong>:</p>
+<h2>Warning overflow</h2>
+<p><sin>i32</sin>contains only a maximum of ~2.1 billion. When accumulating large numbers, use<sin>i64</sin>:</p>
 <pre><code>paw total: i64 = 0       # ✓
-paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
+paw total: i32 = 0       # ✗ overflow at 2.1 billion</code></pre>
 
-<p>Đây là hành vi giống hệt C/C++.</p>
+<p>This is identical behavior to C/C++.</p>
 
-<h2>Khi nào dùng native</h2>
+<h2>When to use native</h2>
 <ul>
-<li>Code số học nặng (loop, tính toán)</li>
-<li>Thuật toán (sort, search, fibonacci)</li>
-<li>Benchmark, so sánh</li>
+<li>Heavy arithmetic code (loop, calculate)</li>
+<li>Algorithm (sort, search, fibonacci)</li>
+<li>Benchmark, compare</li>
 </ul>
 
-<p>Khi <strong>không</strong> cần native:</p>
+<p>Khi <sin>No</sin>needs native:</p>
 <ul>
-<li>Code có list/dict/class phức tạp (dùng boxed)</li>
-<li>Code ngắn, không cần tốc độ</li>
-<li>Prototype nhanh (không cần type)</li>
+<li>Code with list/dict/class complex (use boxed)</li>
+<li>Short code, no speed required</li>
+<li>Rapid Prototype (without type)</li>
 </ul>

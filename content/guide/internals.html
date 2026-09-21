@@ -1,12 +1,13 @@
-<h1>Internals — Cách Cat++ hoạt động</h1>
-<p>Hiểu sâu về interpreter: từ source code đến output.</p>
+<h1>Internals — How Cat++ Works</h1>
+<p>Deep understanding of interpreter: from source code to output.</p>
 
 <h2>1. Pipeline</h2>
 <pre><code>Source code (.cat)
-        │
-        ▼
+        │        ▼
+
+
 ┌───────────────────┐
-│  Lexer            │  Đọc ký tự → Token
+│  Lexer            │  Read → Token Characters
 │  (tokenize)       │
 └────────┬──────────┘
          │
@@ -19,33 +20,33 @@
          │
          ▼
 ┌───────────────────┐
-│  Interpreter      │  Duyệt AST
-│  (tree-walking)   │  → thực thi
+│  Interpreter      │  Browse AST
+│  (tree-walking)   │  → execution
 └────────┬──────────┘
          │
          ▼
       Output</code></pre>
 
 <h2>2. Lexer</h2>
-<p>Đọc từng ký tự, tạo token. Xử lý:</p>
+<p>Read fromng characters, generate tokens. Processing:</p>
 <ul>
-<li>Số: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
-<li>Chuỗi: <code>"hello"</code> với escape <code>\n \t \"</code></li>
+<li>Number: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
+<li>String: <code>"hello"</code> with escape <code>\n \t \"</code></li>
 <li>Identifiers: <code>foo</code>, <code>bar_baz</code></li>
-<li>Từ khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
-<li>Toán tử: <code>+ - * / % == != & | << >></code></li>
+<li>From course:<code>meow</code>, <code>paw</code>, <code>purr</code></li>
+<li>Operator:<code>+ - * / % == != & | << >></code></li>
 <li>Layout: <code>INDENT</code>, <code>DEDENT</code>, <code>NEWLINE</code></li>
 </ul>
 
-<h3>Ví dụ</h3>
+<h3>Examples</h3>
 <pre><code>paw x = 42</code></pre>
-<p>Tokenize thành:</p>
+<p>Tokenize to:</p>
 <pre><code>PAW("paw")  IDENT("x")  ASSIGN("=")  NUMBER(42)  NEWLINE</code></pre>
 
 <h2>3. Parser</h2>
-<p>Nhận tokens, tạo AST (Abstract Syntax Tree). Dùng <b>recursive descent</b> — mỗi hàm parse một loại cấu trúc.</p>
+<p>Get tokens, create AST (Abstract Syntax Tree). Use<b>recursive descent</b>— each function parse a type of structure.</p>
 
-<h3>Precedence chain (từ thấp đến cao)</h3>
+<h3>Precedence chain (from low to high)</h3>
 <pre><code>expr
  ├── or_          (or, either)
  ├── and_         (and, with)
@@ -61,78 +62,78 @@
  ├── unary        (-, ~)
  └── postfix      (call, index, dot)</code></pre>
 
-<h3>Ví dụ AST</h3>
+<h3>Examples AST</h3>
 <pre><code>paw x = 1 + 2 * 3</code></pre>
-<p>Parse thành:</p>
+<p>Parse to:</p>
 <pre><code>('let', 'x',
   ('+', ('num', 1),
         ('*', ('num', 2), ('num', 3))))</code></pre>
-<p>Vì <code>*</code> có độ ưu tiên cao hơn <code>+</code>, nên <code>2*3</code> được nhóm trước.</p>
+<p>(expression) or<code>*</code>has a higher precedence<code>+</code>, should <code>2*3</code>is the previous group.</p>
 
 <h2>4. Interpreter</h2>
-<p>Duyệt AST. Mỗi node có hàm <code>eval_()</code> (biểu thức) hoặc <code>exec_()</code> (câu lệnh).</p>
+<p>Browse AST. Each node has a function<code>eval_()</code>(expression) or<code>exec_()</code>Statement</p>
 
 <h3>Environment (scope)</h3>
-<pre><code>class Env:
-    vars: dict          # biến trong scope này
-    parent: Env         # scope cha
+<pre><code>class ENV:
+    vars: dict          # variable in this scope
+    parent: ENV         # scope parent
 
-Khi tìm biến `x`:
-1. Nếu x trong vars → trả về
-2. Nếu không → tìm trong parent (đệ quy)
-3. Nếu không có → lỗi</code></pre>
+When searching for the variable `x`:
+1. If x in vars → returns
+2. If not → found in parent (recursive)
+3. If there is no → fault</code></pre>
 
-<h3>Ví dụ scope</h3>
+<h3>Examples scope</h3>
 <pre><code>paw x = 10          # global
 
 purr f()
     paw y = 20      # local
-    meow x          # đọc được x (global)
-    meow y          # đọc được y (local)
+    meow x          # read is x (global)
+    meow y          # read is y (local)
 
 f()                 # OK
-meow y              # LỖI — y chỉ tồn tại trong f</code></pre>
+meow y              # ERROR — y only exists in f</code></pre>
 
 <h2>5. Runtime values</h2>
 <table>
 <tr><th>Cat++ type</th><th>Python type</th></tr>
-<tr><td>Số nguyên</td><td><code>int</code></td></tr>
-<tr><td>Số thực</td><td><code>float</code></td></tr>
-<tr><td>Chuỗi</td><td><code>str</code></td></tr>
-<tr><td>Đúng/Sai</td><td><code>True</code> / <code>False</code></td></tr>
-<tr><td>Rỗng</td><td><code>None</code></td></tr>
-<tr><td>Danh sách</td><td><code>list</code></td></tr>
+<tr><td>Integer</td><td><code>int</code></td></tr>
+<tr><td>Float</td><td><code>float</code></td></tr>
+<tr><td>String</td><td><code>str</code></td></tr>
+<tr><td>True/False</td><td><code>True</code> / <code>False</code></td></tr>
+<tr><td>Empty</td><td><code>None</code></td></tr>
+<tr><td>List</td><td><code>list</code></td></tr>
 <tr><td>Dict</td><td><code>dict</code></td></tr>
 <tr><td>Class instance</td><td><code>Instance</code></td></tr>
 </table>
 
 <h2>6. Exceptions</h2>
-<p>Dùng Python exception để điều khiển luồng:</p>
+<p>Use Python exception to control flow:</p>
 <ul>
-<li><code>ReturnEx</code> — thoát hàm trả về giá trị</li>
-<li><code>StopEx</code> — thoát vòng lặp (sit)</li>
-<li><code>SkipEx</code> — bỏ qua lần lặp (leap)</li>
-<li><code>CatError</code> — lỗi runtime (chia 0, biến chưa khai báo)</li>
+<li><code>ReturnEx</code>— exit function return value</li>
+<li><code>StopEx</code>— exit loop (sit)</li>
+<li><code>SkipEx</code>— skip iteration (leap)</li>
+<li><code>CatError</code>— runtime error (divided by 0, undeclared variable)</li>
 </ul>
 
-<pre><code># Khi gặp `give x`:
+<pre><code># When `give x` is encountered:
 raise ReturnEx(value)
 
-# Trong hàm:
+# In function:
 try:
     for stmt in body: exec_(stmt)
 except ReturnEx as e:
-    return e.v</code></pre>
+    return e.v.</code></pre>
 
 <h2>7. Module system</h2>
 <p>3 file:</p>
 <ul>
-<li><code>core/registry.py</code> — đăng ký API giữa modules</li>
+<li><code>core/registry.py</code>— API registration between modules</li>
 <li><code>core/bus.py</code> — event bus</li>
 <li><code>core/loader.py</code> — auto-load modules</li>
 </ul>
 
-<p>Interpreter đăng ký với registry:</p>
+<p>Interpreter register with registry:</p>
 <pre><code>class InterpreterModule(BaseModule):
     def setup(self):
         self.registry.set('interpreter', self)
@@ -140,23 +141,23 @@ except ReturnEx as e:
     def run(self, code):
         return run_catpp(code)</code></pre>
 
-<p>Module khác gọi qua registry:</p>
+<p>Other modules called through the registry:</p>
 <pre><code>interp = self.registry.get('interpreter')
 result = interp.run("meow \"hi\"")</code></pre>
 
 <h2>8. Web IDE</h2>
-<p>Frontend gửi code lên server qua POST <code>/api/run</code>:</p>
+<p>Frontend sends the code to the server via POST<code>/api/run</code>:</p>
 <pre><code>POST /api/run
 Content-Type: application/json
 
 {"code": "meow \"hello\""}</code></pre>
 
-<p>Server gọi interpreter:</p>
+<p>Server calls interpreter:</p>
 <pre><code>output = run_catpp(code, timeout=5.0)
 return {"ok": True, "output": output}</code></pre>
 
 <h2>9. Transpiler Cat++ → C</h2>
-<p>Khác với interpreter. Không thực thi AST mà <b>sinh C code</b>.</p>
+<p>Other with interpreter. Not implement AST but<b>sinh C code</b>.</p>
 
 <pre><code># Cat++ AST
 ('let', 'x', ('+', ('num', 1), ('num', 2)))
@@ -164,24 +165,24 @@ return {"ok": True, "output": output}</code></pre>
 # C code sinh ra
 long x = (1 + 2);</code></pre>
 
-<p>Dùng 2-pass:</p>
+<p>Use 2-pass:</p>
 <ol>
 <li>Pass 1: scan struct, infer return types</li>
 <li>Pass 2: generate C code</li>
 </ol>
 
-<h2>10. Giới hạn hiệu năng</h2>
-<p>Interpreter tree-walking chậm hơn C khoảng <b>100x</b>. Lý do:</p>
+<h2>10. Performance limitations</h2>
+<p>Interpreter tree-walking slower C approx.<b>100x</b>Reason: </p>
 <ul>
-<li>Mỗi biểu thức duyệt AST (function call overhead)</li>
-<li>Type động (kiểm tra kiểu runtime)</li>
-<li>Python VM (chậm hơn native)</li>
-<li>Không có JIT</li>
+<li>Each AST (function call overhead) browsing expression</li>
+<li>Dynamic type (check type runtime)</li>
+<li>Python VM (slower native)</li>
+<li>None JIT</li>
 </ul>
 
-<p>Muốn nhanh hơn:</p>
+<p>Want faster:</p>
 <ul>
-<li>Compile sang bytecode (nhanh 5-10x)</li>
-<li>Transpile C (nhanh gần bằng C)</li>
-<li>JIT với LLVM (nhanh bằng C)</li>
+<li>Compile to bytecode (nhanh 5-10x)</li>
+<li>Transpile C (almost as fast as C)</li>
+<li>JIT with LLVM (C fast)</li>
 </ul>

@@ -1,7 +1,7 @@
 <p>CatOS là hệ điều hành nhỏ chạy code Cat++ trực tiếp trên bare metal.</p>
 
 <h2>1. CatOS là gì?</h2>
-<p>CatOS là một kernel viết bằng C. Nó nhúng runtime Cat++ và chạy code Cat++ mà không cần Linux, Windows, hay bất kỳ OS nào khác.</p>
+<p>CatOS là một kernel viết bằng C. Nó nhúng runtime Cat++ and chạy code Cat++ mà không cần Linux, Windows, hay bất kỳ OS nào khác.</p>
 
 <h2>2. Kiến trúc</h2>
 <pre><code>Cat++ code (.cat)
@@ -45,17 +45,17 @@ QEMU / máy thật</code></pre>
 │   └── ...
 └── build_catos.sh             # Build script</code></pre>
 
-<h2>4. Cú pháp low-level cho CatOS</h2>
-<p>CatOS dùng cú pháp low-level — không có sẵn trên web IDE.</p>
+<h2>4. Syntax low-level for CatOS</h2>
+<p>CatOS use cú pháp low-level — không có sẵn trên web IDE.</p>
 
 <h3>Bit operations</h3>
 <pre><code>paw mask = 0xFF & 0x0F
 paw shifted = 1 << 4
 paw color = (0x0F << 8) | ord("H")</code></pre>
 
-<h3>Cast và pointer</h3>
+<h3>Cast and pointer</h3>
 <pre><code>paw vga = cast(ptr, 0xB8000)
-# Địa chỉ VGA text mode trong bộ nhớ</code></pre>
+# Địa chỉ VGA text mode in bộ nhớ</code></pre>
 
 <h3>Struct C-layout</h3>
 <pre><code>struct Color
@@ -66,7 +66,7 @@ paw color = (0x0F << 8) | ord("H")</code></pre>
 paw red = Color(255, 0, 0)
 meow red.r</code></pre>
 
-<h3>Volatile — cho MMIO</h3>
+<h3>Volatile — for MMIO</h3>
 <pre><code>volatile paw status = 0</code></pre>
 
 <h3>Inline assembly</h3>
@@ -110,35 +110,35 @@ Halted.</code></pre>
 <h2>6. Build CatOS</h2>
 <pre><code>cd ~/catpp
 bash build_catos.sh</code></pre>
-<p>Các bước build:</p>
+<p>Build steps:</p>
 <ol>
 <li>Transpile <code>demo.cat</code> → <code>demo.c</code></li>
-<li>Compile <code>entry.s</code>, <code>main.c</code>, <code>runtime</code>, <code>demo.c</code> với <code>-m32 -ffreestanding</code></li>
-<li>Link thành <code>catos.elf</code></li>
-<li>(Tùy chọn) Tạo <code>catos.iso</code> với GRUB</li>
+<li>Compile <code>entry.s</code>, <code>main.c</code>, <code>runtime</code>, <code>demo.c</code> with <code>-m32 -ffreestanding</code></li>
+<li>Link thành<code>catos.elf</code></li>
+<li>(Tùy chọn) Create<code>catos.iso</code> with GRUB</li>
 </ol>
 
-<h2>7. Chạy CatOS</h2>
-<p>Không cần ISO, QEMU boot ELF kernel trực tiếp:</p>
+<h2>7. Run CatOS</h2>
+<p>Not cần ISO, QEMU boot ELF kernel trực tiếp:</p>
 <pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M -serial stdio</code></pre>
-<p>Hoặc với cửa sổ đồ họa:</p>
+<p>Hoặc with cửa sổ đồ họa:</p>
 <pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M</code></pre>
 
 <h2>8. Runtime freestanding</h2>
-<p>Trong CatOS, các builtin hoạt động khác:</p>
+<p>In CatOS, các builtin hoạt động khác:</p>
 <table>
 <tr><th>Trên Linux</th><th>Trên CatOS</th></tr>
 <tr><td><code>meow</code> → printf</td><td><code>meow</code> → VGA + serial</td></tr>
 <tr><td><code>read_file</code> → open</td><td>❌ Chưa có filesystem</td></tr>
-<tr><td><code>dice</code> → RNG</td><td>❌ Cần RNG phần cứng</td></tr>
-<tr><td><code>cpp</code> → ctypes</td><td>❌ Không có</td></tr>
+<tr><td><code>dice</code> → RNG</td><td>❌ Cần RNG section cứng</td></tr>
+<tr><td><code>cpp</code> → ctypes</td><td>❌ None</td></tr>
 </table>
 
 <h2>9. Giới hạn hiện tại</h2>
 <ul>
-<li>Không có keyboard input</li>
-<li>Không có filesystem</li>
-<li>Không có process</li>
+<li>None keyboard input</li>
+<li>None filesystem</li>
+<li>None process</li>
 <li>Chỉ hỗ trợ subset Cat++ (meow, paw, sniff, knead, purr, struct, cast)</li>
 <li>Chưa có heap allocator thật</li>
 </ul>
@@ -148,13 +148,13 @@ bash build_catos.sh</code></pre>
 <li>Keyboard driver (IRQ1)</li>
 <li>PIT timer interrupt</li>
 <li>Heap allocator thật (thay bump)</li>
-<li>Shell đọc lệnh từ keyboard</li>
+<li>Shell đọc lệnh from keyboard</li>
 <li>Filesystem (FAT16/FAT32)</li>
 </ul>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>Viết kernel in ra màn hình 10 số Fibonacci.</li>
-<li>Sửa <code>demo.cat</code> để vẽ hình vuông bằng ký tự <code>*</code> trên VGA.</li>
-<li>Thêm hàm <code>print_hex</code> — in số dạng hexa.</li>
+<li>Viết kernel print to screen 10 số Fibonacci.</li>
+<li>Sửa<code>demo.cat</code>để vẽ hình vuông bằng ký tự<code>*</code>trên VGA.</li>
+<li>Thêm function<code>print_hex</code>— in số dạng hexa.</li>
 </ol>

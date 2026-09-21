@@ -488,9 +488,9 @@ def build():
     if os.path.exists(SITE): shutil.move(SITE, backup)
     try:
         os.makedirs(SITE, exist_ok=True)
-        import docs_data_vi, docs_data_en
+        import docs_data_vi as docs_data_en
         importlib.reload(docs_data_vi)
-        importlib.reload(docs_data_en)
+        pass  # EN removed
         # Merge extra
         try:
             import docs_extra_vi, docs_extra_en
@@ -523,6 +523,7 @@ def build():
             print(f'  ⚠ Không merge extra: {e}')
         print('Build docs:')
         build_lang('vi', docs_data_vi)
+        # build_lang('en', docs_data_en)
         build_lang('en', docs_data_en)
         redirect = '''<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Cat++ Docs</title>

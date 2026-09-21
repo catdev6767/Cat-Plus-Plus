@@ -2,12 +2,12 @@
 
 <h2>1. Cổng I/O</h2>
 <table>
-<tr><th>Port</th><th>Chức năng</th></tr>
+<tr><th>Port</th><th>Function</th></tr>
 <tr><td><code>0x60</code></td><td>Keyboard data</td></tr>
 <tr><td><code>0x64</code></td><td>Keyboard status/command</td></tr>
 </table>
 
-<h2>2. Đọc scancode</h2>
+<h2>2. Read scancode</h2>
 <pre><code>uint8_t scancode = inb(0x60);
 
 /* Bit 7 = key release */
@@ -17,7 +17,7 @@ if (scancode & 0x80) return;
 char c = scancode_map[scancode];</code></pre>
 
 <h2>3. Shift/Caps</h2>
-<pre><code>/* Shift = scancode 0x2A hoặc 0x36 */
+<pre><code>/* Shift = scancode 0x2A or 0x36 */
 if (sc == 0x2A || sc == 0x36) {
     shift = 1;
     return;
@@ -48,8 +48,8 @@ if (released == 0x2A || released == 0x36) {
 <tr><td><code>0xE0</code> + <code>0x4D</code></td><td>→ (right)</td></tr>
 </table>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>Thêm phím F1-F12 vào bảng scancode.</li>
+<li>Thêm phím F1-F12 ando bảng scancode.</li>
 <li>Thêm hỗ trợ Ctrl+C để hủy lệnh.</li>
 </ol>

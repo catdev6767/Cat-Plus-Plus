@@ -2,7 +2,7 @@
 
 <h2>1. Port COM1</h2>
 <table>
-<tr><th>Port</th><th>Chức năng</th></tr>
+<tr><th>Port</th><th>Function</th></tr>
 <tr><td><code>0x3F8</code></td><td>Data register</td></tr>
 <tr><td><code>0x3F9</code></td><td>Interrupt enable</td></tr>
 <tr><td><code>0x3FA</code></td><td>FIFO control</td></tr>
@@ -38,13 +38,13 @@ char serial_getchar(void) {
     return inb(COM1);
 }</code></pre>
 
-<h2>5. Debug trong QEMU</h2>
+<h2>5. Debug in QEMU</h2>
 <pre><code>qemu-system-x86_64 -kernel felis.elf -serial stdio -display none</code></pre>
 
 <p>Output serial hiện ra terminal.</p>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>In "Debug: test" qua serial.</li>
-<li>Thêm serial input để gõ lệnh từ terminal.</li>
+<li>Print "Debug: test" qua serial.</li>
+<li>Thêm serial input để gõ lệnh from terminal.</li>
 </ol>

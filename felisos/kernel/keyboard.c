@@ -1,11 +1,10 @@
-/* FelisOS — Full keyboard driver */
+/* Kitty — Keyboard driver with GUI queue */
 #include "catpp_rt.h"
-extern int purrminal_handle_key(char c);
-extern int appmenu_handle_key(char c);
-extern int appmenu_is_active(void);
-extern int appmenu_is_active(void);
 
 #define KBD_DATA 0x60
+
+extern void tty_switch(int n);
+extern int  tty_get(void);
 
 static inline uint8_t inb(uint16_t port) {
     uint8_t r;
@@ -13,7 +12,6 @@ static inline uint8_t inb(uint16_t port) {
     return r;
 }
 
-/* Special keys = 128+ */
 #define KEY_UP      128
 #define KEY_DOWN    129
 #define KEY_LEFT    130
@@ -21,6 +19,12 @@ static inline uint8_t inb(uint16_t port) {
 #define KEY_HOME    132
 #define KEY_END     133
 #define KEY_DELETE  134
+#define KEY_PGUP    135
+#define KEY_PGDN    136
+#define KEY_F1      137
+#define KEY_F2      138
+#define KEY_F3      139
+#define KEY_ESC     27
 
 static const char map_lower[128] = {
     [0x01]=27,
@@ -57,24 +61,85 @@ static const char map_upper[128] = {
 #define KBUF_SIZE 256
 static unsigned char kbuf[KBUF_SIZE];
 static volatile int kbuf_head = 0, kbuf_tail = 0;
-static volatile int shift = 0, caps = 0, extended = 0;
+static volatile int shift = 0, caps = 0, ctrl = 0, alt = 0, extended = 0;
+
+/* ═══ GUI key queue — 32 slot ═══ */
+#define GUIQ_SIZE 32
+volatile char g_gui_queue[GUIQ_SIZE];
+volatile int  g_gui_qhead = 0;
+volatile int  g_gui_qtail = 0;
+
+int gui_key_has(void) { return g_gui_qhead != g_gui_qtail; }
+
+char gui_key_pop(void) {
+    if (g_gui_qhead == g_gui_qtail) return 0;
+    char c = g_gui_queue[g_gui_qtail];
+    g_gui_qtail = (g_gui_qtail + 1) % GUIQ_SIZE;
+    return c;
+}
+
+static void gui_key_push(unsigned char k) {
+    int n = (g_gui_qhead + 1) % GUIQ_SIZE;
+    if (n == g_gui_qtail) return;  /* full — drop */
+    g_gui_queue[g_gui_qhead] = (char)k;
+    g_gui_qhead = n;
+}
 
 void keyboard_handler(void) {
     uint8_t sc = inb(KBD_DATA);
 
+    /* Extended prefix */
     if (sc == 0xE0) { extended = 1; return; }
 
+    /* Release */
     if (sc & 0x80) {
         uint8_t rel = sc & 0x7F;
         if (rel == 0x2A || rel == 0x36) shift = 0;
+        if (rel == 0x1D) ctrl = 0;
+        if (rel == 0x38) alt = 0;
         extended = 0;
         return;
     }
 
+    /* Modifier press */
     if (sc == 0x2A || sc == 0x36) { shift = 1; extended = 0; return; }
+    if (sc == 0x1D) { ctrl = 1; extended = 0; return; }
+    if (sc == 0x38) { alt = 1; extended = 0; return; }
     if (sc == 0x3A) { caps = !caps; extended = 0; return; }
 
+    /* TTY switch Ctrl+Alt+F1-F3 */
+    if (ctrl && alt) {
+        if (sc == 0x3B) { tty_switch(0); extended = 0; return; }
+        if (sc == 0x3C) { tty_switch(1); extended = 0; return; }
+        if (sc == 0x3D) { tty_switch(2); extended = 0; return; }
+    }
+
+    /* Extended keys (arrows, Del, Home, End, PgUp, PgDn) */
     if (extended) {
+        /* Super key (Windows key) — toggle Start menu */
+        if (sc == 0x5B || sc == 0x5C) {
+            extern void fb_start_menu_toggle(void);
+            extern int fb_start_menu_is_open(void);
+            extern void fb_draw_start_menu(void);
+            extern void fb_draw_wallpaper(void);
+            extern void fb_draw_panel(void);
+            extern void fb_draw_dock(void);
+            extern void redraw_windows_after_menu(void);
+
+            fb_start_menu_toggle();
+            if (fb_start_menu_is_open()) {
+                fb_draw_start_menu();
+            } else {
+                /* Đóng menu — vẽ lại desktop + windows */
+                fb_draw_wallpaper();
+                fb_draw_panel();
+                fb_draw_dock();
+                redraw_windows_after_menu();
+            }
+            extended = 0;
+            return;
+        }
+
         unsigned char k = 0;
         switch (sc) {
             case 0x48: k = KEY_UP; break;
@@ -84,41 +149,37 @@ void keyboard_handler(void) {
             case 0x47: k = KEY_HOME; break;
             case 0x4F: k = KEY_END; break;
             case 0x53: k = KEY_DELETE; break;
+            case 0x49: k = KEY_PGUP; break;
+            case 0x51: k = KEY_PGDN; break;
         }
         extended = 0;
-        if (k) {
+        if (!k) return;
+        if (tty_get() == 0) {
+            gui_key_push(k);
+        } else {
             int n = (kbuf_head + 1) % KBUF_SIZE;
             if (n != kbuf_tail) { kbuf[kbuf_head] = k; kbuf_head = n; }
         }
         return;
     }
 
-    if (sc < 128) {
-        char c = shift ? map_upper[sc] : map_lower[sc];
-        if (caps && map_lower[sc] >= 'a' && map_lower[sc] <= 'z')
-            c = shift ? map_lower[sc] : map_upper[sc];
-        if (c) {
-            extern int tty_get(void);
-            extern volatile int g_pending_click;
-            extern volatile int g_click_x;
-            extern volatile int g_click_y;
-            extern int mouse_get_x(void);
-            extern int mouse_get_y(void);
-            if (tty_get() == 0) {
-                if (appmenu_is_active()) {
-                    appmenu_handle_key(c);
-                } else if (c == 10) {
-                    g_click_x = mouse_get_x();
-                    g_click_y = mouse_get_y();
-                    g_pending_click = 1;
-                } else {
-                    purrminal_handle_key(c);
-                }
-            } else {
-                int n = (kbuf_head + 1) % KBUF_SIZE;
-                if (n != kbuf_tail) { kbuf[kbuf_head] = (unsigned char)c; kbuf_head = n; }
-            }
-        }
+    /* Regular keys */
+    if (sc >= 128) return;
+
+    char c = shift ? map_upper[sc] : map_lower[sc];
+    if (caps && map_lower[sc] >= 'a' && map_lower[sc] <= 'z')
+        c = shift ? map_lower[sc] : map_upper[sc];
+    if (!c) return;
+
+    /* Ctrl+letter → control code */
+    if (ctrl && c >= 'a' && c <= 'z') c = c - 'a' + 1;
+    else if (ctrl && c >= 'A' && c <= 'Z') c = c - 'A' + 1;
+
+    if (tty_get() == 0) {
+        gui_key_push((unsigned char)c);
+    } else {
+        int n = (kbuf_head + 1) % KBUF_SIZE;
+        if (n != kbuf_tail) { kbuf[kbuf_head] = (unsigned char)c; kbuf_head = n; }
     }
 }
 

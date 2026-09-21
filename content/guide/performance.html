@@ -1,8 +1,8 @@
 <h1>Performance Guide</h1>
-<p>Cách viết code Cat++ chạy nhanh.</p>
+<p>How to write fast Cat++ code.</p>
 
-<h2>1. Hiệu năng hiện tại</h2>
-<p>Cat++ chạy qua Python interpreter. Chậm hơn C khoảng <b>100x</b>.</p>
+<h2>1. Current Performance</h2>
+<p>Cat++ runs through Python interpreter. Slower than C approx.<b>100x</b>.</p>
 
 <table>
 <tr><th>Task</th><th>Cat++</th><th>Python</th><th>C</th></tr>
@@ -11,12 +11,12 @@
 <tr><td>Sort 10k</td><td>5s</td><td>0.1s</td><td>0.001s</td></tr>
 </table>
 
-<h2>2. Quy tắc chung</h2>
+<h2>general rule</h2>
 
-<h3>Tránh tính lại trong vòng lặp</h3>
-<pre><code># Xấu — tính len(arr) mỗi lần
+<h3>Avoid re-calculating loop printing</h3>
+<pre><code># Ugly — arr each time
 paw i = 0
-knead i < len(arr)
+knead i< len(arr)
     meow arr[i]
     i++
 
@@ -27,10 +27,10 @@ knead i < n
     meow arr[i]
     i++</code></pre>
 
-<h3>Dùng biến tạm cho vòng lặp lồng</h3>
-<pre><code># Xấu
+<h3>Use temporary variable for loop nested</h3>
+<pre><code># Bad
 paw i = 0
-knead i < n
+knead i< n
     paw j = 0
     knead j < len(arr) - i - 1
         ...
@@ -47,44 +47,44 @@ knead i < n
         j++
     i++</code></pre>
 
-<h3>Chọn cấu trúc phù hợp</h3>
-<pre><code># Tìm kiếm trong list — chậm O(n)
-sniff hunt(arr, target)
-    ...
+<h3>Choose the right structure</h3>
+<pre><code># Search in list — slow O(n)
+sniff hunt(arr, target)...
 
-# Tra cứu trong dict — nhanh O(1)
+
+# Lookup in dict — fast O(1)
 sniff seek(dict, key)
     ...</code></pre>
 
-<h2>3. Dùng builtin thay vì tự viết</h2>
-<pre><code># Xấu — tự tính
+<h2>3. Use builtin instead of writing your own</h2>
+<pre><code># Bad — egocentric
 paw sum = 0
 groom x of arr
     paw sum = sum + x
 
-# Tốt — dùng builtin (viết bằng Python, nhanh hơn)
+# Good — use builtin (written in Python, faster)
 paw sum = pile(arr)</code></pre>
 
-<h3>So sánh tốc độ</h3>
+<h3>Speed Comparison</h3>
 <table>
-<tr><th>Thao tác</th><th>Tự viết</th><th>Builtin</th></tr>
-<tr><td>Tính tổng 10k</td><td>0.5s</td><td>0.01s</td></tr>
-<tr><td>Sắp xếp 1k</td><td>1s</td><td>0.02s</td></tr>
+<tr><th>Operation</th><th>Write your own</th><th>Builtin</th></tr>
+<tr><td>Calculated in total 10k</td><td>0.5s</td><td>0.01s</td></tr>
+<tr><td>Arrange 1k</td><td>1s</td><td>0.02s</td></tr>
 <tr><td>Map 10k</td><td>0.3s</td><td>0.005s</td></tr>
 </table>
 
-<h2>4. Hạn chế đệ quy</h2>
-<pre><code># Xấu — đệ quy chậm
+<h2>4. Recursion Restrictions</h2>
+<pre><code># Bad — slow recursion
 purr fib(n)
-    sniff n <= 1
+    sniff n<= 1
         give n
     give fib(n - 1) + fib(n - 2)
 
 meow fib(30)   # ~2 giây</code></pre>
 
-<pre><code># Tốt — vòng lặp
+<pre><code># Good — loop
 purr fib(n)
-    sniff n <= 1
+    sniff n<= 1
         give n
     paw a = 0
     paw b = 1
@@ -98,7 +98,7 @@ purr fib(n)
 
 meow fib(30)   # ~0.05 giây</code></pre>
 
-<h3>Đệ quy có nhớ (memoization)</h3>
+<h3>Memoization</h3>
 <pre><code>paw memo = {}
 
 purr fib(n)
@@ -112,10 +112,10 @@ purr fib(n)
 
 meow fib(100)   # nhanh</code></pre>
 
-<h2>5. Tránh tạo object thừa</h2>
-<pre><code># Xấu — tạo list mới mỗi vòng
+<h2>5. Avoid creating redundant objects</h2>
+<pre><code># Bad — create a new list each round
 paw i = 0
-knead i < 1000
+knead i< 1000
     paw arr = []
     paw arr = arr + [i]
     i++
@@ -127,23 +127,23 @@ knead i < 1000
     arr.push(i)
     i++</code></pre>
 
-<h2>6. Dùng toán tử bit khi có thể</h2>
-<pre><code># Xấu
+<h2>6. Use the bit operator when can</h2>
+<pre><code># Bad
 paw half = x / 2
 paw double = x * 2
 
-# Tốt (chỉ với số nguyên dương)
+# Good (only with positive integers)
 paw half = x >> 1
-paw double = x << 1</code></pre>
+paw double = x<< 1</code></pre>
 
-<h2>7. Break sớm</h2>
-<pre><code># Xấu — duyệt hết mới thoát
+<h2>7. Break soon</h2>
+<pre><code># Bad — browse all to exit
 paw found = no
 groom x of arr
     sniff x == target
         paw found = yes
 
-# Tốt — thoát ngay
+# Good — get out now
 paw found = no
 groom x of arr
     sniff x == target
@@ -153,24 +153,24 @@ groom x of arr
 <h2>8. Benchmark</h2>
 <pre><code>paw start = now()
 
-# ... code cần đo ...
+# ... code to measure ...
 
 paw elapsed = now() - start
 meow "Mat " + cast(str, elapsed) + " giay"</code></pre>
 
-<h2>9. Khi cần nhanh hơn</h2>
+<h2>9. Faster when needed</h2>
 
-<h3>Nếu code tính toán nặng</h3>
+<h3>If code calculate heavy</h3>
 <ul>
-<li>Transpile sang C dùng <code>tools/transpiler.py</code></li>
-<li>Dùng <code>cpp()</code> để gọi C library</li>
-<li>Viết phần nặng bằng C, gọi từ Cat++</li>
+<li>Transpile to C use <code>tools/transpiler.py</code></li>
+<li>Use<code>cpp()</code>to call C library</li>
+<li>Write heavy section in C, call from Cat++</li>
 </ul>
 
-<h3>Ví dụ: tính số nguyên tố</h3>
-<pre><code># Cat++ thuần — 5 giây cho 100k số
+<h3>Examples: calculating prime numbers</h3>
+<pre><code># Cat++ net — 5 seconds for 100K numbers
 purr is_prime(n)
-    sniff n < 2
+    sniff n< 2
         give no
     paw i = 2
     knead i * i <= n
@@ -179,14 +179,14 @@ purr is_prime(n)
         i++
     give yes
 
-# Transpile sang C — 0.1 giây
+# Transpile to C — 0.1 giây
 # bash build_catos.sh && chạy kernel</code></pre>
 
-<h2>10. Kết luận</h2>
-<p>Cat++ không được thiết kế cho hiệu năng. Nếu cần nhanh:</p>
+<h2>10. Conclusion</h2>
+<p>Cat++ not allowed to design for performance. If you need to quickly:</p>
 <ol>
-<li>Dùng builtin thay vì tự viết</li>
-<li>Tránh đệ quy sâu</li>
-<li>Cache giá trị trong vòng lặp</li>
-<li>Nếu vẫn chậm → transpile sang C</li>
+<li>Use builtin instead of writing your own</li>
+<li>Avoid deep recursion</li>
+<li>Cache value in loop</li>
+<li>If still slow → transpile to C</li>
 </ol>

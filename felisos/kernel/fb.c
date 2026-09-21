@@ -36,6 +36,8 @@ void fb_clear_all(void);
 void fb_puts_at(const char* s, int x, int y, uint32_t color);
 void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
 void fb_char_at_scale(char ch, int x, int y, uint32_t fg, uint32_t bg, int scale);
+void fb_char_at_scale_xy(char ch, int x, int y, uint32_t fg, uint32_t bg, int sx, int sy);
+void fb_puts_scale_xy(const char* s, int x, int y, uint32_t fg, uint32_t bg, int sx, int sy);
 void fb_puts_scale(const char* s, int x, int y, uint32_t fg, uint32_t bg, int scale);
 void fb_puts_panel(const char* s, int x, int y, uint32_t color);
 void fb_cursor_forget(void);
@@ -168,27 +170,6 @@ void fb_puts(const char* s) {
 }
 
 /* Vẽ top panel Ubuntu 10.10 style */
-void fb_draw_panel(void) {
-    if (!fb_on) return;
-
-    /* Top panel 24px đen */
-    fb_rect(0, 0, fb_w, PANEL_HEIGHT, PANEL_BG);
-
-    /* Chữ scale 2x cho dễ đọc */
-    uint32_t old_scale = font_scale;
-    font_scale = 2;  /* 16x16 — chỉ cho panel */
-
-    /* Bên trái — 3 mục menu */
-    fb_puts_panel("Activities", 12, 4, 0x00FFFFFF);
-    fb_puts_panel("Places",     160, 4, 0x00CCCCCC);
-    fb_puts_panel("System",     240, 4, 0x00CCCCCC);
-
-    /* Bên phải */
-    fb_puts_panel("felis@den", fb_w - 200, 4, 0x00FFFFFF);
-    fb_puts_panel("12:00",     fb_w - 70, 4, 0x00FFFFFF);
-
-    font_scale = old_scale;
-}
 
 /* In chữ lên panel — không ảnh hưởng cursor chính */
 void fb_puts_panel(const char* s, int x, int y, uint32_t color) {
@@ -351,6 +332,32 @@ void fb_cursor_hide(void) {
 
 /* In chu tai (x, y) voi mau fg + bg */
 /* Vẽ ký tự với scale tùy ý */
+void fb_char_at_scale_xy(char ch, int x, int y, uint32_t fg, uint32_t bg,
+                           int sx, int sy) {
+    if (!fb_on) return;
+    if (ch < 32 || ch > 127) ch = '?';
+    const unsigned char* g = font8x8[ch - 32];
+    for (int row = 0; row < 8; row++) {
+        unsigned char bits = g[row];
+        for (int col = 0; col < 8; col++) {
+            uint32_t color = (bits & (0x80 >> col)) ? fg : bg;
+            for (int dy = 0; dy < sy; dy++)
+                for (int dx = 0; dx < sx; dx++)
+                    fb_pixel(x + col*sx + dx, y + row*sy + dy, color);
+        }
+    }
+}
+
+void fb_puts_scale_xy(const char* s, int x, int y, uint32_t fg, uint32_t bg,
+                      int sx, int sy) {
+    if (!fb_on) return;
+    int cur = x;
+    while (s && *s) {
+        fb_char_at_scale_xy(*s++, cur, y, fg, bg, sx, sy);
+        cur += 8 * sx;
+    }
+}
+
 void fb_char_at_scale(char ch, int x, int y, uint32_t fg, uint32_t bg, int scale) {
     if (!fb_on) return;
     if (ch < 32 || ch > 127) ch = '?';
@@ -389,49 +396,291 @@ void fb_puts_at(const char* s, int x, int y, uint32_t color) {
     fb_puts_at_color(s, x, y, color, 0x000000);
 }
 
+
+
+
+/* ═══ WinXP Luna theme ═══ */
+#define TASKBAR_H 32
+#define TASKBAR_TOP_BLUE 0x00245EDF
+#define TASKBAR_MID_BLUE 0x003A6EA5
+#define START_GREEN_TOP  0x0057A843
+#define START_GREEN_BOT  0x003D7A2E
+#define TITLE_BLUE_TOP   0x005B9DE5
+#define TITLE_BLUE_BOT   0x003A6EA5
+#define XP_PANEL_BG      0x00ECE9D8
+
+
+
+
+/* ═══ WinXP Taskbar + Start menu ═══ */
+#define TASKBAR_H 32
+#define START_BTN_W 100
+#define START_MENU_W 200
+
+/* State: Start menu mở/đóng */
+static int g_start_open = 0;
+/* App nào đang mở trên taskbar */
+
+extern int purrminal_is_visible(void);
+extern int filemgr_is_visible(void);
+extern int pawedit_is_visible(void);
+extern int coming_soon_visible(void);
+
+void fb_start_menu_toggle(void) { g_start_open = !g_start_open; }
+void fb_start_menu_close(void) { g_start_open = 0; }
+int  fb_start_menu_is_open(void) { return g_start_open; }
+
+void fb_draw_panel(void) {
+    /* XP không có panel trên */
+    if (!fb_on) return;
+}
+
+/* Vẽ Start menu (popup trên taskbar) */
+void fb_draw_start_menu(void) {
+    if (!fb_on || !g_start_open) return;
+
+    int mw = START_MENU_W;
+    int mh = 260;
+    int mx = 4;
+    int my = fb_h - TASKBAR_H - mh;
+
+    /* Shadow */
+    fb_rect(mx + 4, my + 4, mw, mh, 0x00101010);
+
+    /* Menu body — trắng kem */
+    fb_rect(mx, my, mw, mh, 0x00FFFFFF);
+
+    /* Header — gradient xanh XP */
+    for (int yy = 0; yy < 40; yy++) {
+        uint32_t col = (yy < 12) ? 0x0060A8E8 : 0x003A6EA5;
+        fb_rect(mx, my + yy, mw, 1, col);
+    }
+
+    /* Tên user */
+    extern void fb_puts_at_color(const char* s, int x, int y, uint32_t fg, uint32_t bg);
+    fb_puts_at_color("kitty", mx + 44, my + 14, 0x00FFFFFF, 0x003A6EA5);
+
+    /* Avatar — icon user */
+    fb_rect(mx + 12, my + 8, 24, 24, 0x00FFFFFF);
+    fb_rect(mx + 16, my + 12, 16, 16, 0x00E8A040);
+
+    /* Menu items */
+    const char* items[] = {"Purrminal", "Files", "PawEditor", "Catting",
+                           "Login", "About", "Shutdown"};
+    int item_h = 28;
+    int items_y = my + 46;
+
+    for (int i = 0; i < 7; i++) {
+        int iy = items_y + i * item_h;
+
+        /* Separator trước Shutdown */
+        if (i == 6) {
+            fb_rect(mx + 8, iy - 2, mw - 16, 1, 0x00CCCCCC);
+        }
+
+        /* Icon nhỏ */
+        fb_rect(mx + 12, iy + 6, 18, 18, 0x00FF8800);
+        fb_rect(mx + 14, iy + 8, 14, 14, 0x00FFFFFF);
+
+        /* Text */
+        fb_puts_at_color(items[i], mx + 40, iy + 8, 0x00000000, 0x00FFFFFF);
+    }
+
+    /* Border */
+    fb_rect(mx, my, mw, 2, 0x003A6EA5);
+    fb_rect(mx, my + mh - 2, mw, 2, 0x003A6EA5);
+    fb_rect(mx, my, 2, mh, 0x003A6EA5);
+    fb_rect(mx + mw - 2, my, 2, mh, 0x003A6EA5);
+}
+
+/* Click vào Start menu — trả về 1 nếu handled */
+int fb_start_menu_click(int mx, int my) {
+    if (!g_start_open) return 0;
+
+    int mw = START_MENU_W;
+    int mh = 260;
+    int sx = 4;
+    int sy = fb_h - TASKBAR_H - mh;
+
+    /* Ngoài menu? */
+    if (mx < sx || mx > sx + mw || my < sy || my > sy + mh) {
+        g_start_open = 0;
+        return 0;
+    }
+
+    /* Item click? */
+    int items_y = sy + 46;
+    int item_h = 28;
+    for (int i = 0; i < 7; i++) {
+        int iy = items_y + i * item_h;
+        if (my >= iy && my < iy + item_h) {
+            g_start_open = 0;
+
+            extern void purrminal_open(void);
+            extern void filemgr_open(void);
+            extern void pawedit_open(const char*);
+            extern void coming_soon_open(const char*);
+            extern int fs_create(const char*, int);
+
+            switch (i) {
+                case 0: purrminal_open(); break;
+                case 1: filemgr_open(); break;
+                case 2: fs_create("untitled.txt", 0); pawedit_open("untitled.txt"); break;
+                case 3: coming_soon_open("Catting"); break;
+                case 4: coming_soon_open("Login"); break;
+                case 5: coming_soon_open("About"); break;
+                case 6: coming_soon_open("Shutdown"); break;
+            }
+
+            /* App tự vẽ, chỉ cần đóng menu */
+            g_start_open = 0;
+            return 1;
+        }
+    }
+    return 1;
+}
+
+/* Vẽ taskbar XP */
+void fb_draw_wallpaper(void) {
+    if (!fb_on) return;
+    int top_h = fb_h - TASKBAR_H;
+    int half = top_h / 2;
+    for (int y = 0; y < top_h; y++) {
+        uint32_t r, g, b;
+        if (y < half) {
+            r = 0x40 + ((y * 0x30) / half);
+            g = 0x70 + ((y * 0x30) / half);
+            b = 0xC0 - ((y * 0x40) / half);
+        } else {
+            int yy = y - half;
+            r = 0x50 + ((yy * 0x20) / half);
+            g = 0x90 + ((yy * 0x20) / half);
+            b = 0x40 + ((yy * 0x10) / half);
+        }
+        fb_rect(0, y, fb_w, 1, (r << 16) | (g << 8) | b);
+    }
+}
+
+void fb_draw_dock(void) {
+    if (!fb_on) return;
+
+    /* ═══ Wallpaper Bliss ═══ */
+    for (uint32_t y = 0; y < fb_h - TASKBAR_H; y++) {
+        for (uint32_t x = 0; x < fb_w; x++) {
+            uint32_t r, g, b;
+            if (y < (fb_h - TASKBAR_H) / 2) {
+                r = 0x40 + ((y * 0x30) / ((fb_h - TASKBAR_H) / 2));
+                g = 0x70 + ((y * 0x30) / ((fb_h - TASKBAR_H) / 2));
+                b = 0xC0 - ((y * 0x40) / ((fb_h - TASKBAR_H) / 2));
+            } else {
+                uint32_t yy = y - (fb_h - TASKBAR_H) / 2;
+                r = 0x50 + ((yy * 0x20) / ((fb_h - TASKBAR_H) / 2));
+                g = 0x90 + ((yy * 0x20) / ((fb_h - TASKBAR_H) / 2));
+                b = 0x40 + ((yy * 0x10) / ((fb_h - TASKBAR_H) / 2));
+            }
+            fb_pixel(x, y, (r << 16) | (g << 8) | b);
+        }
+    }
+
+    /* ═══ Taskbar dưới ═══ */
+    int ty = fb_h - TASKBAR_H;
+
+    for (int yy = 0; yy < TASKBAR_H; yy++) {
+        uint32_t col;
+        if (yy < 4)       col = 0x002860DC;
+        else if (yy < 8)  col = 0x00245EDF;
+        else if (yy < 20) col = 0x003A6EA5;
+        else if (yy < 28) col = 0x002358B0;
+        else              col = 0x001A4680;
+        fb_rect(0, ty + yy, fb_w, 1, col);
+    }
+    fb_rect(0, ty, fb_w, 1, 0x0060A0FF);
+
+    /* ═══ Start button — không có logo Windows, chỉ chữ "Felis" ═══ */
+    int sx = 4, sw = START_BTN_W, sh = TASKBAR_H - 6;
+    int sy = ty + 3;
+
+    for (int yy = 0; yy < sh; yy++) {
+        uint32_t col;
+        if (yy < 4)        col = 0x0070C860;
+        else if (yy < sh/2) col = 0x0057A843;
+        else if (yy < sh-4) col = 0x003D7A2E;
+        else               col = 0x002A5010;
+        fb_rect(sx + 2, sy + yy, sw - 4, 1, col);
+    }
+    /* Bo góc */
+    fb_rect(sx, sy + 4, 1, sh - 8, 0x00505050);
+    fb_rect(sx + 1, sy + 2, 1, sh - 4, 0x00505050);
+    fb_rect(sx + sw - 1, sy + 4, 1, sh - 8, 0x00505050);
+    fb_rect(sx + sw - 2, sy + 2, 1, sh - 4, 0x00505050);
+
+    /* Chữ "Felis" to rõ */
+    extern void fb_puts_scale_xy(const char* s, int x, int y, uint32_t fg, uint32_t bg, int sx, int sy);
+    fb_puts_scale_xy("Felis", sx + 22, sy + 6, 0x00FFFFFF, 0x0057A843, 1, 2);
+
+    /* ═══ Taskbar items — chỉ hiện app đang mở ═══ */
+    int bx = sx + sw + 8;
+    int btn_h = TASKBAR_H - 8;
+    int by = ty + 4;
+
+    const char* labels[] = {"Purrminal", "Files", "PawEditor", "Catting"};
+    int visible[] = {
+        purrminal_is_visible(),
+        filemgr_is_visible(),
+        pawedit_is_visible(),
+        0
+    };
+
+    for (int i = 0; i < 4; i++) {
+        if (!visible[i]) continue;
+
+        int bw = 100;
+        for (int yy = 0; yy < btn_h; yy++) {
+            uint32_t col;
+            if (yy < 2) col = 0x0050A0E8;
+            else if (yy < btn_h - 2) col = 0x002A5FA5;
+            else col = 0x001F4578;
+            fb_rect(bx + 1, by + yy, bw - 2, 1, col);
+        }
+        fb_rect(bx, by, bw, 1, 0x0060A8F0);
+        fb_rect(bx, by + btn_h - 1, bw, 1, 0x00103058);
+        fb_rect(bx, by, 1, btn_h, 0x0060A8F0);
+        fb_rect(bx + bw - 1, by, 1, btn_h, 0x00103058);
+
+        fb_puts_at_color(labels[i], bx + 8, by + 4, 0x00FFFFFF, 0x002A5FA5);
+        bx += bw + 4;
+    }
+
+    /* ═══ System tray phải ═══ */
+    int tray_x = (int)fb_w - 90;
+    for (int yy = 0; yy < btn_h; yy++) {
+        uint32_t col = (yy < btn_h/2) ? 0x002560B0 : 0x00184078;
+        fb_rect(tray_x, by + yy, 80, 1, col);
+    }
+    fb_puts_at_color("12:00", tray_x + 22, by + 4, 0x00FFFFFF, 0x002560B0);
+
+    /* Vẽ Start menu nếu đang mở */
+    if (g_start_open) fb_draw_start_menu();
+
+    text_area_y0 = 4;
+    text_area_x0 = 4;
+    cur_x = text_area_x0;
+    cur_y = text_area_y0;
+}
+
 void fb_clear_all(void) {
     if (!fb_on) return;
-    for (uint32_t y = 0; y < fb_h; y++)
-        for (uint32_t x = 0; x < fb_w; x++)
-            fb_pixel(x, y, bg_color);
+    /* Wallpaper xanh gradient dọc */
+    for (uint32_t y = 0; y < fb_h; y++) {
+        for (uint32_t x = 0; x < fb_w; x++) {
+            uint32_t b = 0x87 + ((y * 30) / fb_h);
+            if (b > 0xFF) b = 0xFF;
+            uint32_t color = (0x20 << 16) | (0x4A << 8) | b;
+            fb_pixel(x, y, color);
+        }
+    }
     cur_x = 0;
     cur_y = 0;
 }
 
 
-void fb_draw_dock(void) {
-    if (!fb_on) return;
-
-    /* Dock trái 64px */
-    fb_rect(0, PANEL_HEIGHT, DOCK_WIDTH, fb_h - PANEL_HEIGHT, DOCK_BG);
-    fb_rect(DOCK_WIDTH - 1, PANEL_HEIGHT, 1, fb_h - PANEL_HEIGHT, 0x00333333);
-
-    int ix = 16;
-    int iy = PANEL_HEIGHT + 30;
-    uint32_t cols[] = {0x00E95420, 0x00FFFFFF, 0x00FFAA00,
-                       0x0066AAFF, 0x00AA66FF, 0x00FF6666};
-    for (int i = 0; i < 6; i++) {
-        fb_rect(ix, iy, 32, 32, cols[i]);
-        fb_rect(ix + 2, iy + 2, 28, 28, 0x00222222);
-        fb_rect(ix + 4, iy + 4, 6, 6, cols[i]);
-        iy += 48;
-        if (iy + 32 > (int)fb_h - 60) break;
-    }
-
-    /* ═══ Nút MENU — icon thứ 7, ở dưới cùng dock ═══ */
-    int menu_y = fb_h - 56;
-    fb_rect(ix, menu_y, 32, 32, 0x00FF6600);       /* viền cam */
-    fb_rect(ix + 2, menu_y + 2, 28, 28, 0x00111111); /* nền đen */
-    /* 3 gạch ngang — icon menu */
-    fb_rect(ix + 7, menu_y + 9,  18, 3, 0x00FF6600);
-    fb_rect(ix + 7, menu_y + 14, 18, 3, 0x00FF6600);
-    fb_rect(ix + 7, menu_y + 19, 18, 3, 0x00FF6600);
-
-    /* Nút Ubuntu logo đầu dock */
-    fb_rect(ix, PANEL_HEIGHT + 4, 32, 8, 0x00E95420);
-
-    text_area_y0 = PANEL_HEIGHT + 8;
-    text_area_x0 = DOCK_WIDTH + 12;
-    cur_x = text_area_x0;
-    cur_y = text_area_y0;
-}

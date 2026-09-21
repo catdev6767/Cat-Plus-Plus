@@ -1,19 +1,19 @@
-<p>Cat++ có <b>3 engine</b> chạy code. Mỗi cái có tốc độ khác nhau.</p>
+<p>Cat++ có<b>3 engine</b>chạy code. Mỗi cái có tốc độ khác nhau.</p>
 
 <h2>1. Ba engine</h2>
 <table>
 <tr><th>Engine</th><th>Tốc độ</th><th>Cách hoạt động</th></tr>
-<tr><td>Interpreter</td><td>1x</td><td>Duyệt AST, eval từng node</td></tr>
+<tr><td>Interpreter</td><td>1x</td><td>Duyệt AST, eval fromng node</td></tr>
 <tr><td>Bytecode VM</td><td>2-3x</td><td>AST → bytecode → stack machine</td></tr>
 <tr><td>PyCompiler</td><td>20-50x</td><td>AST → Python source → exec()</td></tr>
 </table>
 
 <h2>2. Tự động chọn</h2>
-<p>Server tự động:</p>
+<p>Server automatic:</p>
 <ol>
 <li>Thử PyCompiler trước (nhanh nhất)</li>
-<li>Nếu lỗi → Bytecode VM</li>
-<li>Nếu vẫn lỗi → Interpreter</li>
+<li>If lỗi → Bytecode VM</li>
+<li>If vẫn lỗi → Interpreter</li>
 </ol>
 
 <h2>3. Benchmark</h2>
@@ -30,8 +30,8 @@ meow s</code></pre>
 <tr><td>PyCompiler</td><td>13 ms</td><td>10 ms</td></tr>
 </table>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Đo thời gian 1 triệu lần lặp.</li>
-<li>So sánh 3 engine với fib(28).</li>
+<li>So sánh 3 engine with fib(28).</li>
 </ol>

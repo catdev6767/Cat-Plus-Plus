@@ -134,6 +134,8 @@ void mouse_handler(void) {
                     g_click_x = new_x;
                     g_click_y = new_y;
                     g_pending_click = 1;
+                    extern void serial_print_str(const char* s);
+                    serial_print_str("[mouse] click pending\n");
                 }
                 mouse_buttons = new_buttons;
 

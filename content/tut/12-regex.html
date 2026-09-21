@@ -1,14 +1,14 @@
-<p>Regex (regular expression) là công cụ mạnh để xử lý chuỗi theo mẫu.</p>
+<p>Regex (regular expression) is a powerful tool for sample string processing.</p>
 
-<h2>1. Ba hàm regex</h2>
+<h2>1. Ba function regex</h2>
 <table>
-<tr><th>Hàm</th><th>Chức năng</th></tr>
-<tr><td><code>match(pattern, s)</code></td><td>Kiểm tra có khớp không</td></tr>
-<tr><td><code>find_all(pattern, s)</code></td><td>Tìm tất cả chuỗi khớp</td></tr>
-<tr><td><code>replace_all(pattern, s, sub)</code></td><td>Thay thế tất cả</td></tr>
+<tr><th>Function</th><th>Function</th></tr>
+<tr><td><code>match(pattern, s)</code></td><td>Check if it matches</td></tr>
+<tr><td><code>find_all(pattern, s)</code></td><td>Find all matching strings</td></tr>
+<tr><td><code>replace_all(pattern, s, sub)</code></td><td>Replace &All</td></tr>
 </table>
 
-<h2>2. match — kiểm tra mẫu</h2>
+<h2>2. match — sample check</h2>
 <pre><code>sniff match("[0-9]+", "abc123")
     meow "co so"
 swat
@@ -18,10 +18,10 @@ sniff match("^[a-z]+$", "hello")
     meow "toan chu thuong"
 
 sniff match("@", "user@example.com")
-    meow "co @ trong email"</code></pre>
+    meow "co @ in email"</code></pre>
 
-<h2>3. find_all — tìm tất cả</h2>
-<pre><code>meow find_all("[0-9]+", "toi co 3 con meo va 5 con cho")
+<h2>3. find_all — find all</h2>
+<pre><code>meow find_all("[0-9]+", "toi co 3 con meo va 5 con for")
 # [3, 5]
 
 meow find_all("[a-z]+", "Hello World Foo")
@@ -30,7 +30,7 @@ meow find_all("[a-z]+", "Hello World Foo")
 meow find_all("\\w+@\\w+\\.\\w+", "lien he a@x.com hoac b@y.org")
 # [a@x.com, b@y.org]</code></pre>
 
-<h2>4. replace_all — thay thế</h2>
+<h2>4. replace_all — replace</h2>
 <pre><code>meow replace_all("[0-9]", "abc123def", "#")
 # abc###def
 
@@ -40,40 +40,40 @@ meow replace_all("\\s+", "hello   world  foo", " ")
 meow replace_all("[aeiou]", "hello world", "*")
 # h*ll* w*rld</code></pre>
 
-<h2>5. Cú pháp regex thường dùng</h2>
+<h2>5. Syntax regex is often used</h2>
 <table>
-<tr><th>Mẫu</th><th>Nghĩa</th></tr>
-<tr><td><code>.</code></td><td>Bất kỳ ký tự</td></tr>
-<tr><td><code>\\d</code></td><td>Chữ số [0-9]</td></tr>
-<tr><td><code>\\w</code></td><td>Chữ cái, số, _</td></tr>
-<tr><td><code>\\s</code></td><td>Khoảng trắng</td></tr>
-<tr><td><code>*</code></td><td>0 hoặc nhiều</td></tr>
-<tr><td><code>+</code></td><td>1 hoặc nhiều</td></tr>
-<tr><td><code>?</code></td><td>0 hoặc 1</td></tr>
-<tr><td><code>[abc]</code></td><td>a, b, hoặc c</td></tr>
-<tr><td><code>[^abc]</code></td><td>Không phải a, b, c</td></tr>
-<tr><td><code>^</code></td><td>Bắt đầu chuỗi</td></tr>
-<tr><td><code>$</code></td><td>Kết thúc chuỗi</td></tr>
-<tr><td><code>()</code></td><td>Nhóm</td></tr>
-<tr><td><code>|</code></td><td>Hoặc</td></tr>
+<tr><th>Templates</th><th>Nghia</th></tr>
+<tr><td><code>.</code></td><td>Any text value</td></tr>
+<tr><td><code>\\d</code></td><td>Digit</td></tr>
+<tr><td><code>\\w</code></td><td>Letters, numbers, _</td></tr>
+<tr><td><code>\\s</code></td><td>Spaces</td></tr>
+<tr><td><code>*</code></td><td>0 or more</td></tr>
+<tr><td><code>+</code></td><td>1 or more</td></tr>
+<tr><td><code>?</code></td><td>0 or 1</td></tr>
+<tr><td><code>[abc]</code></td><td>a, b, or c</td></tr>
+<tr><td><code>[^abc]</code></td><td>Not must a, b, c</td></tr>
+<tr><td><code>^</code></td><td>Start string</td></tr>
+<tr><td><code>$</code></td><td>End string</td></tr>
+<tr><td><code>()</code></td><td>Group</td></tr>
+<tr><td><code>|</code></td><td>or</td></tr>
 </table>
 
-<h2>6. Ví dụ thực tế: kiểm tra email</h2>
+<h2>6. Actual examples: check email</h2>
 <pre><code>purr is_email(s)
     give match("^[\\w.]+@[\\w.]+\\.[a-z]+$", s)
 
 meow is_email("user@example.com")   # yes
 meow is_email("invalid")            # no</code></pre>
 
-<h2>7. Ví dụ: trích xuất số điện thoại</h2>
+<h2>7. Examples: phone number extraction</h2>
 <pre><code>paw text = "Lien he: 0912345678 hoac 0987654321"
 paw phones = find_all("[0-9]{10}", text)
 groom p of phones
     meow p</code></pre>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>Kiểm tra chuỗi có phải số điện thoại VN (10 số, bắt đầu bằng 0).</li>
-<li>Đếm số từ trong một đoạn văn.</li>
-<li>Chuẩn hóa chuỗi: xóa khoảng trắng thừa, viết hoa chữ đầu câu.</li>
+<li>Check string must have a Vietnamese phone number (10 numbers, starts with 0).</li>
+<li>Count the number of words in a paragraph.</li>
+<li>Normalize string: remove extra whitespace, capitalize the sentence.</li>
 </ol>

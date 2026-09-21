@@ -1,40 +1,40 @@
 <h2>File I/O</h2>
 
-<h3>1. Đọc file thành chuỗi</h3>
+<h3>1. Read file to string</h3>
 <pre><code>paw content = read_file("data.txt")
 meow content</code></pre>
 
-<h3>2. Đọc file theo dòng</h3>
+<h3>2. Read file by line</h3>
 <pre><code>paw lines = read_lines("data.txt")
 groom line of lines
     meow line</code></pre>
 
-<h3>3. Ghi file (ghi đè)</h3>
+<h3>3. Write file (overwrite)</h3>
 <pre><code>write_file("output.txt", "Hello, world!")</code></pre>
 
-<h3>4. Ghi thêm vào cuối file</h3>
+<h3>4. Write add to end of file</h3>
 <pre><code>append_file("log.txt", "New entry\n")</code></pre>
 
-<h3>5. Đếm số dòng trong file</h3>
+<h3>5. Count the number of lines in the file</h3>
 <pre><code>purr count_lines(path)
     give len(read_lines(path))
 
 meow count_lines("data.txt")</code></pre>
 
-<h3>6. Đếm số từ trong file</h3>
+<h3>6. Count numbers from print file</h3>
 <pre><code>purr count_words(path)
     paw content = read_file(path)
     give len(shred(content, " "))
 
 meow count_words("data.txt")</code></pre>
 
-<h3>7. Sao chép file</h3>
+<h3>7. Copy file</h3>
 <pre><code>purr copy_file(src, dst)
     write_file(dst, read_file(src))
 
 copy_file("a.txt", "b.txt")</code></pre>
 
-<h3>8. Tìm kiếm trong file</h3>
+<h3>8. Search and print files</h3>
 <pre><code>purr find_in_file(path, keyword)
     paw lines = read_lines(path)
     paw results = []
@@ -47,7 +47,7 @@ copy_file("a.txt", "b.txt")</code></pre>
 
 meow find_in_file("data.txt", "cat")</code></pre>
 
-<h3>9. Ghi log có timestamp</h3>
+<h3>9. Write log with timestamp</h3>
 <pre><code>purr log(msg)
     paw t = timestamp()
     append_file("app.log", cast(str, t) + ": " + msg + "\n")
@@ -55,7 +55,7 @@ meow find_in_file("data.txt", "cat")</code></pre>
 log("Ung dung bat dau")
 log("Xu ly du lieu")</code></pre>
 
-<h3>10. Đọc cấu hình dạng key=value</h3>
+<h3>10. Read key=value configuration</h3>
 <pre><code>purr read_config(path)
     paw config = {}
     paw lines = read_lines(path)

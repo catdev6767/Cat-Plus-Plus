@@ -1,7 +1,7 @@
 <p>Cách in ký tự lên màn hình VGA text mode.</p>
 
 <h2>1. VGA text mode</h2>
-<p>Buffer ở địa chỉ <code>0xB8000</code>. 80 cột × 25 hàng. Mỗi ký tự 2 byte.</p>
+<p>Buffer ở địa chỉ<code>0xB8000</code>. 80 cột × 25 hàng. Mỗi ký tự 2 byte.</p>
 
 <pre><code>volatile uint16_t* vga = (uint16_t*)0xB8000;</code></pre>
 
@@ -23,7 +23,7 @@ uint16_t entry = c | (color << 8);</code></pre>
 <tr><td>15</td><td>Trắng</td></tr>
 </table>
 
-<h2>4. In ký tự</h2>
+<h2>4. Print ký tự</h2>
 <pre><code>static size_t row = 0, col = 0;
 static uint8_t color = 0x0F;  /* Trắng trên đen */
 
@@ -33,7 +33,7 @@ void vga_putc(char c) {
         if (++row >= 25) scroll();
         return;
     }
-    vga[row * 80 + col] = c | (color << 8);
+    vga[row * 80 + col] = c | (color<< 8);
     if (++col >= 80) {
         col = 0;
         if (++row >= 25) scroll();
@@ -50,9 +50,9 @@ void vga_putc(char c) {
     row = 24;
 }</code></pre>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>In "Hello" màu đỏ.</li>
-<li>Vẽ hình vuông bằng ký tự <code>*</code>.</li>
-<li>Thêm hàm <code>vga_clear()</code>.</li>
+<li>Print "Hello" màu đỏ.</li>
+<li>Vẽ hình vuông bằng ký tự<code>*</code>.</li>
+<li>Thêm function<code>vga_clear()</code>.</li>
 </ol>

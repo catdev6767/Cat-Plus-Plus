@@ -1,14 +1,14 @@
-<p>Đồ án tổng hợp — tạo một mini game hoặc ứng dụng chạy trong Felis OS.</p>
+<p>Đồ án tổng hợp — tạo một mini game or ứng dụng chạy in Felis OS.</p>
 
-<h2>1. Đề bài: Game đoán số</h2>
-<p>Viết lệnh <code>guess</code> để chơi đoán số. Máy chọn số 1-100, người dùng đoán.</p>
+<h2>1. Đề lesson: Game đoán số</h2>
+<p>Viết lệnh<code>guess</code>để chơi đoán số. Máy chọn số 1-100, người use đoán.</p>
 
 <h3>Yêu cầu</h3>
 <ul>
-<li>Lưu số bí mật trong biến static</li>
-<li>Mỗi lần gọi <code>guess N</code> → kiểm tra</li>
-<li>In "cao hon" hoặc "thap hon"</li>
-<li>Đúng → in số lần đoán</li>
+<li>Lưu số bí mật in variable static</li>
+<li>Mỗi lần gọi<code>guess N</code> → check</li>
+<li>Print "cao hon" or "thap hon"</li>
+<li>True → in số lần đoán</li>
 </ul>
 
 <h2>2. Gợi ý code</h2>
@@ -20,27 +20,27 @@ static void cmd_guess(char* arg) {
         /* Khởi tạo */
         secret = 42;
         tries = 0;
-        catpp_print_str("Da chon so 1-100. Doan di!");
+        catpp_print_str("Da forn so 1-100. Doan di!");
         return;
     }
     int n = 0;
-    while (*arg >= '0' && *arg <= '9') {
+    while (*arg >= '0' && *arg<= '9') {
         n = n * 10 + (*arg - '0');
         arg++;
     }
     tries++;
     if (n < secret) catpp_print_str("Cao hon");
-    else if (n > secret) catpp_print_str("Thap hon");
+    else if (n >secret) catpp_print_str("Thap hon");
     else {
         catpp_print_str("Dung roi!");
-        /* In số lần đoán */
+        /* Printing numbers lần đoán */
         secret = 0;
     }
 }</code></pre>
 
 <h2>3. Test</h2>
 <pre><code>felis$ guess
-Da chon so 1-100. Doan di!
+Da forn so 1-100. Doan di!
 felis$ guess 50
 Thap hon
 felis$ guess 25
@@ -51,8 +51,8 @@ Dung roi!</code></pre>
 <h2>4. Mở rộng</h2>
 <ul>
 <li>Thêm menu nhiều game</li>
-<li>Lưu high score vào file</li>
-<li>Đổi secret mỗi lần chơi</li>
+<li>Lưu high score ando file</li>
+<li>Đổi secret each time chơi</li>
 </ul>
 
 <h2>5. Đồ án khác</h2>
@@ -60,14 +60,14 @@ Dung roi!</code></pre>
 <tr><th>Đề tài</th><th>Độ khó</th></tr>
 <tr><td>Đồng hồ đếm ngược</td><td>Dễ</td></tr>
 <tr><td>Todo list (lưu file)</td><td>Trung bình</td></tr>
-<tr><td>Text editor đơn giản</td><td>Trung bình</td></tr>
-<tr><td>Calculator với parser</td><td>Khó</td></tr>
+<tr><td>Text editor simple</td><td>Trung bình</td></tr>
+<tr><td>Calculator with parser</td><td>Khó</td></tr>
 <tr><td>Snake game (VGA)</td><td>Rất khó</td></tr>
 </table>
 
-<h2>6. Nộp bài</h2>
+<h2>6. Nộp lesson</h2>
 <ol>
-<li>Code trong <code>kernel/commands.c</code></li>
+<li>Code in <code>kernel/commands.c</code></li>
 <li>Build: <code>bash build_felis.sh</code></li>
 <li>Test QEMU</li>
 <li>Chụp màn hình output</li>

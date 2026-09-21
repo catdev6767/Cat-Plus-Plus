@@ -1,6 +1,6 @@
-<h2>Thuật toán</h2>
+<h2>Algorithm</h2>
 
-<h3>31. Sắp xếp nổi bọt</h3>
+<h3>31. Foam Buoyancy Arrangement</h3>
 <pre><code>purr bubble_sort(arr)
     paw n = len(arr)
     paw i = 0
@@ -17,7 +17,7 @@
 
 meow bubble_sort([5, 2, 8, 1, 9])</code></pre>
 
-<h3>32. Tìm kiếm nhị phân</h3>
+<h3>Binary Search</h3>
 <pre><code>purr binary_search(arr, target)
     paw lo = 0
     paw hi = len(arr) - 1
@@ -33,7 +33,7 @@ meow bubble_sort([5, 2, 8, 1, 9])</code></pre>
 
 meow binary_search([1, 3, 5, 7, 9], 7)   # 3</code></pre>
 
-<h3>33. Kiểm tra số nguyên tố</h3>
+<h3>33. Check the prime number</h3>
 <pre><code>purr is_prime(n)
     sniff n < 2
         give no
@@ -46,7 +46,7 @@ meow binary_search([1, 3, 5, 7, 9], 7)   # 3</code></pre>
 
 meow is_prime(17)   # yes</code></pre>
 
-<h3>34. Giai thừa (đệ quy)</h3>
+<h3>34. Factorial (recursive)</h3>
 <pre><code>purr factorial(n)
     sniff n <= 1
         give 1
@@ -54,7 +54,7 @@ meow is_prime(17)   # yes</code></pre>
 
 meow factorial(5)   # 120</code></pre>
 
-<h3>35. Fibonacci (đệ quy có nhớ)</h3>
+<h3>35. Fibonacci (recursive remembering)</h3>
 <pre><code>paw memo = {}
 
 purr fib(n)
@@ -68,7 +68,7 @@ purr fib(n)
 
 meow fib(30)   # 832040 (nhanh)</code></pre>
 
-<h3>36. Ước chung lớn nhất (Euclid)</h3>
+<h3>36. Common Greatest Wish (Euclid)</h3>
 <pre><code>purr gcd(a, b)
     knead b != 0
         paw t = b
@@ -78,7 +78,7 @@ meow fib(30)   # 832040 (nhanh)</code></pre>
 
 meow gcd(48, 18)   # 6</code></pre>
 
-<h3>37. Chuyển cơ số</h3>
+<h3>37. Base Transfers</h3>
 <pre><code>purr to_base(n, base)
     paw digits = "0123456789ABCDEF"
     sniff n == 0
@@ -92,7 +92,7 @@ meow gcd(48, 18)   # 6</code></pre>
 
 meow to_base(255, 16)   # FF</code></pre>
 
-<h3>38. Đảo ngược danh sách liên kết (mô phỏng)</h3>
+<h3>38. Reverse link list (simulation)</h3>
 <pre><code>purr reverse_in_place(arr)
     paw i = 0
     paw j = len(arr) - 1
@@ -106,7 +106,7 @@ meow to_base(255, 16)   # FF</code></pre>
 
 meow reverse_in_place([1, 2, 3, 4, 5])</code></pre>
 
-<h3>39. Tìm đường trong mê cung (BFS)</h3>
+<h3>39. Find a way to print a maze (BFS)</h3>
 <pre><code>purr find_path(grid, start, end)
     paw queue = [start]
     paw visited = {}
@@ -130,7 +130,7 @@ meow reverse_in_place([1, 2, 3, 4, 5])</code></pre>
 
 meow "BFS implemented"</code></pre>
 
-<h3>40. Đếm hoán vị</h3>
+<h3>40. Counting the permutations</h3>
 <pre><code>purr permutations(arr)
     sniff len(arr) <= 1
         give [arr]

@@ -462,7 +462,7 @@ int shell_get_prompt(char* buf) {
     char path[200];
     fs_path_of(g_cwd, path, sizeof(path));
     if (path[0] == '/' && path[1] == 0) {
-        strcpy(buf, "felis:/");
+        strcpy(buf, "kitty@felis:/");
     } else {
         strcpy(buf, "kitty:");
         strcat(buf, path);

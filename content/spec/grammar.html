@@ -1,4 +1,4 @@
-<h2>Chương trình</h2>
+<h2>Program</h2>
 <pre><code>program    = { statement } ;
 statement  = let_stmt | assign_stmt | print_stmt | listen_stmt
            | fn_stmt | return_stmt | if_stmt | while_stmt
@@ -16,7 +16,7 @@ try_stmt   = "tap" NEWLINE INDENT { stmt } DEDENT
              [ "hiss" [ IDENT ] NEWLINE INDENT { stmt } DEDENT ] ;
 class_stmt = "cat" IDENT [ "kin" IDENT ] NEWLINE INDENT { member } DEDENT ;
 enum_stmt  = "litter" IDENT NEWLINE INDENT { IDENT NEWLINE } DEDENT ;</code></pre>
-<h2>Biểu thức</h2>
+<h2>Expression</h2>
 <pre><code>expr     = or_expr ;
 or_expr  = and_expr { "either" and_expr } ;
 and_expr = not_expr { "with" not_expr } ;

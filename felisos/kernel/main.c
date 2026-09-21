@@ -99,10 +99,37 @@ void kmain(uint32_t mbi_addr, uint32_t magic) {
     fb_clear_all();
     fb_draw_panel();
     fb_draw_dock();
-    appmenu_open();
+    /* Purrminal chỉ mở khi click dock */
     mouse_show();
 
+    extern int purrminal_handle_key(char c);
+    extern int filemgr_handle_key(char c);
+    extern int pawedit_handle_key(char c);
+    extern int textview_handle_key(char c);
+    extern int appmenu_handle_key(char c);
+    extern int appmenu_is_active(void);
+
     while (1) {
+        extern int gui_key_has(void);
+        extern char gui_key_pop(void);
+        while (gui_key_has()) {
+            char k = gui_key_pop();
+            if (appmenu_is_active()) {
+                appmenu_handle_key(k);
+            } else if (pawedit_handle_key(k)) {
+            } else if (textview_handle_key(k)) {
+            } else if (filemgr_handle_key(k)) {
+            } else {
+                purrminal_handle_key(k);
+            }
+        }
+        if (g_pending_click) {
+            int cx = g_click_x;
+            int cy = g_click_y;
+            g_pending_click = 0;
+            extern int purrminal_handle_click(int, int);
+            purrminal_handle_click(cx, cy);
+        }
         if (tty_get() == 1) {
             mouse_hide();
             shell_run();

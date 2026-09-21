@@ -1,7 +1,7 @@
-<p>Cách thêm lệnh mới vào Felis OS shell.</p>
+<p>Cách thêm lệnh mới ando Felis OS shell.</p>
 
-<h2>1. Viết hàm xử lý</h2>
-<pre><code>/* Trong commands.c */
+<h2>1. Viết function xử lý</h2>
+<pre><code>/* In commands.c */
 static void cmd_greet(char* arg) {
     char buf[128];
     strcpy(buf, "Hello, ");
@@ -9,14 +9,14 @@ static void cmd_greet(char* arg) {
     catpp_print_str(buf);
 }</code></pre>
 
-<h2>2. Đăng ký vào command table</h2>
+<h2>2. Đăng ký ando command table</h2>
 <pre><code>const char* shell_commands[] = {
     "help","clear","info",...,
     "greet",              /* ← thêm */
     0
 };</code></pre>
 
-<h2>3. Thêm vào shell_execute</h2>
+<h2>3. Thêm ando shell_execute</h2>
 <pre><code>if (strcmp(cmdline, "greet") == 0) {
     cmd_greet(arg);
     return 0;
@@ -26,7 +26,7 @@ static void cmd_greet(char* arg) {
 <pre><code>felis$ greet World
 Hello, World</code></pre>
 
-<h2>5. Ví dụ — lệnh `rand`</h2>
+<h2>5. Examples — lệnh `rand`</h2>
 <pre><code>static unsigned int seed = 12345;
 
 static void cmd_rand(void) {
@@ -36,12 +36,12 @@ static void cmd_rand(void) {
     catpp_print(r);
 }
 
-/* Trong shell_execute: */
+/* In shell_execute: */
 if (strcmp(cmdline, "rand") == 0) { cmd_rand(); return 0; }</code></pre>
 
-<h2>Bài tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>Thêm lệnh <code>calc EXPR</code> — tính toán đơn giản.</li>
-<li>Thêm lệnh <code>color N</code> — đổi màu chữ VGA.</li>
-<li>Thêm lệnh <code>reboot -f</code> — force reboot.</li>
+<li>Thêm lệnh<code>calc EXPR</code> — calculate simple.</li>
+<li>Thêm lệnh<code>color N</code>— đổi màu chữ VGA.</li>
+<li>Thêm lệnh<code>reboot -f</code> — force reboot.</li>
 </ol>

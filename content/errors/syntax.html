@@ -1,52 +1,52 @@
-<h2>Lỗi cú pháp</h2>
+<h2>Syntax error</h2>
 
-<h3>1. Thụt lề sai</h3>
+<h3>1. Incorrect Indentation</h3>
 <pre><code>purr test()
 meow "hi"</code></pre>
-<p><b>Lỗi:</b> <code>Can 'NEWLINE', gap 'MEOW'</code></p>
-<p><b>Sửa:</b></p>
+<p><b>Error:</b> <code>Can 'NEWLINE', gap 'MEOW'</code></p>
+<p><b>Edit</b></p>
 <pre><code>purr test()
     meow "hi"</code></pre>
 
-<h3>2. Trộn tab và space</h3>
+<h3>2. Mix tabs and space</h3>
 <pre><code>purr test()
 \tmeow "hi"    # tab
     meow "yo"  # space</code></pre>
-<p><b>Sửa:</b> Chỉ dùng space. 4 spaces mỗi cấp.</p>
+<p><b>Edit</b>Use space only. 4 spaces per level.</p>
 
-<h3>3. Thiếu dấu đóng ngoặc</h3>
+<h3>3. Missing brackets</h3>
 <pre><code>paw x = (5 + 3</code></pre>
-<p><b>Lỗi:</b> <code>Can ')', gap 'NEWLINE'</code></p>
-<p><b>Sửa:</b> <code>paw x = (5 + 3)</code></p>
+<p><b>Error:</b> <code>Can ')', gap 'NEWLINE'</code></p>
+<p><b>Edit</b> <code>paw x = (5 + 3)</code></p>
 
-<h3>4. Dùng từ khóa làm tên biến</h3>
+<h3>4. Use the keyword as a name variable</h3>
 <pre><code>paw meow = "hi"</code></pre>
-<p><b>Lỗi:</b> Không parse được — <code>meow</code> là từ khóa.</p>
-<p><b>Sửa:</b> <code>paw greeting = "hi"</code></p>
+<p><b>Error:</b> Not parse is — <code>meow</code>is the keyword.</p>
+<p><b>Edit</b> <code>paw greeting = "hi"</code></p>
 
-<h3>5. Quên dấu hai chấm trong struct</h3>
+<h3>5. Forgetting to print a colon in struct</h3>
 <pre><code>struct Point
     x i32
     y i32</code></pre>
-<p><b>Lỗi:</b> <code>Can ':', gap 'IDENT'</code></p>
-<p><b>Sửa:</b></p>
+<p><b>Error:</b> <code>Can ':', gap 'IDENT'</code></p>
+<p><b>Edit</b></p>
 <pre><code>struct Point
     x: i32
     y: i32</code></pre>
 
-<h3>6. Chuỗi chưa đóng</h3>
+<h3>6. String not closed</h3>
 <pre><code>meow "hello</code></pre>
-<p><b>Lỗi:</b> <code>Unterminated string</code></p>
-<p><b>Sửa:</b> <code>meow "hello"</code></p>
+<p><b>Error:</b> <code>Unterminated string</code></p>
+<p><b>Edit</b> <code>meow "hello"</code></p>
 
-<h3>7. Dùng <code>=</code> thay vì <code>==</code></h3>
+<h3>7. Use<code>=</code>instead<code>==</code></h3>
 <pre><code>sniff x = 5
     meow "yes"</code></pre>
-<p><b>Lỗi:</b> Parse thành gán, không phải so sánh.</p>
-<p><b>Sửa:</b> <code>sniff x == 5</code></p>
+<p><b>Error:</b>Parse to assign, not compare.</p>
+<p><b>Edit</b> <code>sniff x == 5</code></p>
 
-<h3>8. Dấu chấm phẩy thừa</h3>
+<h3>8. Excess semicolon</h3>
 <pre><code>paw x = 5;
 meow x;</code></pre>
-<p><b>Lỗi:</b> Cat++ không dùng <code>;</code> như C.</p>
-<p><b>Sửa:</b> Bỏ hết <code>;</code>.</p>
+<p><b>Error:</b>Cat++ don't use<code>;</code>as C.</p>
+<p><b>Edit</b>Just dump it.<code>;</code>.</p>
