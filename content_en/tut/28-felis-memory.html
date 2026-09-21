@@ -4,7 +4,7 @@
 <pre><code>0x00000000 - 0x000FFFFF:  BIOS, VGA, bootloader (1MB)
 0x00100000 - ...        :  Kernel (loaded by GRUB)
 0xB8000                 :  VGA text buffer
-0xC0000000 - ...        :  (không dùng)</code></pre>
+0xC0000000 - ...        :  (không use)</code></pre>
 
 <h2>2. Stack</h2>
 <pre><code>/* entry.s */
@@ -36,7 +36,7 @@ void* kmalloc(size_t n) {
 <table>
 <tr><th>Giới hạn</th><th>Value</th></tr>
 <tr><td>RAM</td><td>128 MB (QEMU)</td></tr>
-<tr><td>Kernel dùng</td><td>~30 KB</td></tr>
+<tr><td>Kernel use</td><td>~30 KB</td></tr>
 <tr><td>Filesystem</td><td>~133 KB</td></tr>
 <tr><td>Stack</td><td>16 KB</td></tr>
 </table>

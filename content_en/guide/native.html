@@ -2,7 +2,7 @@
 
 <p>Cat++ có 2 transpiler sang C:</p>
 <ul>
-<li><strong>→ C</strong> (boxed) — dùng <code>Value</code> động, chạy mọi code, slower</li>
+<li><strong>→ C</strong> (boxed) — use <code>Value</code> động, chạy mọi code, slower</li>
 <li><strong>⚡ C fast</strong> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <strong>nhanh gần C++</strong>, yêu cầu type annotation</li>
 </ul>
 
@@ -16,8 +16,8 @@
 <tr><td><strong>C native</strong></td><td><strong>0.4ms</strong></td><td><strong>13635x</strong></td></tr>
 </table>
 
-<h2>Cách dùng</h2>
-<p>Thêm type annotation cho biến và hàm:</p>
+<h2>Cách use</h2>
+<p>Thêm type annotation cho biến and hàm:</p>
 <pre><code>purr sum_to(n: i32) -> i64
     paw total: i64 = 0
     paw i: i32 = 1
@@ -43,13 +43,13 @@ meow sum_to(1000000)</code></pre>
 </table>
 
 <h2>Warning overflow</h2>
-<p><strong>i32</strong> chỉ chứa được tối đa ~2.1 tỷ. Khi accumulate số lớn, dùng <strong>i64</strong>:</p>
+<p><strong>i32</strong> chỉ chứa is tối đa ~2.1 tỷ. Khi accumulate số lớn, use <strong>i64</strong>:</p>
 <pre><code>paw total: i64 = 0       # ✓
 paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
 
 <p>Đây là hành vi giống hệt C/C++.</p>
 
-<h2>Khi nào dùng native</h2>
+<h2>Khi nào use native</h2>
 <ul>
 <li>Code số học nặng (loop, calculate)</li>
 <li>Thuật toán (sort, search, fibonacci)</li>
@@ -58,7 +58,7 @@ paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
 
 <p>Khi <strong>không</strong> cần native:</p>
 <ul>
-<li>Code có list/dict/class complex (dùng boxed)</li>
+<li>Code có list/dict/class complex (use boxed)</li>
 <li>Code ngắn, không cần tốc độ</li>
 <li>Prototype nhanh (không cần type)</li>
 </ul>

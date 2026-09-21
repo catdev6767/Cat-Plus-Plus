@@ -17,7 +17,7 @@ if (scancode & 0x80) return;
 char c = scancode_map[scancode];</code></pre>
 
 <h2>3. Shift/Caps</h2>
-<pre><code>/* Shift = scancode 0x2A hoặc 0x36 */
+<pre><code>/* Shift = scancode 0x2A or 0x36 */
 if (sc == 0x2A || sc == 0x36) {
     shift = 1;
     return;
@@ -50,6 +50,6 @@ if (released == 0x2A || released == 0x36) {
 
 <h2>Lesson tập</h2>
 <ol>
-<li>Thêm phím F1-F12 vào bảng scancode.</li>
+<li>Thêm phím F1-F12 ando bảng scancode.</li>
 <li>Thêm hỗ trợ Ctrl+C để hủy lệnh.</li>
 </ol>

@@ -1,7 +1,7 @@
 <p>CatOS là hệ điều hành nhỏ chạy code Cat++ trực tiếp trên bare metal.</p>
 
 <h2>1. CatOS là gì?</h2>
-<p>CatOS là một kernel viết bằng C. Nó nhúng runtime Cat++ và chạy code Cat++ mà không cần Linux, Windows, hay bất kỳ OS nào khác.</p>
+<p>CatOS là một kernel viết bằng C. Nó nhúng runtime Cat++ and chạy code Cat++ mà không cần Linux, Windows, hay bất kỳ OS nào khác.</p>
 
 <h2>2. Kiến trúc</h2>
 <pre><code>Cat++ code (.cat)
@@ -46,14 +46,14 @@ QEMU / máy thật</code></pre>
 └── build_catos.sh             # Build script</code></pre>
 
 <h2>4. Syntax low-level cho CatOS</h2>
-<p>CatOS dùng cú pháp low-level — không có sẵn trên web IDE.</p>
+<p>CatOS use cú pháp low-level — không có sẵn trên web IDE.</p>
 
 <h3>Bit operations</h3>
 <pre><code>paw mask = 0xFF & 0x0F
 paw shifted = 1 << 4
 paw color = (0x0F << 8) | ord("H")</code></pre>
 
-<h3>Cast và pointer</h3>
+<h3>Cast and pointer</h3>
 <pre><code>paw vga = cast(ptr, 0xB8000)
 # Địa chỉ VGA text mode trong bộ nhớ</code></pre>
 

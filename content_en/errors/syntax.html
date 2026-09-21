@@ -8,11 +8,11 @@ meow "hi"</code></pre>
 <pre><code>purr test()
     meow "hi"</code></pre>
 
-<h3>2. Trộn tab và space</h3>
+<h3>2. Trộn tab and space</h3>
 <pre><code>purr test()
 \tmeow "hi"    # tab
     meow "yo"  # space</code></pre>
-<p><b>Sửa:</b> Chỉ dùng space. 4 spaces mỗi cấp.</p>
+<p><b>Sửa:</b> Chỉ use space. 4 spaces mỗi cấp.</p>
 
 <h3>3. Thiếu dấu đóng ngoặc</h3>
 <pre><code>paw x = (5 + 3</code></pre>
@@ -21,7 +21,7 @@ meow "hi"</code></pre>
 
 <h3>4. Dùng từ khóa làm tên biến</h3>
 <pre><code>paw meow = "hi"</code></pre>
-<p><b>Error:</b> Not parse được — <code>meow</code> là từ khóa.</p>
+<p><b>Error:</b> Not parse is — <code>meow</code> là từ khóa.</p>
 <p><b>Sửa:</b> <code>paw greeting = "hi"</code></p>
 
 <h3>5. Quên dấu hai chấm trong struct</h3>
@@ -42,11 +42,11 @@ meow "hi"</code></pre>
 <h3>7. Dùng <code>=</code> thay vì <code>==</code></h3>
 <pre><code>sniff x = 5
     meow "yes"</code></pre>
-<p><b>Error:</b> Parse thành gán, không phải compare.</p>
+<p><b>Error:</b> Parse thành gán, không must compare.</p>
 <p><b>Sửa:</b> <code>sniff x == 5</code></p>
 
 <h3>8. Dấu chấm phẩy thừa</h3>
 <pre><code>paw x = 5;
 meow x;</code></pre>
-<p><b>Error:</b> Cat++ không dùng <code>;</code> như C.</p>
+<p><b>Error:</b> Cat++ không use <code>;</code> như C.</p>
 <p><b>Sửa:</b> Bỏ hết <code>;</code>.</p>

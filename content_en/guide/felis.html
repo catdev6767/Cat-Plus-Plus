@@ -1,5 +1,5 @@
 <h1>Felis OS — Hướng dẫn đầy đủ</h1>
-<p>Từ Cat++ code tới kernel boot trên bare metal, không Linux, không Python.</p>
+<p>From Cat++ code tới kernel boot trên bare metal, không Linux, không Python.</p>
 
 <h2>1. Tổng quan kiến trúc</h2>
 <pre><code>┌──────────────────────────────────────┐
@@ -22,7 +22,7 @@
 ┌──────────────────────────────────────┐
 │  ELF kernel (felis.elf)              │
 └──────────────┬───────────────────────┘
-               │ QEMU hoặc GRUB
+               │ QEMU or GRUB
                ▼
 ┌──────────────────────────────────────┐
 │  Bare metal — CPU chạy trực tiếp     │
@@ -78,7 +78,7 @@ meow sizeof(Color)   # 8</code></pre>
 
 <h3>Volatile cho MMIO</h3>
 <pre><code>volatile paw status = 0
-# Compiler sẽ không tối ưu hóa biến này</code></pre>
+# Compiler will không tối ưu hóa biến này</code></pre>
 
 <h3>Inline assembly</h3>
 <pre><code>asm("cli")   # Tắt interrupt
@@ -154,11 +154,11 @@ qemu-system-x86_64 -cdrom felis.iso</code></pre>
 <p>Bảng màu:</p>
 <pre><code>0 = đen      4 = đỏ đậm    8 = xám đậm     12 = đỏ nhạt
 1 = xanh dương đậm   5 = tím đậm     9 = xanh dương nhạt  13 = hồng
-2 = xanh lá đậm      6 = nâu        10 = xanh lá nhạt    14 = vàng
+2 = xanh lá đậm      6 = nâu        10 = xanh lá nhạt    14 = andng
 3 = xanh lơ đậm      7 = xám nhạt   11 = xanh lơ nhạt    15 = trắng</code></pre>
 
 <h3>Serial port (COM1)</h3>
-<p>Write ra cổng <code>0x3F8</code>. QEMU với <code>-serial stdio</code> sẽ hiện ra terminal. Dùng để debug kernel.</p>
+<p>Write ra cổng <code>0x3F8</code>. QEMU với <code>-serial stdio</code> will hiện ra terminal. Dùng để debug kernel.</p>
 
 <h3>Memory</h3>
 <p>Bump allocator: cấp phát tuyến tính từ <code>0x100000</code> (1MB) đến <code>0x400000</code> (4MB). Chưa có <code>free</code> thật.</p>
@@ -189,7 +189,7 @@ qemu-system-x86_64 -cdrom felis.iso</code></pre>
 <p>Prompt <code>cat> </code> + đọc từ keyboard + parse + run Cat++.</p>
 
 <h3>Step 5 — Filesystem</h3>
-<p>Cài FAT16 hoặc FAT32. Cần driver đọc/ghi sector từ disk.</p>
+<p>Cài FAT16 or FAT32. Cần driver đọc/ghi sector từ disk.</p>
 
 <h2>10. Debug</h2>
 

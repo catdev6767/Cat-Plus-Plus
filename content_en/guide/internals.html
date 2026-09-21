@@ -32,7 +32,7 @@
 <li>Number: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
 <li>String: <code>"hello"</code> với escape <code>\n \t \"</code></li>
 <li>Identifiers: <code>foo</code>, <code>bar_baz</code></li>
-<li>Từ khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
+<li>From khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
 <li>Toán tử: <code>+ - * / % == != & | << >></code></li>
 <li>Layout: <code>INDENT</code>, <code>DEDENT</code>, <code>NEWLINE</code></li>
 </ul>
@@ -67,10 +67,10 @@
 <pre><code>('let', 'x',
   ('+', ('num', 1),
         ('*', ('num', 2), ('num', 3))))</code></pre>
-<p>Vì <code>*</code> có độ ưu tiên cao hơn <code>+</code>, nên <code>2*3</code> được nhóm trước.</p>
+<p>Vì <code>*</code> có precedence cao hơn <code>+</code>, should <code>2*3</code> is nhóm trước.</p>
 
 <h2>4. Interpreter</h2>
-<p>Duyệt AST. Mỗi node có hàm <code>eval_()</code> (biểu thức) hoặc <code>exec_()</code> (câu lệnh).</p>
+<p>Duyệt AST. Mỗi node có hàm <code>eval_()</code> (biểu thức) or <code>exec_()</code> (câu lệnh).</p>
 
 <h3>Environment (scope)</h3>
 <pre><code>class Env:
@@ -78,17 +78,17 @@
     parent: Env         # scope cha
 
 Khi tìm biến `x`:
-1. Nếu x trong vars → trả về
-2. Nếu không → tìm trong parent (đệ quy)
-3. Nếu không có → lỗi</code></pre>
+1. If x trong vars → trả về
+2. If không → tìm trong parent (đệ quy)
+3. If không có → lỗi</code></pre>
 
 <h3>Examples scope</h3>
 <pre><code>paw x = 10          # global
 
 purr f()
     paw y = 20      # local
-    meow x          # đọc được x (global)
-    meow y          # đọc được y (local)
+    meow x          # đọc is x (global)
+    meow y          # đọc is y (local)
 
 f()                 # OK
 meow y              # LỖI — y chỉ tồn tại trong f</code></pre>

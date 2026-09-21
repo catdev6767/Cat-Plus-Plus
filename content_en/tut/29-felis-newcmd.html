@@ -1,4 +1,4 @@
-<p>Cách thêm lệnh mới vào Felis OS shell.</p>
+<p>Cách thêm lệnh mới ando Felis OS shell.</p>
 
 <h2>1. Viết hàm xử lý</h2>
 <pre><code>/* Trong commands.c */
@@ -9,14 +9,14 @@ static void cmd_greet(char* arg) {
     catpp_print_str(buf);
 }</code></pre>
 
-<h2>2. Đăng ký vào command table</h2>
+<h2>2. Đăng ký ando command table</h2>
 <pre><code>const char* shell_commands[] = {
     "help","clear","info",...,
     "greet",              /* ← thêm */
     0
 };</code></pre>
 
-<h2>3. Thêm vào shell_execute</h2>
+<h2>3. Thêm ando shell_execute</h2>
 <pre><code>if (strcmp(cmdline, "greet") == 0) {
     cmd_greet(arg);
     return 0;

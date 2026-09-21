@@ -40,18 +40,18 @@ meow replace_all("\\s+", "hello   world  foo", " ")
 meow replace_all("[aeiou]", "hello world", "*")
 # h*ll* w*rld</code></pre>
 
-<h2>5. Syntax regex thường dùng</h2>
+<h2>5. Syntax regex thường use</h2>
 <table>
 <tr><th>Mẫu</th><th>Nghĩa</th></tr>
 <tr><td><code>.</code></td><td>Bất kỳ ký tự</td></tr>
 <tr><td><code>\\d</code></td><td>Chữ số [0-9]</td></tr>
 <tr><td><code>\\w</code></td><td>Chữ cái, số, _</td></tr>
 <tr><td><code>\\s</code></td><td>Khoảng trắng</td></tr>
-<tr><td><code>*</code></td><td>0 hoặc nhiều</td></tr>
-<tr><td><code>+</code></td><td>1 hoặc nhiều</td></tr>
-<tr><td><code>?</code></td><td>0 hoặc 1</td></tr>
-<tr><td><code>[abc]</code></td><td>a, b, hoặc c</td></tr>
-<tr><td><code>[^abc]</code></td><td>Not phải a, b, c</td></tr>
+<tr><td><code>*</code></td><td>0 or nhiều</td></tr>
+<tr><td><code>+</code></td><td>1 or nhiều</td></tr>
+<tr><td><code>?</code></td><td>0 or 1</td></tr>
+<tr><td><code>[abc]</code></td><td>a, b, or c</td></tr>
+<tr><td><code>[^abc]</code></td><td>Not must a, b, c</td></tr>
 <tr><td><code>^</code></td><td>Bắt đầu chuỗi</td></tr>
 <tr><td><code>$</code></td><td>Kết thúc chuỗi</td></tr>
 <tr><td><code>()</code></td><td>Nhóm</td></tr>
@@ -73,7 +73,7 @@ groom p of phones
 
 <h2>Lesson tập</h2>
 <ol>
-<li>Check chuỗi có phải số điện thoại VN (10 số, starts with 0).</li>
+<li>Check chuỗi có must số điện thoại VN (10 số, starts with 0).</li>
 <li>Đếm số từ trong một đoạn văn.</li>
 <li>Chuẩn hóa chuỗi: xóa khoảng trắng thừa, viết hoa chữ đầu câu.</li>
 </ol>
