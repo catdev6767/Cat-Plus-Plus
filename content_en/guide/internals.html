@@ -1,5 +1,5 @@
 <h1>Internals — Cách Cat++ hoạt động</h1>
-<p>Hiểu sâu về interpreter: từ source code đến output.</p>
+<p>Hiểu sâu về interpreter: from source code to output.</p>
 
 <h2>1. Pipeline</h2>
 <pre><code>Source code (.cat)
@@ -27,10 +27,10 @@
       Output</code></pre>
 
 <h2>2. Lexer</h2>
-<p>Read từng ký tự, tạo token. Xử lý:</p>
+<p>Read fromng ký tự, tạo token. Xử lý:</p>
 <ul>
 <li>Number: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
-<li>String: <code>"hello"</code> với escape <code>\n \t \"</code></li>
+<li>String: <code>"hello"</code> with escape <code>\n \t \"</code></li>
 <li>Identifiers: <code>foo</code>, <code>bar_baz</code></li>
 <li>From khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
 <li>Toán tử: <code>+ - * / % == != & | << >></code></li>
@@ -43,9 +43,9 @@
 <pre><code>PAW("paw")  IDENT("x")  ASSIGN("=")  NUMBER(42)  NEWLINE</code></pre>
 
 <h2>3. Parser</h2>
-<p>Nhận tokens, tạo AST (Abstract Syntax Tree). Dùng <b>recursive descent</b> — mỗi hàm parse một loại cấu trúc.</p>
+<p>Nhận tokens, tạo AST (Abstract Syntax Tree). Dùng <b>recursive descent</b> — mỗi function parse một loại cấu trúc.</p>
 
-<h3>Precedence chain (từ thấp đến cao)</h3>
+<h3>Precedence chain (from thấp to cao)</h3>
 <pre><code>expr
  ├── or_          (or, either)
  ├── and_         (and, with)
@@ -70,16 +70,16 @@
 <p>Vì <code>*</code> có precedence cao hơn <code>+</code>, should <code>2*3</code> is nhóm trước.</p>
 
 <h2>4. Interpreter</h2>
-<p>Duyệt AST. Mỗi node có hàm <code>eval_()</code> (biểu thức) or <code>exec_()</code> (câu lệnh).</p>
+<p>Duyệt AST. Mỗi node có function <code>eval_()</code> (biểu thức) or <code>exec_()</code> (câu lệnh).</p>
 
 <h3>Environment (scope)</h3>
 <pre><code>class Env:
-    vars: dict          # biến trong scope này
+    vars: dict          # variable in scope này
     parent: Env         # scope cha
 
-Khi tìm biến `x`:
-1. If x trong vars → trả về
-2. If không → tìm trong parent (đệ quy)
+Khi tìm variable `x`:
+1. If x in vars → trả về
+2. If không → tìm in parent (đệ quy)
 3. If không có → lỗi</code></pre>
 
 <h3>Examples scope</h3>
@@ -91,7 +91,7 @@ purr f()
     meow y          # đọc is y (local)
 
 f()                 # OK
-meow y              # LỖI — y chỉ tồn tại trong f</code></pre>
+meow y              # LỖI — y chỉ tồn tại in f</code></pre>
 
 <h2>5. Runtime values</h2>
 <table>
@@ -109,16 +109,16 @@ meow y              # LỖI — y chỉ tồn tại trong f</code></pre>
 <h2>6. Exceptions</h2>
 <p>Dùng Python exception để điều khiển luồng:</p>
 <ul>
-<li><code>ReturnEx</code> — thoát hàm return value</li>
-<li><code>StopEx</code> — thoát vòng lặp (sit)</li>
+<li><code>ReturnEx</code> — thoát function return value</li>
+<li><code>StopEx</code> — thoát loop (sit)</li>
 <li><code>SkipEx</code> — bỏ qua lần lặp (leap)</li>
-<li><code>CatError</code> — lỗi runtime (chia 0, biến chưa khai báo)</li>
+<li><code>CatError</code> — lỗi runtime (chia 0, variable chưa khai báo)</li>
 </ul>
 
 <pre><code># Khi gặp `give x`:
 raise ReturnEx(value)
 
-# Trong hàm:
+# In function:
 try:
     for stmt in body: exec_(stmt)
 except ReturnEx as e:
@@ -132,7 +132,7 @@ except ReturnEx as e:
 <li><code>core/loader.py</code> — auto-load modules</li>
 </ul>
 
-<p>Interpreter đăng ký với registry:</p>
+<p>Interpreter đăng ký with registry:</p>
 <pre><code>class InterpreterModule(BaseModule):
     def setup(self):
         self.registry.set('interpreter', self)
@@ -156,7 +156,7 @@ Content-Type: application/json
 return {"ok": True, "output": output}</code></pre>
 
 <h2>9. Transpiler Cat++ → C</h2>
-<p>Khác với interpreter. Not thực thi AST mà <b>sinh C code</b>.</p>
+<p>Khác with interpreter. Not thực thi AST mà <b>sinh C code</b>.</p>
 
 <pre><code># Cat++ AST
 ('let', 'x', ('+', ('num', 1), ('num', 2)))
@@ -174,14 +174,14 @@ long x = (1 + 2);</code></pre>
 <p>Interpreter tree-walking slower C khoảng <b>100x</b>. Lý do:</p>
 <ul>
 <li>Mỗi biểu thức duyệt AST (function call overhead)</li>
-<li>Type động (check kiểu runtime)</li>
+<li>Type động (check type runtime)</li>
 <li>Python VM (slower native)</li>
 <li>None JIT</li>
 </ul>
 
 <p>Muốn faster:</p>
 <ul>
-<li>Compile sang bytecode (nhanh 5-10x)</li>
+<li>Compile to bytecode (nhanh 5-10x)</li>
 <li>Transpile C (nhanh gần bằng C)</li>
-<li>JIT với LLVM (nhanh bằng C)</li>
+<li>JIT with LLVM (nhanh bằng C)</li>
 </ul>

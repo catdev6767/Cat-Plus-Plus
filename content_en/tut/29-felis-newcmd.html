@@ -1,7 +1,7 @@
 <p>Cách thêm lệnh mới ando Felis OS shell.</p>
 
-<h2>1. Viết hàm xử lý</h2>
-<pre><code>/* Trong commands.c */
+<h2>1. Viết function xử lý</h2>
+<pre><code>/* In commands.c */
 static void cmd_greet(char* arg) {
     char buf[128];
     strcpy(buf, "Hello, ");
@@ -36,10 +36,10 @@ static void cmd_rand(void) {
     catpp_print(r);
 }
 
-/* Trong shell_execute: */
+/* In shell_execute: */
 if (strcmp(cmdline, "rand") == 0) { cmd_rand(); return 0; }</code></pre>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Thêm lệnh <code>calc EXPR</code> — calculate simple.</li>
 <li>Thêm lệnh <code>color N</code> — đổi màu chữ VGA.</li>

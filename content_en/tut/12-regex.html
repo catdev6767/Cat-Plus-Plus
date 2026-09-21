@@ -1,10 +1,10 @@
-<p>Regex (regular expression) là công cụ mạnh để xử lý chuỗi theo mẫu.</p>
+<p>Regex (regular expression) là công cụ mạnh để xử lý string theo mẫu.</p>
 
-<h2>1. Ba hàm regex</h2>
+<h2>1. Ba function regex</h2>
 <table>
 <tr><th>Function</th><th>Chức năng</th></tr>
 <tr><td><code>match(pattern, s)</code></td><td>Check có khớp không</td></tr>
-<tr><td><code>find_all(pattern, s)</code></td><td>Tìm tất cả chuỗi khớp</td></tr>
+<tr><td><code>find_all(pattern, s)</code></td><td>Tìm tất cả string khớp</td></tr>
 <tr><td><code>replace_all(pattern, s, sub)</code></td><td>Thay thế tất cả</td></tr>
 </table>
 
@@ -18,10 +18,10 @@ sniff match("^[a-z]+$", "hello")
     meow "toan chu thuong"
 
 sniff match("@", "user@example.com")
-    meow "co @ trong email"</code></pre>
+    meow "co @ in email"</code></pre>
 
 <h2>3. find_all — tìm tất cả</h2>
-<pre><code>meow find_all("[0-9]+", "toi co 3 con meo va 5 con cho")
+<pre><code>meow find_all("[0-9]+", "toi co 3 con meo va 5 con for")
 # [3, 5]
 
 meow find_all("[a-z]+", "Hello World Foo")
@@ -52,8 +52,8 @@ meow replace_all("[aeiou]", "hello world", "*")
 <tr><td><code>?</code></td><td>0 or 1</td></tr>
 <tr><td><code>[abc]</code></td><td>a, b, or c</td></tr>
 <tr><td><code>[^abc]</code></td><td>Not must a, b, c</td></tr>
-<tr><td><code>^</code></td><td>Bắt đầu chuỗi</td></tr>
-<tr><td><code>$</code></td><td>Kết thúc chuỗi</td></tr>
+<tr><td><code>^</code></td><td>Start string</td></tr>
+<tr><td><code>$</code></td><td>End string</td></tr>
 <tr><td><code>()</code></td><td>Nhóm</td></tr>
 <tr><td><code>|</code></td><td>Hoặc</td></tr>
 </table>
@@ -71,9 +71,9 @@ paw phones = find_all("[0-9]{10}", text)
 groom p of phones
     meow p</code></pre>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
-<li>Check chuỗi có must số điện thoại VN (10 số, starts with 0).</li>
-<li>Đếm số từ trong một đoạn văn.</li>
-<li>Chuẩn hóa chuỗi: xóa khoảng trắng thừa, viết hoa chữ đầu câu.</li>
+<li>Check string có must số điện thoại VN (10 số, starts with 0).</li>
+<li>Đếm số from in một đoạn văn.</li>
+<li>Chuẩn hóa string: xóa khoảng trắng thừa, viết hoa chữ đầu câu.</li>
 </ol>

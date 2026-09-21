@@ -13,8 +13,8 @@
 
 <h2>2. Quy tắc chung</h2>
 
-<h3>Tránh tính lại trong vòng lặp</h3>
-<pre><code># Xấu — tính len(arr) mỗi lần
+<h3>Tránh tính lại in loop</h3>
+<pre><code># Xấu — tính len(arr) each time
 paw i = 0
 knead i < len(arr)
     meow arr[i]
@@ -27,7 +27,7 @@ knead i < n
     meow arr[i]
     i++</code></pre>
 
-<h3>Dùng biến tạm cho vòng lặp lồng</h3>
+<h3>Dùng variable tạm for loop lồng</h3>
 <pre><code># Xấu
 paw i = 0
 knead i < n
@@ -48,11 +48,11 @@ knead i < n
     i++</code></pre>
 
 <h3>Chọn cấu trúc phù hợp</h3>
-<pre><code># Tìm kiếm trong list — chậm O(n)
+<pre><code># Tìm kiếm in list — chậm O(n)
 sniff hunt(arr, target)
     ...
 
-# Tra cứu trong dict — nhanh O(1)
+# Tra cứu in dict — nhanh O(1)
 sniff seek(dict, key)
     ...</code></pre>
 
@@ -82,7 +82,7 @@ purr fib(n)
 
 meow fib(30)   # ~2 giây</code></pre>
 
-<pre><code># Tốt — vòng lặp
+<pre><code># Tốt — loop
 purr fib(n)
     sniff n <= 1
         give n
@@ -132,7 +132,7 @@ knead i < 1000
 paw half = x / 2
 paw double = x * 2
 
-# Tốt (chỉ với số nguyên dương)
+# Tốt (chỉ with số nguyên dương)
 paw half = x >> 1
 paw double = x << 1</code></pre>
 
@@ -162,13 +162,13 @@ meow "Mat " + cast(str, elapsed) + " giay"</code></pre>
 
 <h3>If code calculate nặng</h3>
 <ul>
-<li>Transpile sang C use <code>tools/transpiler.py</code></li>
+<li>Transpile to C use <code>tools/transpiler.py</code></li>
 <li>Dùng <code>cpp()</code> để gọi C library</li>
-<li>Viết section nặng bằng C, gọi từ Cat++</li>
+<li>Viết section nặng bằng C, gọi from Cat++</li>
 </ul>
 
 <h3>Examples: tính số nguyên tố</h3>
-<pre><code># Cat++ thuần — 5 giây cho 100k số
+<pre><code># Cat++ thuần — 5 giây for 100k số
 purr is_prime(n)
     sniff n < 2
         give no
@@ -179,14 +179,14 @@ purr is_prime(n)
         i++
     give yes
 
-# Transpile sang C — 0.1 giây
+# Transpile to C — 0.1 giây
 # bash build_catos.sh && chạy kernel</code></pre>
 
 <h2>10. Kết luận</h2>
-<p>Cat++ not allowed thiết kế cho hiệu năng. If cần nhanh:</p>
+<p>Cat++ not allowed thiết kế for hiệu năng. If cần nhanh:</p>
 <ol>
 <li>Dùng builtin thay vì tự viết</li>
 <li>Tránh đệ quy sâu</li>
-<li>Cache giá trị trong vòng lặp</li>
-<li>If vẫn chậm → transpile sang C</li>
+<li>Cache value in loop</li>
+<li>If vẫn chậm → transpile to C</li>
 </ol>

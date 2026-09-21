@@ -27,7 +27,7 @@ void* kmalloc(size_t n) {
 
 /* None free() */</code></pre>
 
-<h2>4. Filesystem trong RAM</h2>
+<h2>4. Filesystem in RAM</h2>
 <pre><code>FileEntry fs_files[64];
 /* Mỗi entry: name 32B + data 2048B = 2080B */
 /* Tổng: 64 × 2080 = 133 KB */</code></pre>
@@ -41,7 +41,7 @@ void* kmalloc(size_t n) {
 <tr><td>Stack</td><td>16 KB</td></tr>
 </table>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Thêm <code>kfree()</code> simple (mark free, không reuse).</li>
 <li>Giảm MAX_FILES xuống 32 → tiết kiệm RAM.</li>

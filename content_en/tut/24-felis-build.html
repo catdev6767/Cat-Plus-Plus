@@ -1,4 +1,4 @@
-<p>Cách Felis OS is biên dịch từ source C + Assembly thành kernel ELF.</p>
+<p>Cách Felis OS is biên dịch from source C + Assembly thành kernel ELF.</p>
 
 <h2>1. Compiler flags</h2>
 <pre><code>-m32                  # 32-bit
@@ -41,9 +41,9 @@ SECTIONS {
 }</code></pre>
 
 <h2>5. Tại sao load tại 1MB?</h2>
-<p>Vùng 0-1MB dành cho BIOS, VGA buffer, bootloader. Kernel must be trên 1MB.</p>
+<p>Vùng 0-1MB dành for BIOS, VGA buffer, bootloader. Kernel must be trên 1MB.</p>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Sửa linker script load kernel tại 2MB.</li>
 <li>Thêm <code>-Os</code> thay vì <code>-O2</code> → compare kích thước.</li>

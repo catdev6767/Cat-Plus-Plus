@@ -1,6 +1,6 @@
 <h2>File I/O</h2>
 
-<h3>1. Read file thành chuỗi</h3>
+<h3>1. Read file thành string</h3>
 <pre><code>paw content = read_file("data.txt")
 meow content</code></pre>
 
@@ -15,13 +15,13 @@ groom line of lines
 <h3>4. Write add to cuối file</h3>
 <pre><code>append_file("log.txt", "New entry\n")</code></pre>
 
-<h3>5. Đếm số dòng trong file</h3>
+<h3>5. Đếm số dòng in file</h3>
 <pre><code>purr count_lines(path)
     give len(read_lines(path))
 
 meow count_lines("data.txt")</code></pre>
 
-<h3>6. Đếm số từ trong file</h3>
+<h3>6. Đếm số from in file</h3>
 <pre><code>purr count_words(path)
     paw content = read_file(path)
     give len(shred(content, " "))
@@ -34,7 +34,7 @@ meow count_words("data.txt")</code></pre>
 
 copy_file("a.txt", "b.txt")</code></pre>
 
-<h3>8. Tìm kiếm trong file</h3>
+<h3>8. Tìm kiếm in file</h3>
 <pre><code>purr find_in_file(path, keyword)
     paw lines = read_lines(path)
     paw results = []

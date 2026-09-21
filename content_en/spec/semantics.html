@@ -13,9 +13,9 @@
 <h2>Đánh giá ngắn mạch</h2>
 <pre><code>a with b    # a sai → không đánh giá b
 a either b  # a đúng → không đánh giá b</code></pre>
-<h2>Ép kiểu</h2>
+<h2>Ép type</h2>
 <ul>
-<li>+ với chuỗi → ép vế còn lại thành chuỗi</li>
+<li>+ with string → ép vế còn lại thành string</li>
 <li>Các phép khác yêu cầu cả hai là số</li>
 <li>So sánh không ép: 42 == "42" là shake</li>
 </ul>
@@ -28,7 +28,7 @@ a either b  # a đúng → không đánh giá b</code></pre>
 </ul>
 <h2>Scope</h2>
 <ul>
-<li>Mỗi hàm có scope riêng</li>
-<li>Variable trong hàm nhìn thấy biến ngoài (lexical scope)</li>
-<li>None từ khóa global</li>
+<li>Mỗi function có scope riêng</li>
+<li>Variable in function nhìn thấy variable outside (lexical scope)</li>
+<li>None keyword global</li>
 </ul>

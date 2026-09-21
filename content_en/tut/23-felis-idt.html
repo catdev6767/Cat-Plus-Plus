@@ -1,4 +1,4 @@
-<p>IDT (Interrupt Descriptor Table) — bảng 256 entry ánh xạ interrupt đến handler.</p>
+<p>IDT (Interrupt Descriptor Table) — bảng 256 entry ánh xạ interrupt to handler.</p>
 
 <h2>1. Cấu trúc IDT entry</h2>
 <pre><code>struct idt_entry {
@@ -16,7 +16,7 @@ idtp.base = (uint32_t)&idt;
 asm volatile("lidt (%0)" : : "r"(&idtp));</code></pre>
 
 <h2>3. Remap PIC</h2>
-<p>Mặc định PIC ánh xạ IRQ0-7 → interrupt 0-7. Ta remap để IRQ0-7 → 32-39 (tránh conflict với CPU exceptions).</p>
+<p>Mặc định PIC ánh xạ IRQ0-7 → interrupt 0-7. Ta remap để IRQ0-7 → 32-39 (tránh conflict with CPU exceptions).</p>
 <pre><code>outb(0x20, 0x11);   /* ICW1 */
 outb(0xA0, 0x11);
 outb(0x21, 0x20);   /* ICW2 - master offset 32 */
@@ -30,7 +30,7 @@ outb(0xA1, 0x01);</code></pre>
 <pre><code>idt_set_gate(33, (uint32_t)irq1_stub, 0x08, 0x8E);
 
 /* Enable IRQ1 */
-outb(0x21, 0xFD);  /* 11111101 — chỉ cho IRQ1 */
+outb(0x21, 0xFD);  /* 11111101 — chỉ for IRQ1 */
 outb(0xA1, 0xFF);  /* Disable slave PIC */
 
 asm volatile("sti");  /* Enable interrupts */</code></pre>
@@ -44,8 +44,8 @@ asm volatile("sti");  /* Enable interrupts */</code></pre>
     popa
     iret</code></pre>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Thêm IRQ0 (timer) để đo thời gian.</li>
-<li>Thêm handler cho exception divide-by-zero.</li>
+<li>Thêm handler for exception divide-by-zero.</li>
 </ol>

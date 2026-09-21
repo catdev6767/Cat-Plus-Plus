@@ -1,4 +1,4 @@
-<p>Cat++ can đọc, ghi file and tương tác với hệ thống.</p>
+<p>Cat++ can đọc, ghi file and tương tác with hệ thống.</p>
 
 <h2>1. Read file</h2>
 <pre><code>paw content = read_file("/etc/hostname")
@@ -24,7 +24,7 @@ groom line of lines
 hai
 ba</code></pre>
 
-<h2>5. Write danh sách theo dòng</h2>
+<h2>5. Write list theo dòng</h2>
 <pre><code>write_lines("/tmp/out.txt", ["alpha", "beta", "gamma"])
 meow read_file("/tmp/out.txt")</code></pre>
 
@@ -56,7 +56,7 @@ remove_file("/tmp/myapp/data.txt")</code></pre>
 meow env("USER")
 meow env("PATH")</code></pre>
 
-<h2>10. Examples: đếm từ trong file</h2>
+<h2>10. Examples: đếm from in file</h2>
 <pre><code>write_file("/tmp/text.txt", "hello world from catpp\n")
 paw content = read_file("/tmp/text.txt")
 paw words = shred(content, " ")
@@ -72,9 +72,9 @@ log("Xu ly du lieu")
 log("Hoan thanh")
 meow read_file("/tmp/app.log")</code></pre>
 
-<h2>Lesson tập</h2>
+<h2>Exercises</h2>
 <ol>
 <li>Viết the program sao chép file.</li>
-<li>Đếm số dòng, số từ, số ký tự trong file.</li>
-<li>Viết hàm tìm kiếm chuỗi trong file, in ra số dòng có chứa.</li>
+<li>Đếm số dòng, số from, số ký tự in file.</li>
+<li>Viết function tìm kiếm string in file, print số dòng có chứa.</li>
 </ol>

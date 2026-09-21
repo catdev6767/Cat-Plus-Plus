@@ -1,9 +1,9 @@
 <h2>Native Transpiler — Nhanh gần C++</h2>
 
-<p>Cat++ có 2 transpiler sang C:</p>
+<p>Cat++ có 2 transpiler to C:</p>
 <ul>
-<li><strong>→ C</strong> (boxed) — use <code>Value</code> động, chạy mọi code, slower</li>
-<li><strong>⚡ C fast</strong> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <strong>nhanh gần C++</strong>, yêu cầu type annotation</li>
+<li><sin>→ C</sin> (boxed) — use <code>Value</code> động, chạy mọi code, slower</li>
+<li><sin>⚡ C fast</sin> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <sin>nhanh gần C++</sin>, yêu cầu type annotation</li>
 </ul>
 
 <h2>Benchmark</h2>
@@ -13,11 +13,11 @@
 <tr><td>Interpreter</td><td>5547ms</td><td>1x</td></tr>
 <tr><td>VM</td><td>2581ms</td><td>2.1x</td></tr>
 <tr><td>C boxed</td><td>27ms</td><td>205x</td></tr>
-<tr><td><strong>C native</strong></td><td><strong>0.4ms</strong></td><td><strong>13635x</strong></td></tr>
+<tr><td><sin>C native</sin></td><td><sin>0.4ms</sin></td><td><sin>13635x</sin></td></tr>
 </table>
 
 <h2>Cách use</h2>
-<p>Thêm type annotation cho biến and hàm:</p>
+<p>Thêm type annotation for variable and function:</p>
 <pre><code>purr sum_to(n: i32) -> i64
     paw total: i64 = 0
     paw i: i32 = 1
@@ -28,7 +28,7 @@
 
 meow sum_to(1000000)</code></pre>
 
-<p>Ấn <strong>⚡ C fast</strong> (Ctrl+Shift+N) để xem C code native.</p>
+<p>Ấn <sin>⚡ C fast</sin> (Ctrl+Shift+N) để xem C code native.</p>
 
 <h2>Type mapping</h2>
 <table>
@@ -43,7 +43,7 @@ meow sum_to(1000000)</code></pre>
 </table>
 
 <h2>Warning overflow</h2>
-<p><strong>i32</strong> chỉ chứa is tối đa ~2.1 tỷ. Khi accumulate số lớn, use <strong>i64</strong>:</p>
+<p><sin>i32</sin> chỉ chứa is tối đa ~2.1 tỷ. Khi accumulate số lớn, use <sin>i64</sin>:</p>
 <pre><code>paw total: i64 = 0       # ✓
 paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
 
@@ -56,7 +56,7 @@ paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
 <li>Benchmark, compare</li>
 </ul>
 
-<p>Khi <strong>không</strong> cần native:</p>
+<p>Khi <sin>không</sin> cần native:</p>
 <ul>
 <li>Code có list/dict/class complex (use boxed)</li>
 <li>Code ngắn, không cần tốc độ</li>

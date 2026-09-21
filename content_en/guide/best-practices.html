@@ -1,7 +1,7 @@
 <h1>Best Practices</h1>
 <p>Quy ước viết Cat++ sạch, dễ đọc, dễ bảo trì.</p>
 
-<h2>1. Đặt tên</h2>
+<h2>1. Đặt name</h2>
 
 <h3>Variable — snake_case</h3>
 <pre><code># Tốt
@@ -78,7 +78,7 @@ paw result = compute(first_arg, second_arg, third_arg, fourth_arg, fifth_arg, si
 <h3>Explanation TẠI SAO, không must LÀM GÌ</h3>
 <pre><code># Tốt — giải thích lý do
 # Dùng sqrt để tránh thử chia hết tới n
-# faster 10x cho số lớn
+# faster 10x for số lớn
 purr is_prime(n)
     paw i = 2
     knead i * i <= n
@@ -88,15 +88,15 @@ purr is_prime(n)
 # Tăng i lên 1
 paw i = i + 1</code></pre>
 
-<h3>Comment cho hàm complex</h3>
-<pre><code># Tìm section tử trong mảng already sắp xếp bằng binary search.
+<h3>Comment for function complex</h3>
+<pre><code># Tìm section tử in mảng already sắp xếp bằng binary search.
 # Return chỉ số or -1 if không tìm thấy.
 # Độ complex: O(log n)
 purr binary_search(arr, target)
     ...</code></pre>
 
-<h2>5. Chia hàm nhỏ</h2>
-<pre><code># Tốt — mỗi hàm 1 việc
+<h2>5. Chia function nhỏ</h2>
+<pre><code># Tốt — mỗi function 1 việc
 purr read_scores(path)
     give read_lines(path)
 
@@ -118,7 +118,7 @@ meow average(scores)</code></pre>
 
 <h2>6. Xử lý lỗi</h2>
 
-<h3>Dùng try/hiss cho code can lỗi</h3>
+<h3>Dùng try/hiss for code can lỗi</h3>
 <pre><code># Tốt
 tap
     paw n = cast(int, user_input)
@@ -129,7 +129,7 @@ hiss e
 # Xấu — code crash
 paw n = cast(int, user_input)</code></pre>
 
-<h3>Check điều kiện biên</h3>
+<h3>Check condition biên</h3>
 <pre><code># Tốt
 purr divide(a, b)
     sniff b == 0
@@ -149,7 +149,7 @@ meow "Ten: " + user2.name
 meow "Tuoi: " + cast(str, user2.age)
 ...
 
-# Tốt — hàm
+# Tốt — function
 purr print_user(u)
     meow "Ten: " + u.name
     meow "Tuoi: " + cast(str, u.age)
@@ -174,13 +174,13 @@ sniff score > GRADE_A
 sniff score > GRADE_B
     meow "B"</code></pre>
 
-<h2>9. Xử lý danh sách</h2>
+<h2>9. Xử lý list</h2>
 <pre><code># Tốt — use builtin
 paw nums = [1, 2, 3, 4, 5]
 paw squares = chase(nums, kit(x) => x * x)
 paw evens = sift(nums, kit(x) => x % 2 == 0)
 
-# Xấu — tự viết vòng lặp
+# Xấu — tự viết loop
 paw squares = []
 paw i = 0
 knead i < len(nums)
@@ -209,12 +209,12 @@ main()</code></pre>
 
 <h2>11. Checklist trước khi commit</h2>
 <ul>
-<li>Tên biến/hàm rõ nghĩa</li>
+<li>Name variable/function rõ nghĩa</li>
 <li>Thụt lề 4 spaces, không tab</li>
 <li>Dòng dưới 80 ký tự</li>
 <li>Comment giải thích "tại sao"</li>
 <li>Xử lý lỗi bằng try/hiss</li>
 <li>Not magic number</li>
 <li>Not lặp code</li>
-<li>Test với input biên (0, âm, rỗng)</li>
+<li>Test with input biên (0, âm, rỗng)</li>
 </ul>
