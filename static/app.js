@@ -58,7 +58,7 @@ function shareLink() {
     alert('Error creating link: ' + e.message);
   }
 }
-/* Cat++ IDE v2.0 — app.js hoàn chỉnh */
+/* Cat++ IDE v2.0 — complete app.js */
 
 // ============ CONSTANTS ============
 var KW = ['paw','meow','purr','give','hiss','tap','sit','leap','listen','sniff',
@@ -358,7 +358,7 @@ function handleImportFile(evt) {
   reader.onload = function(e) {
     try {
       var data = JSON.parse(e.target.result);
-      if (!data.files) { alert('File không hợp lệ'); return; }
+      if (!data.files) { alert('Invalid file'); return; }
       var count = Object.keys(data.files).length;
       var overwrite = confirm('Nhập ' + count + ' file?\n\nOK = GHI ĐÈ (mất hết file hiện tại)\nCancel = GỘP (thêm vào)');
       if (overwrite) { files = data.files; }
@@ -369,9 +369,9 @@ function handleImportFile(evt) {
       renderFileTree();
       var keys = Object.keys(files);
       if (keys.length) openFile(keys[0]);
-      if (term) term.writeln('\x1b[32m✓ Đã nhập ' + count + ' file\x1b[0m');
+      if (term) term.writeln('\x1b[32m✓ Imported ' + count + ' file(s)\x1b[0m');
     } catch (err) {
-      alert('Lỗi đọc file: ' + err.message);
+      alert('Error reading file: ' + err.message);
     }
     evt.target.value = '';
   };
@@ -505,7 +505,7 @@ function toggleCatTheme() {
 // ============ EDITOR ============
 function initTerminal() {
   if (typeof Terminal === 'undefined') {
-    console.error('xterm.js chưa load');
+    console.error('xterm.js not loaded');
     return;
   }
   term = new Terminal({
@@ -523,7 +523,7 @@ function initTerminal() {
 
 function initMonaco() {
   return new Promise(function(resolve, reject) {
-    if (typeof require === 'undefined') { reject('require chưa load'); return; }
+    if (typeof require === 'undefined') { reject('require not loaded'); return; }
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
     require(['vs/editor/editor.main'], function() {
       monaco.languages.register({ id: 'catpp' });
@@ -651,7 +651,7 @@ function initMonaco() {
       });
 
       var el = document.getElementById('editor');
-      if (!el) { reject('Không có #editor'); return; }
+      if (!el) { reject('No #editor element'); return; }
       editor = monaco.editor.create(el, {
         value: '',
         language: 'catpp',
@@ -712,7 +712,7 @@ function transpileCode() {
       for (var i = 0; i < lines.length; i++) {
         term.writeln('\x1b[32m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
       }
-      term.writeln('\r\n\x1b[32m✓ ' + lines.length + ' dòng C\x1b[0m');
+      term.writeln('\r\n\x1b[32m✓ ' + lines.length + ' C lines\x1b[0m');
       if (st) st.textContent = 'Ready';
     } else {
       term.writeln('\x1b[31m✗ ' + (data.error || 'unknown') + '\x1b[0m');
@@ -743,13 +743,13 @@ function transpileNativeCode() {
       for (var i = 0; i < lines.length; i++) {
         term.writeln('\x1b[36m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
       }
-      term.writeln('\r\n\x1b[36m⚡ C native — ' + lines.length + ' dòng\x1b[0m');
-      term.writeln('\x1b[90m  gcc -O2 → nhanh gần C++\x1b[0m');
+      term.writeln('\r\n\x1b[36m⚡ C native — ' + lines.length + ' lines\x1b[0m');
+      term.writeln('\x1b[90m  gcc -O2 → nearly C++ speed\x1b[0m');
       if (st) st.textContent = 'Ready';
     } else {
       term.writeln('\x1b[33m⚠ ' + (data.error || 'unknown') + '\x1b[0m');
-      term.writeln('\x1b[90m  Thêm type: paw x: i32 = 5\x1b[0m');
-      term.writeln('\x1b[90m  hoặc:     purr f(a: i32) -> i32\x1b[0m');
+      term.writeln('\x1b[90m  Add types: paw x: i32 = 5\x1b[0m');
+      term.writeln('\x1b[90m  or:        purr f(a: i32) -> i32\x1b[0m');
       if (st) st.textContent = 'Need types';
     }
   })
