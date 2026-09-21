@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <script>
 (function() {
@@ -17,7 +17,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cat++ — Ngôn ngữ lập trình cú pháp tiếng mèo</title>
+<title>Cat++ — A programming language with cat syntax</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
@@ -101,11 +101,11 @@ footer a { color:#94a3b8; }
 <div class="nav">
   <div class="container nav-inner">
     <div class="nav-logo">🐱 Cat++</div>
-    <a href="#features" class="nav-link">Tính năng</a>
+    <a href="#features" class="nav-link">Features</a>
     <a href="#cli" class="nav-link">CLI</a>
-    <a href="/docs/" class="nav-link">Tài liệu</a>
-    <a href="/learn/" class="nav-link">Học</a>
-    <a href="/ide/" class="nav-cta">Mở IDE →</a>
+    <a href="/docs/" class="nav-link">Docs</a>
+    <a href="/learn/" class="nav-link">Learn</a>
+    <a href="/ide/" class="nav-cta">Open IDE →</a>
   </div>
 </div>
 
@@ -117,22 +117,22 @@ footer a { color:#94a3b8; }
     </div>
     <p>Ngôn ngữ lập trình cú pháp tiếng mèo. Dễ đọc, dễ học, chạy trong browser.<br>Bây giờ có thể <b style="color:#fb923c;">biên dịch sang C native</b> — nhanh gần C++.</p>
     <div class="hero-btns">
-      <a href="/ide/" class="btn btn-primary">🚀 Mở IDE ngay</a>
-      <a href="#install" class="btn btn-secondary">📦 Cài đặt</a>
-      <a href="/docs/" class="btn btn-secondary">📖 Tài liệu</a>
+      <a href="/ide/" class="btn btn-primary">🚀 Open IDE</a>
+      <a href="#install" class="btn btn-secondary">📦 Install</a>
+      <a href="/docs/" class="btn btn-secondary">📖 Docs</a>
     </div>
   </div>
 </div>
 
 <section>
   <div class="container">
-    <h2>Cat++ là gì?</h2>
+    <h2>What is Cat++?</h2>
     <p style="font-size:18px; max-width:800px;">
       Cat++ là ngôn ngữ lập trình nhỏ, chạy hoàn toàn trong browser. Cú pháp dùng từ khóa tiếng mèo — dễ nhớ, vui vẻ, phù hợp cho người mới học lập trình.
       Có thể transpile sang C để viết kernel OS (Felis OS).
     </p>
 
-    <h3>Ví dụ</h3>
+    <h3>Example</h3>
     <pre><code><span class="cmt"># Hello world</span>
 <span class="kw">meow</span> <span class="str">"Hello, Cat++!"</span>
 
@@ -158,23 +158,23 @@ footer a { color:#94a3b8; }
 
 <section id="features" style="background:#0d1220;">
   <div class="container">
-    <h2>Tính năng</h2>
+    <h2>Features</h2>
     <div class="grid">
-      <div class="card"><span class="card-icon">🐱</span><h3>Cú pháp tiếng mèo</h3><p>meow, paw, purr, sniff, knead... dễ nhớ, vui vẻ, gần gũi.</p></div>
-      <div class="card"><span class="card-icon">⚡</span><h3>Chạy trong browser</h3><p>Không cần cài đặt. Mở link là dùng được. Zero-config.</p></div>
-      <div class="card"><span class="card-icon">📝</span><h3>IDE tích hợp</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
-      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>15 bài tập tương tác. Quiz, Dashboard tiến độ, Certificate.</p></div>
-      <div class="card"><span class="card-icon">🌏</span><h3>Song ngữ VI/EN</h3><p>Toàn bộ docs có 2 ngôn ngữ. 156 trang mỗi bên.</p></div>
+      <div class="card"><span class="card-icon">🐱</span><h3>Cat syntax</h3><p>meow, paw, purr, sniff, knead... easy to remember, fun, friendly.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>Runs in browser</h3><p>No install. Just open the link. Zero-config.</p></div>
+      <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
+      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
+      <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
       <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile sang C native (int32_t, double). Nhanh gần C++. Chạy kernel Felis OS.</p></div>
-      <div class="card"><span class="card-icon">🎨</span><h3>Theme mèo</h3><p>Dark, light, và theme mèo đêm với animation.</p></div>
-      <div class="card"><span class="card-icon">📦</span><h3>100+ builtin</h3><p>Math, string, file, regex, FFI (gọi C library).</p></div>
+      <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
+      <div class="card"><span class="card-icon">📦</span><h3>149 builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
     </div>
   </div>
 </section>
 
 <section id="performance" style="background:#0d1220;">
   <div class="container">
-    <h2>Hiệu suất — Nhanh gần C++</h2>
+    <h2>Performance — Nearly C++</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
       Cat++ có 4 engine. Bạn chọn tốc độ hay linh hoạt tùy nhu cầu.
       Với <b style="color:#fb923c;">⚡ C native</b>, code có type annotation được biên dịch sang C thuần (<code>int32_t</code>, <code>double</code>) — gcc -O2 tối ưu như C++ thật.
@@ -215,7 +215,7 @@ footer a { color:#94a3b8; }
       </div>
     </div>
 
-    <h3>Khi nào dùng gì?</h3>
+    <h3>When to use what?</h3>
     <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
       <li><b>⚡ C native</b> — code số học nặng, thuật toán (cần type annotation)</li>
       <li><b>C boxed</b> — code có list/dict/class phức tạp (chạy mọi code)</li>
@@ -223,14 +223,14 @@ footer a { color:#94a3b8; }
     </ul>
 
     <p style="margin-top:24px;">
-      <a href="/docs/vi/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Đọc hướng dẫn native →</a>
+      <a href="/docs/vi/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Read native guide →</a>
     </p>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2>Thống kê</h2>
+    <h2>Statistics</h2>
     <div class="stats">
       <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
       <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
@@ -294,18 +294,18 @@ paw check game.cat</code></pre>
 
 <section id="install" style="background:#0d1220;">
   <div class="container">
-    <h2>Cài đặt</h2>
+    <h2>Install</h2>
 
-    <h3>Chạy trực tiếp (không cần cài)</h3>
-    <p>Mở <a href="/ide/">IDE</a> — dùng ngay trong browser.</p>
+    <h3>Run directly (no install)</h3>
+    <p>Open <a href="/ide/">IDE</a> — works right in your browser.</p>
 
-    <h3>Cài trên máy</h3>
-    <pre><code><span class="cmt"># Yêu cầu: Python 3.8+</span>
+    <h3>Install locally</h3>
+    <pre><code><span class="cmt"># Requires: Python 3.8+</span>
 git clone https://github.com/catpp/catpp.git
 cd catpp
 python3 catpp.py
 
-<span class="cmt"># Mở: http://localhost:5000</span></code></pre>
+<span class="cmt"># Open: http://localhost:5000</span></code></pre>
 
     <h3>Docker</h3>
     <pre><code>docker build -t catpp:1.0 .
@@ -322,11 +322,11 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code><
 <section>
   <div class="container">
     <div class="cta-box">
-      <h2>Sẵn sàng viết Cat++?</h2>
-      <p>Mở IDE, chọn một ví dụ, và bắt đầu ngay. Thử ⚡ C fast để thấy tốc độ.</p>
+      <h2>Ready to write Cat++?</h2>
+      <p>Open the IDE, pick an example, start immediately. Try ⚡ C fast to see the speed.</p>
       <div class="hero-btns">
         <a href="/ide/" class="btn btn-primary">🚀 Mở IDE</a>
-        <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Bài 1 — Hello Mèo</a>
+        <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
       </div>
     </div>
   </div>
@@ -338,7 +338,7 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code><
     <p>MIT License · Made with 🐱</p>
     <p style="margin-top:16px;">
       <a href="/ide/">IDE</a> ·
-      <a href="/docs/">Tài liệu</a> ·
+      <a href="/docs/">Docs</a> ·
       <a href="/docs/vi/guide/felis.html">Felis OS</a> ·
       <a href="https://github.com/catpp">GitHub</a>
     </p>

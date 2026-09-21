@@ -46,7 +46,7 @@ function shareLink() {
       }
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(function(){
-          alert('Đã copy link:\n\n' + url + note);
+          alert('Copied link:\n\n' + url + note);
         }).catch(function(){
           prompt('Link (Ctrl+C để copy):', url);
         });
@@ -697,7 +697,7 @@ function transpileCode() {
   if (!editor || !activeTab || !term) return;
   var code = editor.getValue();
   term.clear();
-  term.writeln('\x1b[90m> Đang dịch ' + activeTab + ' → C...\x1b[0m\r\n');
+  term.writeln('\x1b[90m> Compiling ' + activeTab + ' → C...\x1b[0m\r\n');
   var st = document.getElementById('status');
   if (st) st.textContent = 'Transpiling...';
   fetch('/api/transpile-c', {
@@ -720,7 +720,7 @@ function transpileCode() {
     }
   })
   .catch(function(e) {
-    term.writeln('\x1b[31mLỗi: ' + e.message + '\x1b[0m');
+    term.writeln('\x1b[31mError: ' + e.message + '\x1b[0m');
   });
 }
 
@@ -728,7 +728,7 @@ function transpileNativeCode() {
   if (!editor || !activeTab || !term) return;
   var code = editor.getValue();
   term.clear();
-  term.writeln('\x1b[90m> Đang dịch → C native...\x1b[0m\r\n');
+  term.writeln('\x1b[90m> Compiling → C native...\x1b[0m\r\n');
   var st = document.getElementById('status');
   if (st) st.textContent = 'Transpiling native...';
   fetch('/api/transpile-native', {
@@ -754,7 +754,7 @@ function transpileNativeCode() {
     }
   })
   .catch(function(e) {
-    term.writeln('\x1b[31mLỗi: ' + e.message + '\x1b[0m');
+    term.writeln('\x1b[31mError: ' + e.message + '\x1b[0m');
   });
 }
 
@@ -789,10 +789,10 @@ function benchmarkCode() {
 
 function runCode() {
   if (!editor || !activeTab) return;
-  if (!term) { console.error('terminal chưa khởi tạo'); return; }
+  if (!term) { console.error('terminal not initialized'); return; }
   var code = editor.getValue();
   term.clear();
-  term.writeln('\x1b[90m> Đang chạy ' + activeTab + '...\x1b[0m\r\n');
+  term.writeln('\x1b[90m> Running ' + activeTab + '...\x1b[0m\r\n');
   var st = document.getElementById('status');
   if (st) st.textContent = 'Running...';
   if (editor.getModel()) monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
@@ -823,7 +823,7 @@ function runCode() {
     }
   })
   .catch(function(e) {
-    term.writeln('\x1b[31mLỗi kết nối: ' + e.message + '\x1b[0m');
+    term.writeln('\x1b[31mConnection error: ' + e.message + '\x1b[0m');
   });
 }
 
@@ -852,7 +852,7 @@ function finishShare(base, enc) {
   }
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
-      alert('Đã copy link:\n\n' + msg);
+      alert('Copied link:\n\n' + msg);
     }).catch(function() {
       prompt('Link (Ctrl+C để copy):', url);
     });
