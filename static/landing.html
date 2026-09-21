@@ -102,6 +102,7 @@ footer a { color:#94a3b8; }
   <div class="container nav-inner">
     <div class="nav-logo">🐱 Cat++</div>
     <a href="#features" class="nav-link">Tính năng</a>
+    <a href="#cli" class="nav-link">CLI</a>
     <a href="/docs/" class="nav-link">Tài liệu</a>
     <a href="/learn/" class="nav-link">Học</a>
     <a href="/ide/" class="nav-cta">Mở IDE →</a>
@@ -233,11 +234,61 @@ footer a { color:#94a3b8; }
     <div class="stats">
       <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
       <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
+      <div class="stat"><span class="num">149</span><span class="label">Builtins</span></div>
+      <div class="stat"><span class="num">6</span><span class="label">CLI commands</span></div>
       <div class="stat"><span class="num">184</span><span class="label">Test runs</span></div>
-      <div class="stat"><span class="num">82</span><span class="label">Builtins</span></div>
-      <div class="stat"><span class="num">6.5K</span><span class="label">Dòng Python</span></div>
       <div class="stat"><span class="num">171</span><span class="label">Trang docs</span></div>
     </div>
+  </div>
+</section>
+
+<section id="cli" style="background:#0d1220;">
+  <div class="container">
+    <h2>CLI — paw</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      <b style="color:#fb923c;">paw</b> là command-line tool chính thức.
+      Chạy script, tạo file, REPL, transpile, format, lint.
+    </p>
+
+    <pre><code><span class="cmt"># Chạy script</span>
+paw run hello.cat
+
+<span class="cmt"># Tạo file mới + mở editor</span>
+paw new game.cat
+
+<span class="cmt"># REPL tương tác</span>
+paw repl
+
+<span class="cmt"># Transpile sang C (13,635× nhanh hơn)</span>
+paw build-fast calc.cat
+
+<span class="cmt"># Format + lint + check</span>
+paw fmt game.cat --write
+paw lint game.cat
+paw check game.cat</code></pre>
+
+    <div class="cards" style="margin-top:32px;">
+      <div class="card">
+        <h3>paw run</h3>
+        <p>Chạy Cat++ script qua interpreter (hoặc VM, PyCompiler)</p>
+      </div>
+      <div class="card">
+        <h3>paw build-fast</h3>
+        <p>Transpile sang native C — nhanh gấp 13,635× interpreter</p>
+      </div>
+      <div class="card">
+        <h3>paw fmt / lint / check</h3>
+        <p>Format code, phát hiện lỗi, kiểm tra type coverage</p>
+      </div>
+      <div class="card">
+        <h3>PawEditor</h3>
+        <p>Editor nano-like với syntax highlight Cat++, viết bằng Python + curses</p>
+      </div>
+    </div>
+
+    <p style="margin-top:32px;">
+      <a href="/docs/vi/guide/cli.html" class="btn btn-secondary">📖 Đọc hướng dẫn CLI →</a>
+    </p>
   </div>
 </section>
 
