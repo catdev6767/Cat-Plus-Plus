@@ -2,7 +2,7 @@
 
 <p>Cat++ có 2 transpiler sang C:</p>
 <ul>
-<li><strong>→ C</strong> (boxed) — dùng <code>Value</code> động, chạy mọi code, chậm hơn</li>
+<li><strong>→ C</strong> (boxed) — dùng <code>Value</code> động, chạy mọi code, slower</li>
 <li><strong>⚡ C fast</strong> (native) — sinh C native (<code>int32_t</code>, <code>double</code>), <strong>nhanh gần C++</strong>, yêu cầu type annotation</li>
 </ul>
 
@@ -51,14 +51,14 @@ paw total: i32 = 0       # ✗ tràn ở 2.1 tỷ</code></pre>
 
 <h2>Khi nào dùng native</h2>
 <ul>
-<li>Code số học nặng (loop, tính toán)</li>
+<li>Code số học nặng (loop, calculate)</li>
 <li>Thuật toán (sort, search, fibonacci)</li>
-<li>Benchmark, so sánh</li>
+<li>Benchmark, compare</li>
 </ul>
 
 <p>Khi <strong>không</strong> cần native:</p>
 <ul>
-<li>Code có list/dict/class phức tạp (dùng boxed)</li>
+<li>Code có list/dict/class complex (dùng boxed)</li>
 <li>Code ngắn, không cần tốc độ</li>
 <li>Prototype nhanh (không cần type)</li>
 </ul>

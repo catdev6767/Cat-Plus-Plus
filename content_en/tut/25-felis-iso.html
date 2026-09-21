@@ -1,4 +1,4 @@
-<p>Tạo file ISO boot từ USB như Linux distro.</p>
+<p>Create file ISO boot từ USB như Linux distro.</p>
 
 <h2>1. Cấu trúc ISO</h2>
 <pre><code>iso/
@@ -16,7 +16,7 @@ menuentry "Felis OS v0.2" {
     boot
 }</code></pre>
 
-<h2>3. Tạo ISO</h2>
+<h2>3. Create ISO</h2>
 <pre><code>grub-mkrescue -o felis.iso iso</code></pre>
 
 <p>GRUB tự thêm:</p>
@@ -31,11 +31,11 @@ menuentry "Felis OS v0.2" {
 
 <p>Sẽ hiện GRUB menu → chọn "Felis OS" → boot.</p>
 
-<h2>5. Ghi ra USB</h2>
+<h2>5. Write ra USB</h2>
 <pre><code># Xem USB
 lsblk
 
-# Ghi (CẨN THẬN — xóa hết USB)
+# Write (CẨN THẬN — xóa hết USB)
 sudo dd if=felis.iso of=/dev/sdX bs=4M status=progress
 sync</code></pre>
 
@@ -48,7 +48,7 @@ sync</code></pre>
 
 <h2>Lesson tập</h2>
 <ol>
-<li>Tạo ISO, boot trong QEMU.</li>
-<li>Ghi USB, boot trên máy thật (nếu có).</li>
+<li>Create ISO, boot trong QEMU.</li>
+<li>Write USB, boot trên máy thật (nếu có).</li>
 <li>Thêm menu entry thứ 2 với option khác.</li>
 </ol>

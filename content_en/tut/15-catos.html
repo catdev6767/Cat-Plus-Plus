@@ -115,11 +115,11 @@ bash build_catos.sh</code></pre>
 <li>Transpile <code>demo.cat</code> → <code>demo.c</code></li>
 <li>Compile <code>entry.s</code>, <code>main.c</code>, <code>runtime</code>, <code>demo.c</code> với <code>-m32 -ffreestanding</code></li>
 <li>Link thành <code>catos.elf</code></li>
-<li>(Tùy chọn) Tạo <code>catos.iso</code> với GRUB</li>
+<li>(Tùy chọn) Create <code>catos.iso</code> với GRUB</li>
 </ol>
 
-<h2>7. Chạy CatOS</h2>
-<p>Không cần ISO, QEMU boot ELF kernel trực tiếp:</p>
+<h2>7. Run CatOS</h2>
+<p>Not cần ISO, QEMU boot ELF kernel trực tiếp:</p>
 <pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M -serial stdio</code></pre>
 <p>Hoặc với cửa sổ đồ họa:</p>
 <pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M</code></pre>
@@ -130,7 +130,7 @@ bash build_catos.sh</code></pre>
 <tr><th>Trên Linux</th><th>Trên CatOS</th></tr>
 <tr><td><code>meow</code> → printf</td><td><code>meow</code> → VGA + serial</td></tr>
 <tr><td><code>read_file</code> → open</td><td>❌ Chưa có filesystem</td></tr>
-<tr><td><code>dice</code> → RNG</td><td>❌ Cần RNG phần cứng</td></tr>
+<tr><td><code>dice</code> → RNG</td><td>❌ Cần RNG section cứng</td></tr>
 <tr><td><code>cpp</code> → ctypes</td><td>❌ None</td></tr>
 </table>
 
@@ -154,7 +154,7 @@ bash build_catos.sh</code></pre>
 
 <h2>Lesson tập</h2>
 <ol>
-<li>Viết kernel in ra màn hình 10 số Fibonacci.</li>
+<li>Viết kernel print to screen 10 số Fibonacci.</li>
 <li>Sửa <code>demo.cat</code> để vẽ hình vuông bằng ký tự <code>*</code> trên VGA.</li>
 <li>Thêm hàm <code>print_hex</code> — in số dạng hexa.</li>
 </ol>

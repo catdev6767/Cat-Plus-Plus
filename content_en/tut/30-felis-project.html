@@ -1,13 +1,13 @@
 <p>Đồ án tổng hợp — tạo một mini game hoặc ứng dụng chạy trong Felis OS.</p>
 
-<h2>1. Đề bài: Game đoán số</h2>
+<h2>1. Đề lesson: Game đoán số</h2>
 <p>Viết lệnh <code>guess</code> để chơi đoán số. Máy chọn số 1-100, người dùng đoán.</p>
 
 <h3>Yêu cầu</h3>
 <ul>
 <li>Lưu số bí mật trong biến static</li>
-<li>Mỗi lần gọi <code>guess N</code> → kiểm tra</li>
-<li>In "cao hon" hoặc "thap hon"</li>
+<li>Mỗi lần gọi <code>guess N</code> → check</li>
+<li>Print "cao hon" hoặc "thap hon"</li>
 <li>True → in số lần đoán</li>
 </ul>
 
@@ -33,7 +33,7 @@ static void cmd_guess(char* arg) {
     else if (n > secret) catpp_print_str("Thap hon");
     else {
         catpp_print_str("Dung roi!");
-        /* In số lần đoán */
+        /* Printing numbers lần đoán */
         secret = 0;
     }
 }</code></pre>
@@ -60,12 +60,12 @@ Dung roi!</code></pre>
 <tr><th>Đề tài</th><th>Độ khó</th></tr>
 <tr><td>Đồng hồ đếm ngược</td><td>Dễ</td></tr>
 <tr><td>Todo list (lưu file)</td><td>Trung bình</td></tr>
-<tr><td>Text editor đơn giản</td><td>Trung bình</td></tr>
+<tr><td>Text editor simple</td><td>Trung bình</td></tr>
 <tr><td>Calculator với parser</td><td>Khó</td></tr>
 <tr><td>Snake game (VGA)</td><td>Rất khó</td></tr>
 </table>
 
-<h2>6. Nộp bài</h2>
+<h2>6. Nộp lesson</h2>
 <ol>
 <li>Code trong <code>kernel/commands.c</code></li>
 <li>Build: <code>bash build_felis.sh</code></li>

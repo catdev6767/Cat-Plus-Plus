@@ -3,12 +3,12 @@
 <h2>1. Ba hàm regex</h2>
 <table>
 <tr><th>Function</th><th>Chức năng</th></tr>
-<tr><td><code>match(pattern, s)</code></td><td>Kiểm tra có khớp không</td></tr>
+<tr><td><code>match(pattern, s)</code></td><td>Check có khớp không</td></tr>
 <tr><td><code>find_all(pattern, s)</code></td><td>Tìm tất cả chuỗi khớp</td></tr>
 <tr><td><code>replace_all(pattern, s, sub)</code></td><td>Thay thế tất cả</td></tr>
 </table>
 
-<h2>2. match — kiểm tra mẫu</h2>
+<h2>2. match — check mẫu</h2>
 <pre><code>sniff match("[0-9]+", "abc123")
     meow "co so"
 swat
@@ -51,14 +51,14 @@ meow replace_all("[aeiou]", "hello world", "*")
 <tr><td><code>+</code></td><td>1 hoặc nhiều</td></tr>
 <tr><td><code>?</code></td><td>0 hoặc 1</td></tr>
 <tr><td><code>[abc]</code></td><td>a, b, hoặc c</td></tr>
-<tr><td><code>[^abc]</code></td><td>Không phải a, b, c</td></tr>
+<tr><td><code>[^abc]</code></td><td>Not phải a, b, c</td></tr>
 <tr><td><code>^</code></td><td>Bắt đầu chuỗi</td></tr>
 <tr><td><code>$</code></td><td>Kết thúc chuỗi</td></tr>
 <tr><td><code>()</code></td><td>Nhóm</td></tr>
 <tr><td><code>|</code></td><td>Hoặc</td></tr>
 </table>
 
-<h2>6. Examples thực tế: kiểm tra email</h2>
+<h2>6. Examples thực tế: check email</h2>
 <pre><code>purr is_email(s)
     give match("^[\\w.]+@[\\w.]+\\.[a-z]+$", s)
 
@@ -73,7 +73,7 @@ groom p of phones
 
 <h2>Lesson tập</h2>
 <ol>
-<li>Kiểm tra chuỗi có phải số điện thoại VN (10 số, starts with 0).</li>
+<li>Check chuỗi có phải số điện thoại VN (10 số, starts with 0).</li>
 <li>Đếm số từ trong một đoạn văn.</li>
 <li>Chuẩn hóa chuỗi: xóa khoảng trắng thừa, viết hoa chữ đầu câu.</li>
 </ol>

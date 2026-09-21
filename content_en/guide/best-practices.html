@@ -78,7 +78,7 @@ paw result = compute(first_arg, second_arg, third_arg, fourth_arg, fifth_arg, si
 <h3>Explanation TẠI SAO, không phải LÀM GÌ</h3>
 <pre><code># Tốt — giải thích lý do
 # Dùng sqrt để tránh thử chia hết tới n
-# nhanh hơn 10x cho số lớn
+# faster 10x cho số lớn
 purr is_prime(n)
     paw i = 2
     knead i * i <= n
@@ -88,10 +88,10 @@ purr is_prime(n)
 # Tăng i lên 1
 paw i = i + 1</code></pre>
 
-<h3>Comment cho hàm phức tạp</h3>
-<pre><code># Tìm phần tử trong mảng đã sắp xếp bằng binary search.
+<h3>Comment cho hàm complex</h3>
+<pre><code># Tìm section tử trong mảng đã sắp xếp bằng binary search.
 # Return chỉ số hoặc -1 nếu không tìm thấy.
-# Độ phức tạp: O(log n)
+# Độ complex: O(log n)
 purr binary_search(arr, target)
     ...</code></pre>
 
@@ -118,7 +118,7 @@ meow average(scores)</code></pre>
 
 <h2>6. Xử lý lỗi</h2>
 
-<h3>Dùng try/hiss cho code có thể lỗi</h3>
+<h3>Dùng try/hiss cho code can lỗi</h3>
 <pre><code># Tốt
 tap
     paw n = cast(int, user_input)
@@ -129,7 +129,7 @@ hiss e
 # Xấu — code crash
 paw n = cast(int, user_input)</code></pre>
 
-<h3>Kiểm tra điều kiện biên</h3>
+<h3>Check điều kiện biên</h3>
 <pre><code># Tốt
 purr divide(a, b)
     sniff b == 0
@@ -138,7 +138,7 @@ purr divide(a, b)
 
 # Xấu
 purr divide(a, b)
-    give a / b   # Lỗi nếu b == 0</code></pre>
+    give a / b   # Error nếu b == 0</code></pre>
 
 <h2>7. Tránh lặp code</h2>
 <pre><code># Xấu — lặp 3 lần
@@ -204,7 +204,7 @@ purr helper2()
 purr main()
     ...
 
-# 6. Chạy
+# 6. Run
 main()</code></pre>
 
 <h2>11. Checklist trước khi commit</h2>
@@ -214,7 +214,7 @@ main()</code></pre>
 <li>Dòng dưới 80 ký tự</li>
 <li>Comment giải thích "tại sao"</li>
 <li>Xử lý lỗi bằng try/hiss</li>
-<li>Không magic number</li>
-<li>Không lặp code</li>
+<li>Not magic number</li>
+<li>Not lặp code</li>
 <li>Test với input biên (0, âm, rỗng)</li>
 </ul>

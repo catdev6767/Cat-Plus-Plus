@@ -1,11 +1,11 @@
-<h2>Lỗi OOP</h2>
+<h2>Error OOP</h2>
 
-<h3>17. Tạo instance của abstract class</h3>
+<h3>17. Create instance của abstract class</h3>
 <pre><code>cat abstract Shape
     purr area()
 Shape()</code></pre>
-<p><b>Lỗi:</b> <code>Khong the tao instance cua abstract class 'Shape'</code></p>
-<p><b>Sửa:</b> Tạo class con kế thừa và override method abstract.</p>
+<p><b>Error:</b> <code>Khong the tao instance cua abstract class 'Shape'</code></p>
+<p><b>Sửa:</b> Create class con kế thừa và override method abstract.</p>
 
 <h3>18. Method không tồn tại</h3>
 <pre><code>cat Point
@@ -13,7 +13,7 @@ Shape()</code></pre>
     paw y
 paw p = Point(1, 2)
 meow p.area()</code></pre>
-<p><b>Lỗi:</b> <code>Instance khong co 'area'</code></p>
+<p><b>Error:</b> <code>Instance khong co 'area'</code></p>
 <p><b>Sửa:</b> Thêm method <code>area</code> vào class.</p>
 
 <h3>19. Class con chưa override abstract</h3>
@@ -22,7 +22,7 @@ meow p.area()</code></pre>
 cat Circle kin Shape
     paw r
 Circle(2)</code></pre>
-<p><b>Lỗi:</b> <code>Class 'Circle' chua override 'area'</code></p>
+<p><b>Error:</b> <code>Class 'Circle' chua override 'area'</code></p>
 <p><b>Sửa:</b> Thêm <code>purr area()</code> trong class con.</p>
 
 <h3>20. Property không tồn tại</h3>
@@ -30,5 +30,5 @@ Circle(2)</code></pre>
     paw x
 paw p = Point(1)
 meow p.y</code></pre>
-<p><b>Lỗi:</b> <code>Instance khong co 'y'</code></p>
-<p><b>Sửa:</b> Khai báo <code>paw y</code> trong class.</p>
+<p><b>Error:</b> <code>Instance khong co 'y'</code></p>
+<p><b>Sửa:</b> Declare <code>paw y</code> trong class.</p>

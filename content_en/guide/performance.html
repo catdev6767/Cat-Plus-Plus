@@ -62,7 +62,7 @@ paw sum = 0
 groom x of arr
     paw sum = sum + x
 
-# Tốt — dùng builtin (viết bằng Python, nhanh hơn)
+# Tốt — dùng builtin (viết bằng Python, faster)
 paw sum = pile(arr)</code></pre>
 
 <h3>So sánh tốc độ</h3>
@@ -127,7 +127,7 @@ knead i < 1000
     arr.push(i)
     i++</code></pre>
 
-<h2>6. Dùng toán tử bit khi có thể</h2>
+<h2>6. Dùng toán tử bit khi can</h2>
 <pre><code># Xấu
 paw half = x / 2
 paw double = x * 2
@@ -158,13 +158,13 @@ groom x of arr
 paw elapsed = now() - start
 meow "Mat " + cast(str, elapsed) + " giay"</code></pre>
 
-<h2>9. Khi cần nhanh hơn</h2>
+<h2>9. Khi cần faster</h2>
 
-<h3>Nếu code tính toán nặng</h3>
+<h3>Nếu code calculate nặng</h3>
 <ul>
 <li>Transpile sang C dùng <code>tools/transpiler.py</code></li>
 <li>Dùng <code>cpp()</code> để gọi C library</li>
-<li>Viết phần nặng bằng C, gọi từ Cat++</li>
+<li>Viết section nặng bằng C, gọi từ Cat++</li>
 </ul>
 
 <h3>Examples: tính số nguyên tố</h3>
@@ -183,7 +183,7 @@ purr is_prime(n)
 # bash build_catos.sh && chạy kernel</code></pre>
 
 <h2>10. Kết luận</h2>
-<p>Cat++ không được thiết kế cho hiệu năng. Nếu cần nhanh:</p>
+<p>Cat++ not allowed thiết kế cho hiệu năng. Nếu cần nhanh:</p>
 <ol>
 <li>Dùng builtin thay vì tự viết</li>
 <li>Tránh đệ quy sâu</li>

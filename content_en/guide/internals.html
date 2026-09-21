@@ -6,7 +6,7 @@
         │
         ▼
 ┌───────────────────┐
-│  Lexer            │  Đọc ký tự → Token
+│  Lexer            │  Read ký tự → Token
 │  (tokenize)       │
 └────────┬──────────┘
          │
@@ -27,9 +27,9 @@
       Output</code></pre>
 
 <h2>2. Lexer</h2>
-<p>Đọc từng ký tự, tạo token. Xử lý:</p>
+<p>Read từng ký tự, tạo token. Xử lý:</p>
 <ul>
-<li>Số: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
+<li>Number: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
 <li>String: <code>"hello"</code> với escape <code>\n \t \"</code></li>
 <li>Identifiers: <code>foo</code>, <code>bar_baz</code></li>
 <li>Từ khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
@@ -156,7 +156,7 @@ Content-Type: application/json
 return {"ok": True, "output": output}</code></pre>
 
 <h2>9. Transpiler Cat++ → C</h2>
-<p>Khác với interpreter. Không thực thi AST mà <b>sinh C code</b>.</p>
+<p>Khác với interpreter. Not thực thi AST mà <b>sinh C code</b>.</p>
 
 <pre><code># Cat++ AST
 ('let', 'x', ('+', ('num', 1), ('num', 2)))
@@ -171,15 +171,15 @@ long x = (1 + 2);</code></pre>
 </ol>
 
 <h2>10. Giới hạn hiệu năng</h2>
-<p>Interpreter tree-walking chậm hơn C khoảng <b>100x</b>. Lý do:</p>
+<p>Interpreter tree-walking slower C khoảng <b>100x</b>. Lý do:</p>
 <ul>
 <li>Mỗi biểu thức duyệt AST (function call overhead)</li>
-<li>Type động (kiểm tra kiểu runtime)</li>
-<li>Python VM (chậm hơn native)</li>
+<li>Type động (check kiểu runtime)</li>
+<li>Python VM (slower native)</li>
 <li>None JIT</li>
 </ul>
 
-<p>Muốn nhanh hơn:</p>
+<p>Muốn faster:</p>
 <ul>
 <li>Compile sang bytecode (nhanh 5-10x)</li>
 <li>Transpile C (nhanh gần bằng C)</li>

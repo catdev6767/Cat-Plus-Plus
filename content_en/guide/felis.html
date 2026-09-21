@@ -84,11 +84,11 @@ meow sizeof(Color)   # 8</code></pre>
 <pre><code>asm("cli")   # Tắt interrupt
 asm("sti")   # Bật interrupt
 asm("hlt")   # Dừng CPU
-asm("nop")   # Không làm gì</code></pre>
+asm("nop")   # Not làm gì</code></pre>
 
 <h2>4. Viết kernel code</h2>
 
-<h3>Examples 1: In "Hello"</h3>
+<h3>Examples 1: Print "Hello"</h3>
 <pre><code>meow "Hello from Felis OS!"</code></pre>
 
 <h3>Examples 2: Loop</h3>
@@ -118,7 +118,7 @@ meow fib(10)</code></pre>
 <li><b>Link</b> tất cả → <code>felis.elf</code></li>
 </ol>
 
-<h2>6. Chạy trên QEMU</h2>
+<h2>6. Run trên QEMU</h2>
 
 <h3>Cách 1 — Terminal (không cửa sổ)</h3>
 <pre><code>qemu-system-x86_64 \
@@ -130,7 +130,7 @@ meow fib(10)</code></pre>
 <h3>Cách 2 — Cửa sổ đồ họa</h3>
 <pre><code>qemu-system-x86_64 -kernel kernel/felis.elf -m 128M</code></pre>
 
-<h3>Cách 3 — Tạo ISO bootable</h3>
+<h3>Cách 3 — Create ISO bootable</h3>
 <pre><code># Cần grub2-tools
 mkdir -p iso/boot/grub
 cp kernel/felis.elf iso/boot/
@@ -158,7 +158,7 @@ qemu-system-x86_64 -cdrom felis.iso</code></pre>
 3 = xanh lơ đậm      7 = xám nhạt   11 = xanh lơ nhạt    15 = trắng</code></pre>
 
 <h3>Serial port (COM1)</h3>
-<p>Ghi ra cổng <code>0x3F8</code>. QEMU với <code>-serial stdio</code> sẽ hiện ra terminal. Dùng để debug kernel.</p>
+<p>Write ra cổng <code>0x3F8</code>. QEMU với <code>-serial stdio</code> sẽ hiện ra terminal. Dùng để debug kernel.</p>
 
 <h3>Memory</h3>
 <p>Bump allocator: cấp phát tuyến tính từ <code>0x100000</code> (1MB) đến <code>0x400000</code> (4MB). Chưa có <code>free</code> thật.</p>
@@ -177,7 +177,7 @@ qemu-system-x86_64 -cdrom felis.iso</code></pre>
 <h2>9. Hướng phát triển</h2>
 
 <h3>Step 1 — Keyboard driver</h3>
-<p>Đọc từ port <code>0x60</code>. Cài IRQ1. Dịch mã scancode thành ASCII.</p>
+<p>Read từ port <code>0x60</code>. Cài IRQ1. Dịch mã scancode thành ASCII.</p>
 
 <h3>Step 2 — Timer interrupt</h3>
 <p>Cài PIT (Programmable Interval Timer) ở 100 Hz. Dùng cho scheduler.</p>
@@ -203,7 +203,7 @@ qemu-system-x86_64 -cdrom felis.iso</code></pre>
 <pre><code>readelf -h kernel/felis.elf
 readelf -S kernel/felis.elf</code></pre>
 
-<h3>Kiểm tra Multiboot</h3>
+<h3>Check Multiboot</h3>
 <pre><code>grub-file --is-x86-multiboot kernel/felis.elf</code></pre>
 
 <h2>11. Examples: vẽ chữ lên VGA</h2>

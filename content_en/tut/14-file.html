@@ -1,20 +1,20 @@
-<p>Cat++ có thể đọc, ghi file và tương tác với hệ thống.</p>
+<p>Cat++ can đọc, ghi file và tương tác với hệ thống.</p>
 
-<h2>1. Đọc file</h2>
+<h2>1. Read file</h2>
 <pre><code>paw content = read_file("/etc/hostname")
 meow content</code></pre>
 
-<h2>2. Ghi file</h2>
+<h2>2. Write file</h2>
 <pre><code>write_file("/tmp/hello.txt", "Xin chao!")
 meow read_file("/tmp/hello.txt")</code></pre>
 
-<h2>3. Ghi thêm vào file</h2>
+<h2>3. Write add to file</h2>
 <pre><code>write_file("/tmp/log.txt", "Dong 1\n")
 append_file("/tmp/log.txt", "Dong 2\n")
 append_file("/tmp/log.txt", "Dong 3\n")
 meow read_file("/tmp/log.txt")</code></pre>
 
-<h2>4. Đọc theo dòng</h2>
+<h2>4. Read theo dòng</h2>
 <pre><code>write_file("/tmp/data.txt", "mot\nhai\nba\n")
 paw lines = read_lines("/tmp/data.txt")
 groom line of lines
@@ -24,11 +24,11 @@ groom line of lines
 hai
 ba</code></pre>
 
-<h2>5. Ghi danh sách theo dòng</h2>
+<h2>5. Write danh sách theo dòng</h2>
 <pre><code>write_lines("/tmp/out.txt", ["alpha", "beta", "gamma"])
 meow read_file("/tmp/out.txt")</code></pre>
 
-<h2>6. Kiểm tra file tồn tại</h2>
+<h2>6. Check file tồn tại</h2>
 <pre><code>sniff exists("/etc/passwd")
     meow "Co file passwd"
 
@@ -45,7 +45,7 @@ sniff is_dir("/tmp")
 groom f of files
     meow f</code></pre>
 
-<h2>8. Xóa file, tạo thư mục</h2>
+<h2>8. Delete file, tạo thư mục</h2>
 <pre><code>make_dir("/tmp/myapp")
 write_file("/tmp/myapp/data.txt", "test")
 meow exists("/tmp/myapp/data.txt")
