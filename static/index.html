@@ -28,14 +28,14 @@
 <body class="theme-dark">
 <div class="menubar">
   <button id="hamburger"><i class="fas fa-bars"></i></button>
-  <a href="/" class="tb-icon-btn" title="Trang chủ" style="text-decoration:none;color:inherit;">🏠</a>
+  <a href="/" class="tb-icon-btn" title="Home" style="text-decoration:none;color:inherit;">🏠</a>
   <span class="title">Cat++ <small>IDE</small></span>
-  <a href="/docs/" class="menu-item" target="_blank"><i class="fas fa-book"></i> Tài liệu</a>
+  <a href="/docs/" class="menu-item" target="_blank"><i class="fas fa-book"></i> Docs</a>
   <span class="menu-item" data-menu="examples"><i class="fas fa-code"></i> <span data-i18n="menu.examples">Examples</span></span>
   <span class="menu-item" data-menu="cheatsheet"><i class="fas fa-list"></i> <span data-i18n="menu.cheatsheet">Cheatsheet</span></span>
   <span class="menu-item" data-menu="shortcuts"><i class="fas fa-keyboard"></i> <span data-i18n="menu.shortcuts">Shortcuts</span></span>
   <div class="spacer"></div>
-  <button id="cat-btn" class="tb-icon-btn" title="Giao diện mèo">🐱</button>
+  <button id="cat-btn" class="tb-icon-btn" title="Cat theme">🐱</button>
   <button id="lang-btn" class="tb-icon-btn" title="Language"><span id="lang-flag">🇻🇳</span></button>
   <button id="theme-btn" class="tb-icon-btn"><i class="fas fa-adjust"></i></button>
   <button id="zen-btn" class="tb-icon-btn"><i class="fas fa-expand"></i></button>
@@ -49,31 +49,31 @@
   </div>
   <div class="drawer-body" id="drawer-body">
     <div class="drawer-section">
-      <div class="drawer-section-title">Bắt đầu</div>
-      <a class="drawer-item" data-menu="examples"><i class="fas fa-code"></i> Thư viện ví dụ</a>
+      <div class="drawer-section-title">Get started</div>
+      <a class="drawer-item" data-menu="examples"><i class="fas fa-code"></i> Examples</a>
       <a class="drawer-item" data-menu="cheatsheet"><i class="fas fa-list"></i> <span data-i18n="menu.cheatsheet">Cheatsheet</span></a>
       <a class="drawer-item" data-menu="shortcuts"><i class="fas fa-keyboard"></i> <span data-i18n="menu.shortcuts">Shortcuts</span></a>
     </div>
     <div class="drawer-section">
       <div class="drawer-section-title">File</div>
-      <a class="drawer-item" id="act-new"><i class="fas fa-file"></i> File mới</a>
-      <a class="drawer-item" id="act-download"><i class="fas fa-download"></i> Tải về</a>
-      <a class="drawer-item" id="act-upload"><i class="fas fa-upload"></i> Mở file</a>
-      <a class="drawer-item" id="act-share"><i class="fas fa-share-alt"></i> Chia sẻ link</a>
-      <a class="drawer-item" id="act-export"><i class="fas fa-file-export"></i> Xuất dự án (.catpp)</a>
-      <a class="drawer-item" id="act-import"><i class="fas fa-file-import"></i> Nhập dự án (.catpp)</a>
+      <a class="drawer-item" id="act-new"><i class="fas fa-file"></i> New file</a>
+      <a class="drawer-item" id="act-download"><i class="fas fa-download"></i> Download</a>
+      <a class="drawer-item" id="act-upload"><i class="fas fa-upload"></i> Open file</a>
+      <a class="drawer-item" id="act-share"><i class="fas fa-share-alt"></i> Share link</a>
+      <a class="drawer-item" id="act-export"><i class="fas fa-file-export"></i> Export project (.catpp)</a>
+      <a class="drawer-item" id="act-import"><i class="fas fa-file-import"></i> Import project (.catpp)</a>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title">Chạy</div>
-      <a class="drawer-item" id="act-run"><i class="fas fa-play"></i> Chạy (Ctrl+Enter)</a>
-      <a class="drawer-item" id="act-clear"><i class="fas fa-trash"></i> Xóa terminal</a>
+      <div class="drawer-section-title">Run</div>
+      <a class="drawer-item" id="act-run"><i class="fas fa-play"></i> Run (Ctrl+Enter)</a>
+      <a class="drawer-item" id="act-clear"><i class="fas fa-trash"></i> Clear terminal</a>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-title">Giao diện</div>
-      <a class="drawer-item" id="act-theme"><i class="fas fa-adjust"></i> Đổi theme</a>
-      <a class="drawer-item" id="act-sidebar"><i class="fas fa-columns"></i> Ẩn/hiện sidebar</a>
-      <a class="drawer-item" id="act-terminal"><i class="fas fa-terminal"></i> Ẩn/hiện terminal</a>
-      <a class="drawer-item" id="act-minimap"><i class="fas fa-map"></i> Ẩn/hiện minimap</a>
+      <div class="drawer-section-title">Appearance</div>
+      <a class="drawer-item" id="act-theme"><i class="fas fa-adjust"></i> Change theme</a>
+      <a class="drawer-item" id="act-sidebar"><i class="fas fa-columns"></i> Toggle sidebar</a>
+      <a class="drawer-item" id="act-terminal"><i class="fas fa-terminal"></i> Toggle terminal</a>
+      <a class="drawer-item" id="act-minimap"><i class="fas fa-map"></i> Toggle minimap</a>
     </div>
   </div>
 </aside>
@@ -89,9 +89,9 @@
       <div class="sidebar-project-label">📁 DỰ ÁN</div>
       <select id="project-selector" class="project-select"></select>
       <div class="project-btns">
-        <button id="project-new" class="project-btn" title="Dự án mới">+</button>
-        <button id="project-rename" class="project-btn" title="Đổi tên">✎</button>
-        <button id="project-delete" class="project-btn" title="Xóa">🗑</button>
+        <button id="project-new" class="project-btn" title="New project">+</button>
+        <button id="project-rename" class="project-btn" title="Rename">✎</button>
+        <button id="project-delete" class="project-btn" title="Delete">🗑</button>
       </div>
     </div>
     <div class="sidebar-title">FILES</div>

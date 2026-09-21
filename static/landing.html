@@ -113,9 +113,9 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h1>Cat++</h1>
     <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:1px solid rgba(249,115,22,0.3);font-size:14px;font-weight:600;color:#fb923c;margin-bottom:20px;">
-      ⚡ Native C transpiler — nhanh hơn interpreter <b style="color:#fbbf24;">13,635×</b>
+      ⚡ Native C transpiler — faster than interpreter <b style="color:#fbbf24;">13,635×</b>
     </div>
-    <p>Ngôn ngữ lập trình cú pháp tiếng mèo. Dễ đọc, dễ học, chạy trong browser.<br>Bây giờ có thể <b style="color:#fb923c;">biên dịch sang C native</b> — nhanh gần C++.</p>
+    <p>A programming language with cat-themed syntax. Easy to read, easy to learn, runs in the browser.<br>Bây giờ có thể <b style="color:#fb923c;">biên dịch sang C native</b> — nhanh gần C++.</p>
     <div class="hero-btns">
       <a href="/ide/" class="btn btn-primary">🚀 Open IDE</a>
       <a href="#install" class="btn btn-secondary">📦 Install</a>
@@ -128,21 +128,21 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>What is Cat++?</h2>
     <p style="font-size:18px; max-width:800px;">
-      Cat++ là ngôn ngữ lập trình nhỏ, chạy hoàn toàn trong browser. Cú pháp dùng từ khóa tiếng mèo — dễ nhớ, vui vẻ, phù hợp cho người mới học lập trình.
-      Có thể transpile sang C để viết kernel OS (Felis OS).
+      Cat++ is a small programming language that runs entirely in the browser. Syntax uses cat-themed keywords — easy to remember, fun, and great for beginners.
+      Can transpile to C to write OS kernels (Felis OS).
     </p>
 
     <h3>Example</h3>
     <pre><code><span class="cmt"># Hello world</span>
 <span class="kw">meow</span> <span class="str">"Hello, Cat++!"</span>
 
-<span class="cmt"># Hàm với default param</span>
+<span class="cmt"># Function with default parameter</span>
 <span class="kw">purr</span> <span class="fn">greet</span>(name, greeting = <span class="str">"Hello"</span>)
     <span class="kw">give</span> greeting + <span class="str">", "</span> + name
 
 <span class="kw">meow</span> <span class="fn">greet</span>(<span class="str">"Tom"</span>)          <span class="cmt"># Hello, Tom</span>
 
-<span class="cmt"># Class với operator overload</span>
+<span class="cmt"># Class with operator overload</span>
 <span class="kw">cat</span> Vec2
     <span class="kw">paw</span> x
     <span class="kw">paw</span> y
@@ -165,7 +165,7 @@ footer a { color:#94a3b8; }
       <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
       <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
       <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
-      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile sang C native (int32_t, double). Nhanh gần C++. Chạy kernel Felis OS.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in Felis OS kernel.</p></div>
       <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
       <div class="card"><span class="card-icon">📦</span><h3>149 builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
     </div>
@@ -176,11 +176,11 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>Performance — Nearly C++</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
-      Cat++ có 4 engine. Bạn chọn tốc độ hay linh hoạt tùy nhu cầu.
-      Với <b style="color:#fb923c;">⚡ C native</b>, code có type annotation được biên dịch sang C thuần (<code>int32_t</code>, <code>double</code>) — gcc -O2 tối ưu như C++ thật.
+      Cat++ has 4 engines. Pick speed or flexibility as needed.
+      Với <b style="color:#fb923c;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
     </p>
 
-    <h3>Benchmark — loop 1 triệu lần</h3>
+    <h3>Benchmark — 1 million iterations</h3>
     <pre><code><span class="kw">purr</span> <span class="fn">sum_to</span>(n: i32) -> i64
     <span class="kw">paw</span> total: i64 = 0
     <span class="kw">paw</span> i: i32 = 1
@@ -217,9 +217,9 @@ footer a { color:#94a3b8; }
 
     <h3>When to use what?</h3>
     <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
-      <li><b>⚡ C native</b> — code số học nặng, thuật toán (cần type annotation)</li>
-      <li><b>C boxed</b> — code có list/dict/class phức tạp (chạy mọi code)</li>
-      <li><b>Interpreter/VM</b> — prototyping nhanh, không cần type</li>
+      <li><b>⚡ C native</b> — heavy arithmetic, algorithms (needs type annotations)</li>
+      <li><b>C boxed</b> — complex list/dict/class code (runs anything)</li>
+      <li><b>Interpreter/VM</b> — quick prototyping, no types needed</li>
     </ul>
 
     <p style="margin-top:24px;">
@@ -246,20 +246,20 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>CLI — paw</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
-      <b style="color:#fb923c;">paw</b> là command-line tool chính thức.
-      Chạy script, tạo file, REPL, transpile, format, lint.
+      <b style="color:#fb923c;">paw</b> is the official command-line tool.
+      Run scripts, create files, REPL, transpile, format, lint.
     </p>
 
-    <pre><code><span class="cmt"># Chạy script</span>
+    <pre><code><span class="cmt"># Run a script</span>
 paw run hello.cat
 
-<span class="cmt"># Tạo file mới + mở editor</span>
+<span class="cmt"># Create new file + open editor</span>
 paw new game.cat
 
-<span class="cmt"># REPL tương tác</span>
+<span class="cmt"># Interactive REPL</span>
 paw repl
 
-<span class="cmt"># Transpile sang C (13,635× nhanh hơn)</span>
+<span class="cmt"># Transpile to C (13,635× faster)</span>
 paw build-fast calc.cat
 
 <span class="cmt"># Format + lint + check</span>
@@ -270,24 +270,24 @@ paw check game.cat</code></pre>
     <div class="cards" style="margin-top:32px;">
       <div class="card">
         <h3>paw run</h3>
-        <p>Chạy Cat++ script qua interpreter (hoặc VM, PyCompiler)</p>
+        <p>Run Cat++ script via interpreter (or VM, PyCompiler)</p>
       </div>
       <div class="card">
         <h3>paw build-fast</h3>
-        <p>Transpile sang native C — nhanh gấp 13,635× interpreter</p>
+        <p>Transpile to native C — 13,635× faster than interpreter</p>
       </div>
       <div class="card">
         <h3>paw fmt / lint / check</h3>
-        <p>Format code, phát hiện lỗi, kiểm tra type coverage</p>
+        <p>Format code, find errors, check type coverage</p>
       </div>
       <div class="card">
         <h3>PawEditor</h3>
-        <p>Editor nano-like với syntax highlight Cat++, viết bằng Python + curses</p>
+        <p>Nano-like editor with Cat++ syntax highlight, written in Python + curses</p>
       </div>
     </div>
 
     <p style="margin-top:32px;">
-      <a href="/docs/vi/guide/cli.html" class="btn btn-secondary">📖 Đọc hướng dẫn CLI →</a>
+      <a href="/docs/vi/guide/cli.html" class="btn btn-secondary">📖 Read CLI guide →</a>
     </p>
   </div>
 </section>
@@ -313,9 +313,9 @@ docker run -p 5000:5000 catpp:1.0</code></pre>
 
     <h3>CLI</h3>
     <pre><code>python3 catpp.py repl              <span class="cmt"># REPL</span>
-python3 catpp.py run hello.cat     <span class="cmt"># Chạy file</span>
+python3 catpp.py run hello.cat     <span class="cmt"># Run file</span>
 python3 catpp.py fmt hello.cat -w  <span class="cmt"># Format</span>
-python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code></pre>
+python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
   </div>
 </section>
 
@@ -325,7 +325,7 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Kiểm tra</span></code><
       <h2>Ready to write Cat++?</h2>
       <p>Open the IDE, pick an example, start immediately. Try ⚡ C fast to see the speed.</p>
       <div class="hero-btns">
-        <a href="/ide/" class="btn btn-primary">🚀 Mở IDE</a>
+        <a href="/ide/" class="btn btn-primary">🚀 Open IDE</a>
         <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
       </div>
     </div>
