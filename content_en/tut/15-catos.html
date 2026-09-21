@@ -1,0 +1,160 @@
+<p>CatOS là hệ điều hành nhỏ chạy code Cat++ trực tiếp trên bare metal.</p>
+
+<h2>1. CatOS là gì?</h2>
+<p>CatOS là một kernel viết bằng C. Nó nhúng runtime Cat++ và chạy code Cat++ mà không cần Linux, Windows, hay bất kỳ OS nào khác.</p>
+
+<h2>2. Kiến trúc</h2>
+<pre><code>Cat++ code (.cat)
+      │
+      ▼
+Transpiler (tools/transpiler.py)
+      │
+      ▼
+C code (.c)
+      │
+      ▼
+GCC -ffreestanding
+      │
+      ▼
+Object (.o)
+      │
+      ▼
+Linker (kernel/linker.ld)
+      │
+      ▼
+Kernel binary (catos.elf)
+      │
+      ▼
+QEMU / máy thật</code></pre>
+
+<h2>3. Cấu trúc project</h2>
+<pre><code>~/catpp/
+├── tools/
+│   └── transpiler.py          # Cat++ → C
+├── runtime/
+│   ├── catpp_rt.h             # Header chung
+│   └── catpp_freestanding.c   # VGA, serial, memory
+├── kernel/
+│   ├── main.c                 # Entry point
+│   ├── entry.s                # Assembly boot
+│   ├── linker.ld              # Linker script
+│   └── demo.cat               # Code Cat++ demo
+├── libc/                      # Freestanding headers
+│   ├── stdint.h
+│   ├── stddef.h
+│   └── ...
+└── build_catos.sh             # Build script</code></pre>
+
+<h2>4. Syntax low-level cho CatOS</h2>
+<p>CatOS dùng cú pháp low-level — không có sẵn trên web IDE.</p>
+
+<h3>Bit operations</h3>
+<pre><code>paw mask = 0xFF & 0x0F
+paw shifted = 1 << 4
+paw color = (0x0F << 8) | ord("H")</code></pre>
+
+<h3>Cast và pointer</h3>
+<pre><code>paw vga = cast(ptr, 0xB8000)
+# Địa chỉ VGA text mode trong bộ nhớ</code></pre>
+
+<h3>Struct C-layout</h3>
+<pre><code>struct Color
+    r: u8
+    g: u8
+    b: u8
+
+paw red = Color(255, 0, 0)
+meow red.r</code></pre>
+
+<h3>Volatile — cho MMIO</h3>
+<pre><code>volatile paw status = 0</code></pre>
+
+<h3>Inline assembly</h3>
+<pre><code>asm("cli")   # disable interrupts
+asm("hlt")   # halt CPU</code></pre>
+
+<h2>5. Viết kernel code</h2>
+<p>File <code>kernel/demo.cat</code>:</p>
+<pre><code>meow "Hello from Cat++ in kernel!"
+
+paw x = 10
+paw y = 20
+meow x + y
+
+paw i = 0
+knead i < 5
+    meow i
+    i++
+
+purr square(n)
+    give n * n
+
+meow square(7)</code></pre>
+<p>Khi boot, output hiện trên màn hình VGA:</p>
+<pre><code>CatOS v0.1
+---------------
+Kernel loaded.
+Running Cat++ code...
+
+Hello from Cat++ in kernel!
+30
+0
+1
+2
+3
+4
+49
+
+Halted.</code></pre>
+
+<h2>6. Build CatOS</h2>
+<pre><code>cd ~/catpp
+bash build_catos.sh</code></pre>
+<p>Các bước build:</p>
+<ol>
+<li>Transpile <code>demo.cat</code> → <code>demo.c</code></li>
+<li>Compile <code>entry.s</code>, <code>main.c</code>, <code>runtime</code>, <code>demo.c</code> với <code>-m32 -ffreestanding</code></li>
+<li>Link thành <code>catos.elf</code></li>
+<li>(Tùy chọn) Tạo <code>catos.iso</code> với GRUB</li>
+</ol>
+
+<h2>7. Chạy CatOS</h2>
+<p>Không cần ISO, QEMU boot ELF kernel trực tiếp:</p>
+<pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M -serial stdio</code></pre>
+<p>Hoặc với cửa sổ đồ họa:</p>
+<pre><code>qemu-system-x86_64 -kernel kernel/catos.elf -m 128M</code></pre>
+
+<h2>8. Runtime freestanding</h2>
+<p>Trong CatOS, các builtin hoạt động khác:</p>
+<table>
+<tr><th>Trên Linux</th><th>Trên CatOS</th></tr>
+<tr><td><code>meow</code> → printf</td><td><code>meow</code> → VGA + serial</td></tr>
+<tr><td><code>read_file</code> → open</td><td>❌ Chưa có filesystem</td></tr>
+<tr><td><code>dice</code> → RNG</td><td>❌ Cần RNG phần cứng</td></tr>
+<tr><td><code>cpp</code> → ctypes</td><td>❌ None</td></tr>
+</table>
+
+<h2>9. Giới hạn hiện tại</h2>
+<ul>
+<li>None keyboard input</li>
+<li>None filesystem</li>
+<li>None process</li>
+<li>Chỉ hỗ trợ subset Cat++ (meow, paw, sniff, knead, purr, struct, cast)</li>
+<li>Chưa có heap allocator thật</li>
+</ul>
+
+<h2>10. Hướng phát triển</h2>
+<ul>
+<li>Keyboard driver (IRQ1)</li>
+<li>PIT timer interrupt</li>
+<li>Heap allocator thật (thay bump)</li>
+<li>Shell đọc lệnh từ keyboard</li>
+<li>Filesystem (FAT16/FAT32)</li>
+</ul>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Viết kernel in ra màn hình 10 số Fibonacci.</li>
+<li>Sửa <code>demo.cat</code> để vẽ hình vuông bằng ký tự <code>*</code> trên VGA.</li>
+<li>Thêm hàm <code>print_hex</code> — in số dạng hexa.</li>
+</ol>

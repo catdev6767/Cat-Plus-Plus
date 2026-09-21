@@ -1,0 +1,115 @@
+<h2>CLI — paw</h2>
+
+<p><code>paw</code> is the official Cat++ CLI. Run scripts, create files,
+transpile, format, lint, REPL.</p>
+
+<h2>Install</h2>
+
+<pre><code>ln -sf ~/catpp/paw/paw ~/.local/bin/paw
+ln -sf ~/catpp/pawedit/pawedit ~/.local/bin/pawedit</code></pre>
+
+<h2>Commands</h2>
+
+<h3>paw run FILE.cat</h3>
+<p>Run script via fastest engine (PyCompiler first, fallback interpreter).</p>
+<pre><code>$ paw run hello.cat
+Hello, Cat++!</code></pre>
+
+<h3>paw new FILE.cat</h3>
+<p>Create a new file with template and open in PawEditor.</p>
+<pre><code>$ paw new game.cat
+Created: game.cat</code></pre>
+
+<h3>paw edit FILE.cat</h3>
+<p>Open an existing file in PawEditor.</p>
+
+<h3>paw repl</h3>
+<p>Interactive REPL. Type <code>exit</code> to quit.</p>
+<pre><code>$ paw repl
+paw REPL — type 'exit' to quit
+paw&gt; meow 2 + 2
+4
+paw&gt; paw x = 10
+paw&gt; meow x * 3
+30
+paw&gt; exit</code></pre>
+
+<h3>paw build FILE.cat</h3>
+<p>Transpile to C (boxed, uses <code>Value</code> struct). Runs any code.</p>
+<pre><code>$ paw build hello.cat
+Built: hello.c
+Binary: hello</code></pre>
+
+<h3>paw build-fast FILE.cat</h3>
+<p>Transpile to native C (<code>int32_t</code>, <code>double</code>). Requires
+full type annotations. <strong>13,635x faster</strong> than interpreter.</p>
+<pre><code>$ paw build-fast calc.cat
+Built: calc.native.c
+Binary: calc.native  (13,635x faster than interpreter)</code></pre>
+
+<h3>paw fmt FILE.cat</h3>
+<p>Format code: normalize indent to 4 spaces, trim trailing whitespace,
+collapse blank lines.</p>
+<pre><code>$ paw fmt game.cat
+--- game.cat
++++ game.cat
+@@ -1,3 +1,3 @@
+-paw x=1
++paw x = 1
+
+$ paw fmt game.cat --write    # save to file</code></pre>
+
+<h3>paw lint FILE.cat</h3>
+<p>Check for syntax errors, tabs, trailing whitespace, long lines,
+same-scope redefinitions.</p>
+<pre><code>$ paw lint game.cat
+game.cat:5: warn: 'x' redefined at same scope (first at line 4)
+
+1 issue(s): 0 error, 1 warning</code></pre>
+
+<h3>paw check FILE.cat</h3>
+<p>Count type coverage. Tells you if native compile is possible.</p>
+<pre><code>$ paw check calc.cat
+File: calc.cat
+  Functions: 2/2 fully typed
+  Params:    4/4 typed
+  Variables: 3/3 typed
+
+✓ Can compile native (13,635x faster)</code></pre>
+
+<h2>PawEditor</h2>
+
+<p>Nano-like editor for Cat++.</p>
+
+<pre><code>pawedit hello.cat</code></pre>
+
+<table>
+<tr><th>Key</th><th>Function</th></tr>
+<tr><td>^S</td><td>Save</td></tr>
+<tr><td>^O</td><td>Save As</td></tr>
+<tr><td>^W</td><td>Find</td></tr>
+<tr><td>^G</td><td>Goto line</td></tr>
+<tr><td>^K</td><td>Cut line</td></tr>
+<tr><td>^U</td><td>Paste line</td></tr>
+<tr><td>^X</td><td>Exit</td></tr>
+</table>
+
+<h2>Example workflow</h2>
+
+<pre><code># 1. Create a new script
+paw new calc.cat
+
+# 2. Edit in the editor (Ctrl+S to save, Ctrl+X to exit)
+
+# 3. Lint + check
+paw lint calc.cat
+paw check calc.cat
+
+# 4. Try running
+paw run calc.cat
+
+# 5. Compile native
+paw build-fast calc.cat
+
+# 6. Run binary
+./calc.native</code></pre>

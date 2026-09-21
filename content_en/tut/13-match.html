@@ -1,0 +1,108 @@
+<p><code>match/case</code> giúp so sánh một giá trị với nhiều khả năng — gọn hơn nhiều <code>sniff</code> lồng nhau.</p>
+
+<h2>1. Syntax cơ bản</h2>
+<pre><code>paw x = 2
+
+match x
+    case 1
+        meow "mot"
+    case 2
+        meow "hai"
+    case 3
+        meow "ba"</code></pre>
+<p>Result: <code>hai</code>.</p>
+
+<h2>2. Wildcard — nhánh mặc định</h2>
+<pre><code>paw x = 99
+
+match x
+    case 1
+        meow "one"
+    case 2
+        meow "two"
+    case _
+        meow "khac"</code></pre>
+
+<h2>3. Match với chuỗi</h2>
+<pre><code>paw cmd = "hello"
+
+match cmd
+    case "hi"
+        meow "chao"
+    case "hello"
+        meow "xin chao"
+    case "bye"
+        meow "tam biet"</code></pre>
+
+<h2>4. Match với kết quả hàm</h2>
+<pre><code>purr color_code(c)
+    match c
+        case "red"
+            give 1
+        case "green"
+            give 2
+        case "blue"
+            give 3
+        case _
+            give 0
+
+meow color_code("green")</code></pre>
+
+<h2>5. Ứng dụng: xử lý menu</h2>
+<pre><code>purr menu(choice)
+    match choice
+        case 1
+            meow "Them san pham"
+        case 2
+            meow "Xoa san pham"
+        case 3
+            meow "Xem danh sach"
+        case 4
+            meow "Thoat"
+        case _
+            meow "Lua chon khong hop le"
+
+menu(2)</code></pre>
+
+<h2>6. Ứng dụng: xếp loại điểm</h2>
+<pre><code>purr grade(score)
+    sniff score >= 90
+        give "A"
+    sniff score >= 80
+        give "B"
+    sniff score >= 70
+        give "C"
+    give "F"
+
+meow grade(85)</code></pre>
+<p>Bài này không dùng match được vì match so sánh bằng, không so sánh khoảng.</p>
+
+<h2>7. So sánh với sniff/swat</h2>
+<p><b>Dùng sniff lồng nhau:</b></p>
+<pre><code>sniff x == 1
+    meow "mot"
+swat
+    sniff x == 2
+        meow "hai"
+    swat
+        sniff x == 3
+            meow "ba"
+        swat
+            meow "khac"</code></pre>
+<p><b>Dùng match:</b></p>
+<pre><code>match x
+    case 1
+        meow "mot"
+    case 2
+        meow "hai"
+    case 3
+        meow "ba"
+    case _
+        meow "khac"</code></pre>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Viết hàm <code>day_of_week(n)</code> — nhận 1-7, trả về tên thứ.</li>
+<li>Viết hàm <code>calc(op)</code> — nhận "+", "-", "*", "/", thực hiện phép tính.</li>
+<li>Viết chương trình đơn giản mô phỏng menu máy ATM.</li>
+</ol>

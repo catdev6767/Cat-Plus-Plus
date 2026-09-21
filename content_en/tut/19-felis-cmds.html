@@ -1,0 +1,49 @@
+<p>Felis OS có <b>23 lệnh shell</b> chia làm 3 nhóm.</p>
+
+<h2>1. System commands</h2>
+<table>
+<tr><th>Lệnh</th><th>Chức năng</th></tr>
+<tr><td><code>help</code></td><td>List lệnh</td></tr>
+<tr><td><code>info</code></td><td>Thông tin hệ thống</td></tr>
+<tr><td><code>uname</code></td><td>Tên OS</td></tr>
+<tr><td><code>whoami</code></td><td>Tên user</td></tr>
+<tr><td><code>mem</code></td><td>Thông tin RAM</td></tr>
+</table>
+
+<h2>2. Filesystem commands</h2>
+<table>
+<tr><th>Lệnh</th><th>Chức năng</th></tr>
+<tr><td><code>ls</code></td><td>Liệt kê file</td></tr>
+<tr><td><code>cat FILE</code></td><td>Đọc file</td></tr>
+<tr><td><code>touch FILE</code></td><td>Tạo file rỗng</td></tr>
+<tr><td><code>mkdir DIR</code></td><td>Tạo thư mục</td></tr>
+<tr><td><code>rm FILE</code></td><td>Xóa file</td></tr>
+<tr><td><code>write FILE TEXT</code></td><td>Ghi file</td></tr>
+<tr><td><code>append FILE TEXT</code></td><td>Thêm vào file</td></tr>
+<tr><td><code>wc FILE</code></td><td>Đếm từ/ký tự</td></tr>
+</table>
+
+<h2>3. Utilities</h2>
+<table>
+<tr><th>Lệnh</th><th>Chức năng</th></tr>
+<tr><td><code>echo TEXT</code></td><td>In text</td></tr>
+<tr><td><code>history</code></td><td>Lịch sử lệnh</td></tr>
+<tr><td><code>clear</code></td><td>Xóa màn hình</td></tr>
+<tr><td><code>sleep N</code></td><td>Đợi N giây</td></tr>
+<tr><td><code>halt</code></td><td>Dừng CPU</td></tr>
+<tr><td><code>reboot</code></td><td>Khởi động lại</td></tr>
+</table>
+
+<h2>4. Examples</h2>
+<pre><code>felis$ touch notes.txt
+felis$ write notes.txt Hello Felis
+felis$ cat notes.txt
+Hello Felis
+felis$ wc notes.txt
+Lines: 1 Words: 2 Chars: 11</code></pre>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Tạo 5 file với nội dung khác nhau.</li>
+<li>Đếm số từ trong mỗi file bằng <code>wc</code>.</li>
+</ol>

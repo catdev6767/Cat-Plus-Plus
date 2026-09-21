@@ -1,0 +1,51 @@
+<p>IDT (Interrupt Descriptor Table) — bảng 256 entry ánh xạ interrupt đến handler.</p>
+
+<h2>1. Cấu trúc IDT entry</h2>
+<pre><code>struct idt_entry {
+    uint16_t base_lo;
+    uint16_t sel;       /* Code segment selector */
+    uint8_t  always0;
+    uint8_t  flags;     /* 0x8E = present, ring 0, 32-bit */
+    uint16_t base_hi;
+} __attribute__((packed));</code></pre>
+
+<h2>2. Load IDT</h2>
+<pre><code>struct idt_ptr idtp;
+idtp.limit = sizeof(idt) - 1;
+idtp.base = (uint32_t)&idt;
+asm volatile("lidt (%0)" : : "r"(&idtp));</code></pre>
+
+<h2>3. Remap PIC</h2>
+<p>Mặc định PIC ánh xạ IRQ0-7 → interrupt 0-7. Ta remap để IRQ0-7 → 32-39 (tránh conflict với CPU exceptions).</p>
+<pre><code>outb(0x20, 0x11);   /* ICW1 */
+outb(0xA0, 0x11);
+outb(0x21, 0x20);   /* ICW2 - master offset 32 */
+outb(0xA1, 0x28);   /* slave offset 40 */
+outb(0x21, 0x04);   /* ICW3 */
+outb(0xA1, 0x02);
+outb(0x21, 0x01);   /* ICW4 - 8086 mode */
+outb(0xA1, 0x01);</code></pre>
+
+<h2>4. Keyboard IRQ (IRQ1)</h2>
+<pre><code>idt_set_gate(33, (uint32_t)irq1_stub, 0x08, 0x8E);
+
+/* Enable IRQ1 */
+outb(0x21, 0xFD);  /* 11111101 — chỉ cho IRQ1 */
+outb(0xA1, 0xFF);  /* Disable slave PIC */
+
+asm volatile("sti");  /* Enable interrupts */</code></pre>
+
+<h2>5. IRQ handler</h2>
+<pre><code>irq1_stub:
+    pusha
+    call keyboard_handler
+    mov $0x20, %al
+    outb %al, $0x20       /* EOI - End Of Interrupt */
+    popa
+    iret</code></pre>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Thêm IRQ0 (timer) để đo thời gian.</li>
+<li>Thêm handler cho exception divide-by-zero.</li>
+</ol>

@@ -1,0 +1,54 @@
+<p>Tạo file ISO boot từ USB như Linux distro.</p>
+
+<h2>1. Cấu trúc ISO</h2>
+<pre><code>iso/
+├── boot/
+│   ├── felis.elf      kernel
+│   └── grub/
+│       └── grub.cfg   cấu hình GRUB</code></pre>
+
+<h2>2. grub.cfg</h2>
+<pre><code>set timeout=3
+set default=0
+
+menuentry "Felis OS v0.2" {
+    multiboot /boot/felis.elf
+    boot
+}</code></pre>
+
+<h2>3. Tạo ISO</h2>
+<pre><code>grub-mkrescue -o felis.iso iso</code></pre>
+
+<p>GRUB tự thêm:</p>
+<ul>
+<li>El Torito boot record</li>
+<li>BIOS boot sector</li>
+<li>EFI boot partition</li>
+</ul>
+
+<h2>4. Test ISO</h2>
+<pre><code>qemu-system-x86_64 -cdrom felis.iso -m 128M -display curses</code></pre>
+
+<p>Sẽ hiện GRUB menu → chọn "Felis OS" → boot.</p>
+
+<h2>5. Ghi ra USB</h2>
+<pre><code># Xem USB
+lsblk
+
+# Ghi (CẨN THẬN — xóa hết USB)
+sudo dd if=felis.iso of=/dev/sdX bs=4M status=progress
+sync</code></pre>
+
+<h2>6. Boot máy thật</h2>
+<ol>
+<li>Cắm USB vào máy</li>
+<li>Khởi động → F12/F2 → chọn USB</li>
+<li>Felis OS boot từ USB</li>
+</ol>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Tạo ISO, boot trong QEMU.</li>
+<li>Ghi USB, boot trên máy thật (nếu có).</li>
+<li>Thêm menu entry thứ 2 với option khác.</li>
+</ol>

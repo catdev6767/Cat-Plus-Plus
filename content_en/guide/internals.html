@@ -1,0 +1,187 @@
+<h1>Internals — Cách Cat++ hoạt động</h1>
+<p>Hiểu sâu về interpreter: từ source code đến output.</p>
+
+<h2>1. Pipeline</h2>
+<pre><code>Source code (.cat)
+        │
+        ▼
+┌───────────────────┐
+│  Lexer            │  Đọc ký tự → Token
+│  (tokenize)       │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Parser           │  Token → AST
+│  (recursive       │
+│   descent)        │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Interpreter      │  Duyệt AST
+│  (tree-walking)   │  → thực thi
+└────────┬──────────┘
+         │
+         ▼
+      Output</code></pre>
+
+<h2>2. Lexer</h2>
+<p>Đọc từng ký tự, tạo token. Xử lý:</p>
+<ul>
+<li>Số: <code>42</code>, <code>3.14</code>, <code>0xFF</code>, <code>0b1010</code></li>
+<li>String: <code>"hello"</code> với escape <code>\n \t \"</code></li>
+<li>Identifiers: <code>foo</code>, <code>bar_baz</code></li>
+<li>Từ khóa: <code>meow</code>, <code>paw</code>, <code>purr</code></li>
+<li>Toán tử: <code>+ - * / % == != & | << >></code></li>
+<li>Layout: <code>INDENT</code>, <code>DEDENT</code>, <code>NEWLINE</code></li>
+</ul>
+
+<h3>Examples</h3>
+<pre><code>paw x = 42</code></pre>
+<p>Tokenize thành:</p>
+<pre><code>PAW("paw")  IDENT("x")  ASSIGN("=")  NUMBER(42)  NEWLINE</code></pre>
+
+<h2>3. Parser</h2>
+<p>Nhận tokens, tạo AST (Abstract Syntax Tree). Dùng <b>recursive descent</b> — mỗi hàm parse một loại cấu trúc.</p>
+
+<h3>Precedence chain (từ thấp đến cao)</h3>
+<pre><code>expr
+ ├── or_          (or, either)
+ ├── and_         (and, with)
+ ├── not_         (not, never)
+ ├── in_          (in)
+ ├── bit_or       (|)
+ ├── bit_xor      (^)
+ ├── bit_and      (&)
+ ├── shift        (<<, >>)
+ ├── cmp          (==, !=, <, >, <=, >=)
+ ├── add          (+, -)
+ ├── mul          (*, /, %)
+ ├── unary        (-, ~)
+ └── postfix      (call, index, dot)</code></pre>
+
+<h3>Examples AST</h3>
+<pre><code>paw x = 1 + 2 * 3</code></pre>
+<p>Parse thành:</p>
+<pre><code>('let', 'x',
+  ('+', ('num', 1),
+        ('*', ('num', 2), ('num', 3))))</code></pre>
+<p>Vì <code>*</code> có độ ưu tiên cao hơn <code>+</code>, nên <code>2*3</code> được nhóm trước.</p>
+
+<h2>4. Interpreter</h2>
+<p>Duyệt AST. Mỗi node có hàm <code>eval_()</code> (biểu thức) hoặc <code>exec_()</code> (câu lệnh).</p>
+
+<h3>Environment (scope)</h3>
+<pre><code>class Env:
+    vars: dict          # biến trong scope này
+    parent: Env         # scope cha
+
+Khi tìm biến `x`:
+1. Nếu x trong vars → trả về
+2. Nếu không → tìm trong parent (đệ quy)
+3. Nếu không có → lỗi</code></pre>
+
+<h3>Examples scope</h3>
+<pre><code>paw x = 10          # global
+
+purr f()
+    paw y = 20      # local
+    meow x          # đọc được x (global)
+    meow y          # đọc được y (local)
+
+f()                 # OK
+meow y              # LỖI — y chỉ tồn tại trong f</code></pre>
+
+<h2>5. Runtime values</h2>
+<table>
+<tr><th>Cat++ type</th><th>Python type</th></tr>
+<tr><td>Integer</td><td><code>int</code></td></tr>
+<tr><td>Float</td><td><code>float</code></td></tr>
+<tr><td>String</td><td><code>str</code></td></tr>
+<tr><td>True/False</td><td><code>True</code> / <code>False</code></td></tr>
+<tr><td>Empty</td><td><code>None</code></td></tr>
+<tr><td>List</td><td><code>list</code></td></tr>
+<tr><td>Dict</td><td><code>dict</code></td></tr>
+<tr><td>Class instance</td><td><code>Instance</code></td></tr>
+</table>
+
+<h2>6. Exceptions</h2>
+<p>Dùng Python exception để điều khiển luồng:</p>
+<ul>
+<li><code>ReturnEx</code> — thoát hàm return value</li>
+<li><code>StopEx</code> — thoát vòng lặp (sit)</li>
+<li><code>SkipEx</code> — bỏ qua lần lặp (leap)</li>
+<li><code>CatError</code> — lỗi runtime (chia 0, biến chưa khai báo)</li>
+</ul>
+
+<pre><code># Khi gặp `give x`:
+raise ReturnEx(value)
+
+# Trong hàm:
+try:
+    for stmt in body: exec_(stmt)
+except ReturnEx as e:
+    return e.v</code></pre>
+
+<h2>7. Module system</h2>
+<p>3 file:</p>
+<ul>
+<li><code>core/registry.py</code> — đăng ký API giữa modules</li>
+<li><code>core/bus.py</code> — event bus</li>
+<li><code>core/loader.py</code> — auto-load modules</li>
+</ul>
+
+<p>Interpreter đăng ký với registry:</p>
+<pre><code>class InterpreterModule(BaseModule):
+    def setup(self):
+        self.registry.set('interpreter', self)
+
+    def run(self, code):
+        return run_catpp(code)</code></pre>
+
+<p>Module khác gọi qua registry:</p>
+<pre><code>interp = self.registry.get('interpreter')
+result = interp.run("meow \"hi\"")</code></pre>
+
+<h2>8. Web IDE</h2>
+<p>Frontend gửi code lên server qua POST <code>/api/run</code>:</p>
+<pre><code>POST /api/run
+Content-Type: application/json
+
+{"code": "meow \"hello\""}</code></pre>
+
+<p>Server gọi interpreter:</p>
+<pre><code>output = run_catpp(code, timeout=5.0)
+return {"ok": True, "output": output}</code></pre>
+
+<h2>9. Transpiler Cat++ → C</h2>
+<p>Khác với interpreter. Không thực thi AST mà <b>sinh C code</b>.</p>
+
+<pre><code># Cat++ AST
+('let', 'x', ('+', ('num', 1), ('num', 2)))
+
+# C code sinh ra
+long x = (1 + 2);</code></pre>
+
+<p>Dùng 2-pass:</p>
+<ol>
+<li>Pass 1: scan struct, infer return types</li>
+<li>Pass 2: generate C code</li>
+</ol>
+
+<h2>10. Giới hạn hiệu năng</h2>
+<p>Interpreter tree-walking chậm hơn C khoảng <b>100x</b>. Lý do:</p>
+<ul>
+<li>Mỗi biểu thức duyệt AST (function call overhead)</li>
+<li>Type động (kiểm tra kiểu runtime)</li>
+<li>Python VM (chậm hơn native)</li>
+<li>None JIT</li>
+</ul>
+
+<p>Muốn nhanh hơn:</p>
+<ul>
+<li>Compile sang bytecode (nhanh 5-10x)</li>
+<li>Transpile C (nhanh gần bằng C)</li>
+<li>JIT với LLVM (nhanh bằng C)</li>
+</ul>

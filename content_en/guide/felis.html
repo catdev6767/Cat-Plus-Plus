@@ -1,0 +1,233 @@
+<h1>Felis OS — Hướng dẫn đầy đủ</h1>
+<p>Từ Cat++ code tới kernel boot trên bare metal, không Linux, không Python.</p>
+
+<h2>1. Tổng quan kiến trúc</h2>
+<pre><code>┌──────────────────────────────────────┐
+│  Cat++ source (.cat)                 │
+│  meow, paw, sniff, knead, purr...   │
+└──────────────┬───────────────────────┘
+               │ transpiler.py
+               ▼
+┌──────────────────────────────────────┐
+│  C source (.c)                       │
+│  printf, if, while, typedef struct   │
+└──────────────┬───────────────────────┘
+               │ gcc -m32 -ffreestanding
+               ▼
+┌──────────────────────────────────────┐
+│  Object files (.o)                   │
+└──────────────┬───────────────────────┘
+               │ ld + linker.ld
+               ▼
+┌──────────────────────────────────────┐
+│  ELF kernel (felis.elf)              │
+└──────────────┬───────────────────────┘
+               │ QEMU hoặc GRUB
+               ▼
+┌──────────────────────────────────────┐
+│  Bare metal — CPU chạy trực tiếp     │
+└──────────────────────────────────────┘</code></pre>
+
+<h2>2. Cấu trúc thư mục</h2>
+<pre><code>~/catpp/
+├── tools/
+│   └── transpiler.py              # Bộ dịch Cat++ → C
+│
+├── runtime/
+│   ├── catpp_rt.h                 # Header chung (hosted + freestanding)
+│   └── catpp_freestanding.c       # VGA, serial, memory cho kernel
+│
+├── kernel/
+│   ├── main.c                     # Kernel entry (kmain)
+│   ├── entry.s                    # Assembly boot (_start)
+│   ├── linker.ld                  # Linker script
+│   └── demo.cat                   # Code Cat++ demo
+│
+├── libc/                          # Minimal libc cho freestanding
+│   ├── stdint.h
+│   ├── stddef.h
+│   ├── stdarg.h
+│   └── limits.h
+│
+└── build_felis.sh                 # Build script</code></pre>
+
+<h2>3. Syntax low-level chỉ có trong Felis OS</h2>
+
+<h3>Bit operations</h3>
+<pre><code>paw a = 0xFF & 0x0F       # AND → 15
+paw b = 5 | 2             # OR → 7
+paw c = 5 ^ 3             # XOR → 6
+paw d = ~0                # NOT → -1
+paw e = 1 << 4            # SHL → 16
+paw f = 256 >> 4          # SHR → 16</code></pre>
+
+<h3>Cast sang pointer</h3>
+<pre><code>paw vga = cast(ptr, 0xB8000)
+# Địa chỉ VGA text mode. 80x25 ký tự, mỗi ký tự 2 byte:
+# byte 1 = ký tự, byte 2 = màu</code></pre>
+
+<h3>Struct C-layout</h3>
+<pre><code>struct Color
+    r: u8
+    g: u8
+    b: u8
+    a: u8
+
+paw red = Color(255, 0, 0, 255)
+meow sizeof(Color)   # 8</code></pre>
+
+<h3>Volatile cho MMIO</h3>
+<pre><code>volatile paw status = 0
+# Compiler sẽ không tối ưu hóa biến này</code></pre>
+
+<h3>Inline assembly</h3>
+<pre><code>asm("cli")   # Tắt interrupt
+asm("sti")   # Bật interrupt
+asm("hlt")   # Dừng CPU
+asm("nop")   # Không làm gì</code></pre>
+
+<h2>4. Viết kernel code</h2>
+
+<h3>Examples 1: In "Hello"</h3>
+<pre><code>meow "Hello from Felis OS!"</code></pre>
+
+<h3>Examples 2: Loop</h3>
+<pre><code>paw i = 0
+knead i < 10
+    meow i
+    i++</code></pre>
+
+<h3>Examples 3: Function</h3>
+<pre><code>purr fib(n)
+    sniff n <= 1
+        give n
+    give fib(n - 1) + fib(n - 2)
+
+meow fib(10)</code></pre>
+
+<h2>5. Build script</h2>
+<pre><code>bash build_felis.sh</code></pre>
+
+<p>Các bước build:</p>
+<ol>
+<li><b>Transpile</b> <code>demo.cat</code> → <code>demo.c</code></li>
+<li><b>Compile entry.s</b> → <code>entry.o</code> (assembly)</li>
+<li><b>Compile runtime</b> → <code>rt.o</code> (VGA, serial)</li>
+<li><b>Compile main.c</b> → <code>main.o</code></li>
+<li><b>Compile demo.c</b> → <code>demo.o</code></li>
+<li><b>Link</b> tất cả → <code>felis.elf</code></li>
+</ol>
+
+<h2>6. Chạy trên QEMU</h2>
+
+<h3>Cách 1 — Terminal (không cửa sổ)</h3>
+<pre><code>qemu-system-x86_64 \
+    -kernel kernel/felis.elf \
+    -m 128M \
+    -display none \
+    -serial stdio</code></pre>
+
+<h3>Cách 2 — Cửa sổ đồ họa</h3>
+<pre><code>qemu-system-x86_64 -kernel kernel/felis.elf -m 128M</code></pre>
+
+<h3>Cách 3 — Tạo ISO bootable</h3>
+<pre><code># Cần grub2-tools
+mkdir -p iso/boot/grub
+cp kernel/felis.elf iso/boot/
+cat > iso/boot/grub/grub.cfg << 'GRUB'
+menuentry "Felis OS" {
+    multiboot /boot/felis.elf
+    boot
+}
+GRUB
+grub2-mkrescue -o felis.iso iso
+qemu-system-x86_64 -cdrom felis.iso</code></pre>
+
+<h2>7. Runtime freestanding</h2>
+
+<h3>VGA text mode</h3>
+<p>VGA buffer ở địa chỉ <code>0xB8000</code>. 80 cột × 25 hàng. Mỗi ký tự 2 byte:</p>
+<ul>
+<li>Byte 0: ký tự ASCII</li>
+<li>Byte 1: màu (4 bit nền + 4 bit chữ)</li>
+</ul>
+<p>Bảng màu:</p>
+<pre><code>0 = đen      4 = đỏ đậm    8 = xám đậm     12 = đỏ nhạt
+1 = xanh dương đậm   5 = tím đậm     9 = xanh dương nhạt  13 = hồng
+2 = xanh lá đậm      6 = nâu        10 = xanh lá nhạt    14 = vàng
+3 = xanh lơ đậm      7 = xám nhạt   11 = xanh lơ nhạt    15 = trắng</code></pre>
+
+<h3>Serial port (COM1)</h3>
+<p>Ghi ra cổng <code>0x3F8</code>. QEMU với <code>-serial stdio</code> sẽ hiện ra terminal. Dùng để debug kernel.</p>
+
+<h3>Memory</h3>
+<p>Bump allocator: cấp phát tuyến tính từ <code>0x100000</code> (1MB) đến <code>0x400000</code> (4MB). Chưa có <code>free</code> thật.</p>
+
+<h2>8. Giới hạn hiện tại</h2>
+<ul>
+<li>None keyboard input</li>
+<li>None filesystem</li>
+<li>None process</li>
+<li>None heap allocator thật</li>
+<li>Chỉ 1 CPU</li>
+<li>Chưa hỗ trợ 64-bit</li>
+<li>Subset Cat++: <code>meow</code>, <code>paw</code>, <code>sniff</code>, <code>knead</code>, <code>purr</code>, <code>give</code>, <code>struct</code>, <code>cast</code></li>
+</ul>
+
+<h2>9. Hướng phát triển</h2>
+
+<h3>Step 1 — Keyboard driver</h3>
+<p>Đọc từ port <code>0x60</code>. Cài IRQ1. Dịch mã scancode thành ASCII.</p>
+
+<h3>Step 2 — Timer interrupt</h3>
+<p>Cài PIT (Programmable Interval Timer) ở 100 Hz. Dùng cho scheduler.</p>
+
+<h3>Step 3 — Heap allocator</h3>
+<p>Thay bump allocator bằng free list. Cần quản lý block.</p>
+
+<h3>Step 4 — Shell</h3>
+<p>Prompt <code>cat> </code> + đọc từ keyboard + parse + run Cat++.</p>
+
+<h3>Step 5 — Filesystem</h3>
+<p>Cài FAT16 hoặc FAT32. Cần driver đọc/ghi sector từ disk.</p>
+
+<h2>10. Debug</h2>
+
+<h3>Xem serial output</h3>
+<pre><code>qemu-system-x86_64 -kernel kernel/felis.elf -serial stdio</code></pre>
+
+<h3>Disassemble kernel</h3>
+<pre><code>objdump -d kernel/felis.elf</code></pre>
+
+<h3>Xem ELF info</h3>
+<pre><code>readelf -h kernel/felis.elf
+readelf -S kernel/felis.elf</code></pre>
+
+<h3>Kiểm tra Multiboot</h3>
+<pre><code>grub-file --is-x86-multiboot kernel/felis.elf</code></pre>
+
+<h2>11. Examples: vẽ chữ lên VGA</h2>
+<pre><code>struct VgaChar
+    ch: u8
+    color: u8
+
+paw VGA = cast(ptr, 0xB8000)
+
+purr putc(row, col, ch, color)
+    paw index = row * 80 + col
+    # *(VGA + index*2) = ch | (color << 8)
+
+putc(0, 0, 72, 0x0F)    # 'H' trắng trên đen
+putc(0, 1, 101, 0x0F)   # 'e'
+putc(0, 2, 108, 0x0F)   # 'l'
+putc(0, 3, 108, 0x0F)   # 'l'
+putc(0, 4, 111, 0x0F)   # 'o'</code></pre>
+
+<h2>12. Tài liệu tham khảo</h2>
+<ul>
+<li><b>OSDev Wiki</b> — osdev.org (nguồn chính)</li>
+<li><b>Multiboot spec</b> — GNU GRUB manual</li>
+<li><b>x86 Assembly</b> — "Programming from the Ground Up"</li>
+<li><b>Intel SDM</b> — Software Developer Manual (spec CPU)</li>
+<li><b>xv6</b> — OS học tập của MIT</li>
+</ul>

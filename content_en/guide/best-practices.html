@@ -1,0 +1,220 @@
+<h1>Best Practices</h1>
+<p>Quy ước viết Cat++ sạch, dễ đọc, dễ bảo trì.</p>
+
+<h2>1. Đặt tên</h2>
+
+<h3>Variable — snake_case</h3>
+<pre><code># Tốt
+paw cat_name = "Tom"
+paw total_count = 0
+paw max_speed = 100
+
+# Xấu
+paw catName = "Tom"
+paw TotalCount = 0
+paw x = 0</code></pre>
+
+<h3>Function — snake_case</h3>
+<pre><code># Tốt
+purr find_max(arr)
+purr read_config(path)
+purr is_valid_email(s)
+
+# Xấu
+purr findMax(arr)
+purr FindMax(arr)
+purr f(arr)</code></pre>
+
+<h3>Class — PascalCase</h3>
+<pre><code># Tốt
+cat Point
+cat Animal
+cat HttpRequest
+
+# Xấu
+cat point
+cat animal
+cat http_request</code></pre>
+
+<h3>Hằng — UPPER_SNAKE_CASE</h3>
+<pre><code>paw MAX_SIZE = 100
+paw PI = 3.14159
+paw DEFAULT_TIMEOUT = 30</code></pre>
+
+<h3>Private field — gạch dưới đầu</h3>
+<pre><code>cat Person
+    paw _name
+    paw _age
+
+    purr get name()
+        give me._name</code></pre>
+
+<h2>2. Thụt lề</h2>
+<pre><code># True — 4 spaces
+purr test()
+    sniff x > 0
+        meow "positive"
+    swat
+        meow "negative"
+
+# False — trộn tab và space
+purr test()
+\tmeow "hi"
+    meow "world"</code></pre>
+
+<h2>3. Độ dài dòng</h2>
+<pre><code># Tốt — dưới 80 ký tự
+paw result = compute(
+    first_arg,
+    second_arg,
+    third_arg
+)
+
+# Xấu — quá dài
+paw result = compute(first_arg, second_arg, third_arg, fourth_arg, fifth_arg, sixth_arg)</code></pre>
+
+<h2>4. Comment</h2>
+
+<h3>Explanation TẠI SAO, không phải LÀM GÌ</h3>
+<pre><code># Tốt — giải thích lý do
+# Dùng sqrt để tránh thử chia hết tới n
+# nhanh hơn 10x cho số lớn
+purr is_prime(n)
+    paw i = 2
+    knead i * i <= n
+        ...
+
+# Xấu — lặp lại code
+# Tăng i lên 1
+paw i = i + 1</code></pre>
+
+<h3>Comment cho hàm phức tạp</h3>
+<pre><code># Tìm phần tử trong mảng đã sắp xếp bằng binary search.
+# Return chỉ số hoặc -1 nếu không tìm thấy.
+# Độ phức tạp: O(log n)
+purr binary_search(arr, target)
+    ...</code></pre>
+
+<h2>5. Chia hàm nhỏ</h2>
+<pre><code># Tốt — mỗi hàm 1 việc
+purr read_scores(path)
+    give read_lines(path)
+
+purr parse_scores(lines)
+    paw scores = []
+    groom line of lines
+        paw scores = scores + [cast(float, line)]
+    give scores
+
+purr average(scores)
+    sniff len(scores) == 0
+        give 0
+    give pile(scores) / len(scores)
+
+# Dùng
+paw lines = read_scores("data.txt")
+paw scores = parse_scores(lines)
+meow average(scores)</code></pre>
+
+<h2>6. Xử lý lỗi</h2>
+
+<h3>Dùng try/hiss cho code có thể lỗi</h3>
+<pre><code># Tốt
+tap
+    paw n = cast(int, user_input)
+    meow n * 2
+hiss e
+    meow "Khong phai so: " + user_input
+
+# Xấu — code crash
+paw n = cast(int, user_input)</code></pre>
+
+<h3>Kiểm tra điều kiện biên</h3>
+<pre><code># Tốt
+purr divide(a, b)
+    sniff b == 0
+        give hungry
+    give a / b
+
+# Xấu
+purr divide(a, b)
+    give a / b   # Lỗi nếu b == 0</code></pre>
+
+<h2>7. Tránh lặp code</h2>
+<pre><code># Xấu — lặp 3 lần
+meow "Ten: " + user1.name
+meow "Tuoi: " + cast(str, user1.age)
+meow "Dia chi: " + user1.address
+meow "Ten: " + user2.name
+meow "Tuoi: " + cast(str, user2.age)
+...
+
+# Tốt — hàm
+purr print_user(u)
+    meow "Ten: " + u.name
+    meow "Tuoi: " + cast(str, u.age)
+    meow "Dia chi: " + u.address
+
+print_user(user1)
+print_user(user2)</code></pre>
+
+<h2>8. Magic numbers</h2>
+<pre><code># Xấu
+sniff score > 90
+    meow "A"
+sniff score > 80
+    meow "B"
+
+# Tốt
+paw GRADE_A = 90
+paw GRADE_B = 80
+
+sniff score > GRADE_A
+    meow "A"
+sniff score > GRADE_B
+    meow "B"</code></pre>
+
+<h2>9. Xử lý danh sách</h2>
+<pre><code># Tốt — dùng builtin
+paw nums = [1, 2, 3, 4, 5]
+paw squares = chase(nums, kit(x) => x * x)
+paw evens = sift(nums, kit(x) => x % 2 == 0)
+
+# Xấu — tự viết vòng lặp
+paw squares = []
+paw i = 0
+knead i < len(nums)
+    paw squares = squares + [nums[i] * nums[i]]
+    i++</code></pre>
+
+<h2>10. Cấu trúc file</h2>
+<pre><code># 1. Comment đầu file
+# 2. Import
+use "mathlib.cat"
+
+# 3. Hằng số
+paw PI = 3.14159
+paw MAX = 100
+
+# 4. Function tiện ích
+purr helper1()
+purr helper2()
+
+# 5. Function chính
+purr main()
+    ...
+
+# 6. Chạy
+main()</code></pre>
+
+<h2>11. Checklist trước khi commit</h2>
+<ul>
+<li>Tên biến/hàm rõ nghĩa</li>
+<li>Thụt lề 4 spaces, không tab</li>
+<li>Dòng dưới 80 ký tự</li>
+<li>Comment giải thích "tại sao"</li>
+<li>Xử lý lỗi bằng try/hiss</li>
+<li>Không magic number</li>
+<li>Không lặp code</li>
+<li>Test với input biên (0, âm, rỗng)</li>
+</ul>

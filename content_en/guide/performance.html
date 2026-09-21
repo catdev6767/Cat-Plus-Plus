@@ -1,0 +1,192 @@
+<h1>Performance Guide</h1>
+<p>Cách viết code Cat++ chạy nhanh.</p>
+
+<h2>1. Hiệu năng hiện tại</h2>
+<p>Cat++ chạy qua Python interpreter. Chậm hơn C khoảng <b>100x</b>.</p>
+
+<table>
+<tr><th>Task</th><th>Cat++</th><th>Python</th><th>C</th></tr>
+<tr><td>Fibonacci 30</td><td>2s</td><td>0.5s</td><td>0.02s</td></tr>
+<tr><td>Loop 1M</td><td>3s</td><td>0.3s</td><td>0.005s</td></tr>
+<tr><td>Sort 10k</td><td>5s</td><td>0.1s</td><td>0.001s</td></tr>
+</table>
+
+<h2>2. Quy tắc chung</h2>
+
+<h3>Tránh tính lại trong vòng lặp</h3>
+<pre><code># Xấu — tính len(arr) mỗi lần
+paw i = 0
+knead i < len(arr)
+    meow arr[i]
+    i++
+
+# Tốt — cache lại
+paw n = len(arr)
+paw i = 0
+knead i < n
+    meow arr[i]
+    i++</code></pre>
+
+<h3>Dùng biến tạm cho vòng lặp lồng</h3>
+<pre><code># Xấu
+paw i = 0
+knead i < n
+    paw j = 0
+    knead j < len(arr) - i - 1
+        ...
+        j++
+    i++
+
+# Tốt
+paw i = 0
+knead i < n
+    paw limit = len(arr) - i - 1
+    paw j = 0
+    knead j < limit
+        ...
+        j++
+    i++</code></pre>
+
+<h3>Chọn cấu trúc phù hợp</h3>
+<pre><code># Tìm kiếm trong list — chậm O(n)
+sniff hunt(arr, target)
+    ...
+
+# Tra cứu trong dict — nhanh O(1)
+sniff seek(dict, key)
+    ...</code></pre>
+
+<h2>3. Dùng builtin thay vì tự viết</h2>
+<pre><code># Xấu — tự tính
+paw sum = 0
+groom x of arr
+    paw sum = sum + x
+
+# Tốt — dùng builtin (viết bằng Python, nhanh hơn)
+paw sum = pile(arr)</code></pre>
+
+<h3>So sánh tốc độ</h3>
+<table>
+<tr><th>Thao tác</th><th>Tự viết</th><th>Builtin</th></tr>
+<tr><td>Tính tổng 10k</td><td>0.5s</td><td>0.01s</td></tr>
+<tr><td>Sắp xếp 1k</td><td>1s</td><td>0.02s</td></tr>
+<tr><td>Map 10k</td><td>0.3s</td><td>0.005s</td></tr>
+</table>
+
+<h2>4. Hạn chế đệ quy</h2>
+<pre><code># Xấu — đệ quy chậm
+purr fib(n)
+    sniff n <= 1
+        give n
+    give fib(n - 1) + fib(n - 2)
+
+meow fib(30)   # ~2 giây</code></pre>
+
+<pre><code># Tốt — vòng lặp
+purr fib(n)
+    sniff n <= 1
+        give n
+    paw a = 0
+    paw b = 1
+    paw i = 2
+    knead i <= n
+        paw c = a + b
+        paw a = b
+        paw b = c
+        i++
+    give b
+
+meow fib(30)   # ~0.05 giây</code></pre>
+
+<h3>Đệ quy có nhớ (memoization)</h3>
+<pre><code>paw memo = {}
+
+purr fib(n)
+    sniff n <= 1
+        give n
+    sniff seek(memo, n)
+        give memo[n]
+    paw r = fib(n - 1) + fib(n - 2)
+    memo[n] = r
+    give r
+
+meow fib(100)   # nhanh</code></pre>
+
+<h2>5. Tránh tạo object thừa</h2>
+<pre><code># Xấu — tạo list mới mỗi vòng
+paw i = 0
+knead i < 1000
+    paw arr = []
+    paw arr = arr + [i]
+    i++
+
+# Tốt — tạo 1 lần
+paw arr = []
+paw i = 0
+knead i < 1000
+    arr.push(i)
+    i++</code></pre>
+
+<h2>6. Dùng toán tử bit khi có thể</h2>
+<pre><code># Xấu
+paw half = x / 2
+paw double = x * 2
+
+# Tốt (chỉ với số nguyên dương)
+paw half = x >> 1
+paw double = x << 1</code></pre>
+
+<h2>7. Break sớm</h2>
+<pre><code># Xấu — duyệt hết mới thoát
+paw found = no
+groom x of arr
+    sniff x == target
+        paw found = yes
+
+# Tốt — thoát ngay
+paw found = no
+groom x of arr
+    sniff x == target
+        paw found = yes
+        sit</code></pre>
+
+<h2>8. Benchmark</h2>
+<pre><code>paw start = now()
+
+# ... code cần đo ...
+
+paw elapsed = now() - start
+meow "Mat " + cast(str, elapsed) + " giay"</code></pre>
+
+<h2>9. Khi cần nhanh hơn</h2>
+
+<h3>Nếu code tính toán nặng</h3>
+<ul>
+<li>Transpile sang C dùng <code>tools/transpiler.py</code></li>
+<li>Dùng <code>cpp()</code> để gọi C library</li>
+<li>Viết phần nặng bằng C, gọi từ Cat++</li>
+</ul>
+
+<h3>Examples: tính số nguyên tố</h3>
+<pre><code># Cat++ thuần — 5 giây cho 100k số
+purr is_prime(n)
+    sniff n < 2
+        give no
+    paw i = 2
+    knead i * i <= n
+        sniff n % i == 0
+            give no
+        i++
+    give yes
+
+# Transpile sang C — 0.1 giây
+# bash build_catos.sh && chạy kernel</code></pre>
+
+<h2>10. Kết luận</h2>
+<p>Cat++ không được thiết kế cho hiệu năng. Nếu cần nhanh:</p>
+<ol>
+<li>Dùng builtin thay vì tự viết</li>
+<li>Tránh đệ quy sâu</li>
+<li>Cache giá trị trong vòng lặp</li>
+<li>Nếu vẫn chậm → transpile sang C</li>
+</ol>

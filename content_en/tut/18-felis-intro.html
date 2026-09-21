@@ -1,0 +1,49 @@
+<p><b>Felis OS</b> là hệ điều hành nhỏ, boot bare metal. Viết bằng C + runtime Cat++.</p>
+
+<h2>1. Đặc điểm</h2>
+<table>
+<tr><th>Đặc điểm</th><th>Value</th></tr>
+<tr><td>Kernel size</td><td>~30 KB</td></tr>
+<tr><td>Boot time</td><td>&lt; 1 giây</td></tr>
+<tr><td>Commands</td><td>23 lệnh</td></tr>
+<tr><td>Filesystem</td><td>RAM (64 file, 2KB/file)</td></tr>
+<tr><td>Kiến trúc</td><td>x86 32-bit</td></tr>
+</table>
+
+<h2>2. Boot flow</h2>
+<pre><code>Nguồn
+    ↓
+BIOS POST
+    ↓
+GRUB (multiboot)
+    ↓
+Load kernel vào 0x100000
+    ↓
+_start (assembly)
+    ↓
+kmain() → shell</code></pre>
+
+<h2>3. Cấu trúc source</h2>
+<pre><code>kernel/
+├── entry.s      Assembly entry
+├── main.c       kmain()
+├── idt.c        Interrupt table
+├── irq.s        IRQ stubs
+├── keyboard.c   PS/2 driver
+├── string.c     strlen, strcpy, ...
+├── fs.c         RAM filesystem
+├── commands.c   23 commands
+├── shell.c      REPL + line editor
+└── linker.ld    Memory layout</code></pre>
+
+<h2>4. Chạy Felis OS</h2>
+<pre><code>bash build_felis.sh
+qemu-system-x86_64 -kernel kernel/felis.elf \
+    -m 128M -display curses -nodefaults -snapshot</code></pre>
+
+<h2>Lesson tập</h2>
+<ol>
+<li>Boot Felis OS trong QEMU.</li>
+<li>Chạy lệnh <code>help</code> xem danh sách.</li>
+<li>Chạy <code>info</code>, <code>uname</code>, <code>mem</code>.</li>
+</ol>
