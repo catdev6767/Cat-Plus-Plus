@@ -360,7 +360,7 @@ function handleImportFile(evt) {
       var data = JSON.parse(e.target.result);
       if (!data.files) { alert('Invalid file'); return; }
       var count = Object.keys(data.files).length;
-      var overwrite = confirm('Nhập ' + count + ' file?\n\nOK = GHI ĐÈ (mất hết file hiện tại)\nCancel = GỘP (thêm vào)');
+      var overwrite = confirm('Import ' + count + ' file(s)?\n\nOK = OVERWRITE (lose current files)\nCancel = MERGE (add)');
       if (overwrite) { files = data.files; }
       else {
         for (var k in data.files) files[k] = data.files[k];
@@ -419,7 +419,7 @@ function examplesHtml() {
 function cheatsheetHtml() {
   return '<h1>' + T('modal.cheatsheet') + '</h1>' +
     '<h2>' + T('cheat.syntax') + '</h2>' +
-    '<pre><code>meow "in ra"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "lớn"\nswat\n    meow "nhỏ"\n\npaw i = 0\nknead i < 5\n    meow i\n    paw i = i + 1</code></pre>' +
+    '<pre><code>meow "print"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "big"\nswat\n    meow "small"\n\npaw i = 0\nknead i < 5\n    meow i\n    paw i = i + 1</code></pre>' +
     '<h2>' + T('cheat.keyword') + '</h2>' +
     '<table><tr><th>' + T('cheat.cat') + '</th><th>' + T('cheat.meaning') + '</th></tr>' +
     '<tr><td><code>meow</code></td><td>' + T('cheat.in') + '</td></tr>' +
@@ -516,7 +516,7 @@ function initTerminal() {
   var el = document.getElementById('terminal');
   if (el) {
     term.open(el);
-    term.writeln('\x1b[90mCat++ Terminal — Ctrl+Enter để chạy.\x1b[0m');
+    term.writeln('\x1b[90mCat++ Terminal — Ctrl+Enter to run.\x1b[0m');
     term.writeln('');
   }
 }
@@ -770,12 +770,12 @@ function benchmarkCode() {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (!data.ok) { term.writeln('\x1b[31mLỗi\x1b[0m'); return; }
+    if (!data.ok) { term.writeln('\x1b[31mError\x1b[0m'); return; }
     var res = data.results;
     var rows = [];
     if (res.interp && res.interp.ok) rows.push(['Interpreter', res.interp.ms]);
     if (res.vm && res.vm.ok) rows.push(['VM', res.vm.ms]);
-    if (rows.length === 0) { term.writeln('\x1b[33mKhông engine nào chạy\x1b[0m'); return; }
+    if (rows.length === 0) { term.writeln('\x1b[33mNo engine available\x1b[0m'); return; }
     var base = rows[0][1];
     term.writeln('\x1b[36m═══ Benchmark ═══\x1b[0m');
     for (var i = 0; i < rows.length; i++) {
@@ -783,7 +783,7 @@ function benchmarkCode() {
       term.writeln('  ' + rows[i][0].padEnd(14) + rows[i][1].toFixed(1).padStart(8) + ' ms   ' + speed.toFixed(1) + 'x');
     }
     term.writeln('');
-    term.writeln('\x1b[90mGợi ý: ⚡ C fast nhanh ~10000x so interpreter\x1b[0m');
+    term.writeln('\x1b[90mHint: ⚡ C fast is ~10000x faster than interpreter\x1b[0m');
   });
 }
 
@@ -847,8 +847,8 @@ function finishShare(base, enc) {
   var isLocal = base.indexOf('localhost') >= 0 || base.indexOf('127.0.0.1') >= 0;
   var msg = url;
   if (isLocal) {
-    msg = url + '\n\n⚠ CẢNH BÁO: Đây là link LOCAL — chỉ máy bạn mở được.\n' +
-          'Run ./share.sh để có link public.';
+    msg = url + '\n\n⚠ WARNING: This is a LOCAL link — only works on your machine.\n' +
+          'Run ./share.sh to get a public link.';
   }
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
@@ -1017,7 +1017,7 @@ function boot() {
   initMonaco().then(function() {
     console.log('[Cat++] Monaco ready');
   }).catch(function(e) {
-    console.error('[Cat++] Monaco lỗi:', e);
+    console.error('[Cat++] Monaco error:', e);
   });
 
   console.log('[Cat++] Boot done');
