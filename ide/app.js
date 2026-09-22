@@ -797,12 +797,8 @@ function runCode() {
   if (st) st.textContent = 'Running...';
   if (editor.getModel()) monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
 
-  fetch('/api/run', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code })
-  })
-  .then(function(r) { return r.json(); })
+  window.runCatppBrowser(code)
+  .then(function(da) { return { ok: da.ok, output: da.output, line: 0 }; })
   .then(function(data) {
     if (data.output) term.writeln(data.output.replace(/\n/g, '\r\n'));
     if (data.ok) {

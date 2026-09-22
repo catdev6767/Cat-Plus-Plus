@@ -5,7 +5,7 @@
 (function() {
   function doRedirect() {
     if (location.hash.length > 5) {
-      location.replace('https://github.com/catdev6767/Cat-Plus-Plus' + location.hash);
+      location.replace('./ide/' + location.hash);
       return true;
     }
     return false;
@@ -103,7 +103,7 @@ footer a { color:#94a3b8; }
     <div class="nav-logo">🐱 Cat++</div>
     <a href="#features" class="nav-link">Features</a>
     <a href="#cli" class="nav-link">CLI</a>
-    <a href="https://github.com/catdev6767/Cat-Plus-Plus#readme" class="nav-link">Docs</a>
+    <a href="./docs/" class="nav-link">Docs</a>
     <a href="/learn/" class="nav-link">Learn</a>
     <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="nav-link" style="display:inline-flex;align-items:center;gap:6px" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
@@ -123,7 +123,7 @@ footer a { color:#94a3b8; }
     <div class="hero-btns">
       <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="btn btn-primary">🚀 Open IDE</a>
       <a href="#install" class="btn btn-secondary">📦 Install</a>
-      <a href="https://github.com/catdev6767/Cat-Plus-Plus#readme" class="btn btn-secondary">📖 Docs</a>
+      <a href="./docs/" class="btn btn-secondary">📖 Docs</a>
     </div>
   </div>
 </div>
@@ -232,7 +232,7 @@ footer a { color:#94a3b8; }
     </ul>
 
     <p style="margin-top:24px;">
-      <a href="/docs/vi/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Read native guide →</a>
+      <a href="./docs/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Read native guide →</a>
     </p>
   </div>
 </section>
@@ -296,7 +296,7 @@ paw check game.cat</code></pre>
     </div>
 
     <p style="margin-top:32px;">
-      <a href="/docs/vi/guide/cli.html" class="btn btn-secondary">📖 Read CLI guide →</a>
+      <a href="./docs/guide/cli.html" class="btn btn-secondary">📖 Read CLI guide →</a>
     </p>
   </div>
 </section>
@@ -335,7 +335,7 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
       <p>Open the IDE, pick an example, start immediately. Try ⚡ C fast to see the speed.</p>
       <div class="hero-btns">
         <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="btn btn-primary">🚀 Open IDE</a>
-        <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
+        <a href="./docs/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
       </div>
     </div>
   </div>
@@ -347,8 +347,8 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
     <p>MIT License · Made with 🐱</p>
     <p style="margin-top:16px;">
       <a href="https://github.com/catdev6767/Cat-Plus-Plus">IDE</a> ·
-      <a href="https://github.com/catdev6767/Cat-Plus-Plus#readme">Docs</a> ·
-      <a href="/docs/vi/guide/felis.html">Felis OS</a> ·
+      <a href="./docs/">Docs</a> ·
+      <a href="./docs/guide/felis.html">Felis OS</a> ·
       <a href="https://github.com/catdev6767/Cat-Plus-Plus">GitHub</a>
     </p>
   </div>
@@ -358,7 +358,7 @@ python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
 <script>
 // If there is a base64 hash → redirect to IDE
 if (location.hash.length > 5) {
-    location.replace('https://github.com/catdev6767/Cat-Plus-Plus' + location.hash);
+    location.replace('./ide/' + location.hash);
 }
 </script>
 </body>

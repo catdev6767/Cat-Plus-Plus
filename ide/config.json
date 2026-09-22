@@ -1,0 +1,13 @@
+{
+  "modules": {
+    "interpreter": {
+      "enabled": true
+    },
+    "server": {
+      "enabled": true
+    },
+    "cli": {
+      "enabled": true
+    }
+  }
+}
