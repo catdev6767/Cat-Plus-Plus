@@ -17,7 +17,7 @@
     l07: { q: 'Đệ quy là gì?', opts: ['Hàm gọi chính nó', 'Vòng lặp vô tận', 'Hàm có tham số', 'Hàm không có give'], a: 0 },
     l08: { q: 'Hàm tính tổng danh sách là gì?', opts: ['sum()', 'total()', 'pile()', 'add()'], a: 2 },
     l09: { q: 'Chuyển chuỗi sang chữ HOA bằng gì?', opts: ['upper()', 'puff()', 'caps()', 'big()'], a: 1 },
-    l10: { q: 'Class trong Cat++ dùng từ khóa nào?', opts: ['class', 'cat', 'type', 'struct'], a: 1 }
+    l10: { q: 'Class trong Cat++ dùng từ khóa nào?', opts: ['class', 'cat', 'type', 'struct'], a: 1 },
     'l11': { q: 'Default param viết thế nào?', opts: ["f(a)", "f(a=10)", "f(a:10)", "f(a:10=)"], a: 1 },
     'l12': { q: 'Lambda dùng từ khóa nào?', opts: ["fn", "lambda", "kit", "arrow"], a: 2 },
     'l13': { q: 'Hàm map trong Cat++ là?', opts: ["map", "chase", "apply", "each"], a: 1 },
