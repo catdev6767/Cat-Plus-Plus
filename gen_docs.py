@@ -347,10 +347,7 @@ def build_lang(lang_code, data_module):
             if nxt: ph += '<a class="pager-item next" href="' + nxt[1] + '"><span>' + TXT['next'] + '</span><b>' + nxt[0] + '</b></a>'
             ph += '</div>'
 
-        lang_switch = ('<div class="lang-switch">'
-            '<a href="/docs/vi/" class="' + ('active' if lang_code=='vi' else '') + '">VI</a>'
-            '<a href="/docs/en/" class="' + ('active' if lang_code=='en' else '') + '">EN</a>'
-            '</div>')
+        lang_switch = ''
 
         header = (
             '<div class="header">'
