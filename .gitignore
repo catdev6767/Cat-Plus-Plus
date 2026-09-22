@@ -34,3 +34,23 @@ Thumbs.db
 # Test binaries
 test[0-9]
 test[0-9].c
+
+
+# Phase 8c: dev-only (kept local, not in git)
+server.py
+static/
+content/
+felisos/
+felis/
+iso/
+patch_engine.py
+heal.py
+gen_docs.py
+gen_text.py
+docs_*.py
+transpiler_c*.py
+runtime_c.h
+tools/
+patches/
+phase*.py
+Cat-Plus-Plus/
