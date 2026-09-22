@@ -1,0 +1,2109 @@
+Cat++ Documentation — English
+
+============================================================
+
+Table of Contents
+
+1. Lesson 1 — Hello Cat
+2. Lesson 2 — Variables (paw)
+3. Lesson 3 — sniff / swat
+4. Lesson 4 — knead / groom
+5. Lesson 5 — purr / give
+6. Lesson 6 — Lists
+7. Lesson 7 — Strings
+8. Lesson 8 — tap / hiss
+9. Lesson 9 — Algorithms
+10. Lesson 10 — cat / kin / litter
+
+Keywords
+- cat
+- either
+- give
+- groom
+- hiss
+- hungry
+- kin
+- kit
+- knead
+- leap
+- litter
+- me
+- meow
+- never
+- nod
+- of
+- paw
+- purr
+- shake
+- sit
+- sniff
+- swat
+- tap
+- with
+
+Builtins
+- bolt()
+- bound()
+- chase()
+- collar()
+- curl()
+- dice()
+- drip()
+- flip()
+- flop()
+- grow()
+- head()
+- hunt()
+- kits()
+- kitten()
+- lick()
+- line()
+- lion()
+- melt()
+- nip()
+- perch()
+- pile()
+- puff()
+- rear()
+- say()
+- scratch()
+- seek()
+- shred()
+- sift()
+- slant()
+- snatch()
+- stash()
+- swap()
+- sway()
+- tail()
+- tally()
+- walk()
+- wander()
+- wave()
+- weave()
+
+Specification
+- EBNF Grammar
+- Semantics
+- Code conventions
+
+============================================================
+
+Tutorial
+
+============================================================
+
+Lesson 1 — Hello Cat
+
+First program. You will learn how to print to screen.
+
+Printing strings
+
+--- CODE ---
+meow "Meow! Hello, Cat++!"
+--- CODE ---
+
+Result: Meow! Hello, Cat++!
+
+Printing numbers
+
+--- CODE ---
+meow 42
+meow 3 + 4
+--- CODE ---
+
+Print multiple lines
+
+--- CODE ---
+meow "Line 1"
+meow "Line 2"
+--- CODE ---
+
+Exercises
+
+Print your name 3 times, each time one line.
+
+============================================================
+
+Lesson 2 — Variables (paw)
+
+Variables store values for reuse. Use the keyword paw.
+
+Declare
+
+--- CODE ---
+paw name = "Whiskers"
+paw age = 3
+meow name
+meow age
+--- CODE ---
+
+Reassign
+
+--- CODE ---
+paw x = 10
+x = x + 5
+meow x
+--- CODE ---
+
+Result: 15
+
+Concatenate strings and variables
+
+--- CODE ---
+paw name = "Tom"
+meow "Hello, " + name + "!"
+--- CODE ---
+
+Exercises
+
+Declare width = 5, height = 3, print area rectangle.
+
+============================================================
+
+Lesson 3 — sniff / swat
+
+Branch with sniff / swat.
+
+Syntax
+
+--- CODE ---
+sniff dieu_kien
+    code_neu_dung
+swat
+    code_neu_sai
+--- CODE ---
+
+Examples
+
+--- CODE ---
+paw age = 3
+sniff age > 2
+    meow "Big Cat"
+swat
+    meow "Kitten"
+--- CODE ---
+
+Comparison
+
+Exercises
+
+Check n = 8even or odd.
+
+============================================================
+
+Lesson 4 — knead / groom
+
+Repeat code with knead and groom.
+
+knead
+
+--- CODE ---
+paw i = 1
+knead i <= 5
+    meow i
+    paw i = i + 1
+--- CODE ---
+
+groom — browse list
+
+--- CODE ---
+paw cats = ["Tom", "Jerry", "Kitty"]
+groom c of cats
+    meow c
+--- CODE ---
+
+sit / leap
+
+--- CODE ---
+paw i = 0
+knead i < 10
+    paw i = i + 1
+    sniff i == 3
+        leap
+    sniff i == 7
+        sit
+    meow i
+--- CODE ---
+
+Exercises
+
+Print the numbers from 1 to 20 divisible by 3.
+
+============================================================
+
+Lesson 5 — purr / give
+
+Functions group code for reuse.
+
+Define
+
+--- CODE ---
+purr greet(name)
+    meow "Hello, " + name + "!"
+
+greet("Tom")
+greet("Jerry")
+--- CODE ---
+
+Return value
+
+--- CODE ---
+purr add(a, b)
+    give a + b
+
+meow add(3, 4)
+--- CODE ---
+
+Recursive function
+
+--- CODE ---
+purr fact(n)
+    sniff n <= 1
+        give 1
+    give n * fact(n - 1)
+
+meow fact(5)
+--- CODE ---
+
+Exercises
+
+Write functionmax3(a, b, c)returns the largest number that prints three numbers.
+
+============================================================
+
+Lesson 6 — Lists
+
+Lists store multiple values in one variable.
+
+Create
+
+--- CODE ---
+paw empty = []
+paw nums = [1, 2, 3]
+paw mixed = [1, "hai", nod]
+--- CODE ---
+
+Access
+
+--- CODE ---
+paw cats = ["Tom", "Jerry", "Kitty"]
+meow cats[0]
+meow cats[2]
+meow tail(cats)
+--- CODE ---
+
+Add Section Element
+
+--- CODE ---
+paw arr = [1, 2]
+stash(arr, 3)
+meow arr
+--- CODE ---
+
+Exercises
+
+Sum of prints[10, 20, 30, 40].
+
+============================================================
+
+Lesson 7 — Strings
+
+Text processing.
+
+Concat
+
+--- CODE ---
+meow "Hello, " + "Cat!"
+--- CODE ---
+
+Length
+
+--- CODE ---
+meow tail("hello")
+--- CODE ---
+
+Uppercase / Normal
+
+--- CODE ---
+meow puff("hello")
+meow melt("HELLO")
+--- CODE ---
+
+Cut
+
+--- CODE ---
+meow nip("Hello, Cat!", 0, 5)
+--- CODE ---
+
+Interpolation
+
+--- CODE ---
+paw name = "Tom"
+meow "Hello, {name}!"
+--- CODE ---
+
+Exercises
+
+Write reverse function string"hello"of living capital and gestation of the subject. "olleh".
+
+============================================================
+
+Lesson 8 — tap / hiss
+
+Not let the program crash on errors.
+
+Syntax
+
+--- CODE ---
+tap
+    paw x = 1 / 0
+hiss e
+    meow "Error: " + e
+--- CODE ---
+
+Use
+
+--- CODE ---
+paw nums = [10, 0, 5]
+groom n of nums
+    tap
+        meow 100 / n
+    hiss e
+        meow "Skip " + say(n)
+--- CODE ---
+
+Exercises
+
+Cho ["10", "abc", "20"], try to shift the number, ignore the death penalty section.
+
+============================================================
+
+Lesson 9 — Algorithms
+
+Apply cat++ ando practical math lesson.
+
+Foam Floating Arrangement
+
+--- CODE ---
+paw arr = [5, 2, 8, 1, 9]
+paw n = tail(arr)
+
+paw i = 0
+knead i  arr[j + 1]
+            paw tmp = arr[j]
+            arr[j] = arr[j + 1]
+            arr[j + 1] = tmp
+        paw j = j + 1
+    paw i = i + 1
+
+groom x of arr
+    meow x
+--- CODE ---
+
+Binary Search
+
+--- CODE ---
+purr bsearch(arr, target)
+    paw lo = 0
+    paw hi = tail(arr) - 1
+    knead lo <= hi
+        paw mid = flop((lo + hi) / 2)
+        sniff arr[mid] == target
+            give mid
+        sniff arr[mid] < target
+            paw lo = mid + 1
+        swat
+            paw hi = mid - 1
+    give -1
+--- CODE ---
+
+Exercises
+
+Write the function to check the prime number.
+
+============================================================
+
+Lesson 10 — cat / kin / litter
+
+Classes group data and functions that operate on it.
+
+Define
+
+--- CODE ---
+cat Point
+    paw x
+    paw y
+
+    purr new(a, b)
+        me.x = a
+        me.y = b
+
+    purr dist()
+        give scratch(me.x  me.x + me.y  me.y)
+
+paw p = Point(3, 4)
+meow p.dist()
+--- CODE ---
+
+Inheritance (kin)
+
+--- CODE ---
+cat Animal
+    paw name
+    purr new(n)
+        me.name = n
+    purr speak()
+        give "..."
+
+cat Dog kin Animal
+    purr speak()
+        give me.name + " says woof!"
+
+meow Dog("Rex").speak()
+--- CODE ---
+
+Enum (litter)
+
+--- CODE ---
+litter Color
+    red
+    green
+    blue
+
+meow Color.red
+--- CODE ---
+
+Exercises
+
+Write classRectanglewith the method of calculating the area and perimeter.
+
+============================================================
+
+Keywords
+
+============================================================
+
+cat
+
+Category: OOP  
+Syntax: cat <Name>
+
+Description
+
+Define a class.
+
+Class contains paw (field) and purr (method). Method new is the constructor.
+
+Examples
+
+Class
+
+--- CODE ---
+cat Point
+    paw x
+    paw y
+    purr new(a, b)
+        me.x = a
+        me.y = b
+    purr info()
+        give "({me.x}, {me.y})"
+
+paw p = Point(3, 4)
+meow p.info()
+--- CODE ---
+
+Result: (3, 4)
+
+============================================================
+
+either
+
+Category: Logic  
+Syntax: <a> either <b>
+
+Description
+
+True when either is true.
+
+Short-circuit evaluation.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow nod either shake
+--- CODE ---
+
+Result: nod
+
+============================================================
+
+give
+
+Category: Declaration  
+Syntax: give <expression>
+
+Description
+
+Return a value from function.
+
+After give, function exits immediately. Must be inside a function.
+
+Examples
+
+Return
+
+--- CODE ---
+purr check(n)
+    sniff n > 0
+        give "dương"
+    give "khác"
+meow check(5)
+--- CODE ---
+
+Result: dương
+
+============================================================
+
+groom
+
+Category: Control  
+Syntax: groom <variable> of <list>
+
+Description
+
+Iterate list.
+
+Variable is local per iteration. Supports sit/leap.
+
+Examples
+
+Duyệt
+
+--- CODE ---
+groom c of ["a", "b"]
+    meow c
+--- CODE ---
+
+Result: a
+b
+
+============================================================
+
+hiss
+
+Category: Error  
+Syntax: hiss <name>
+
+Description
+
+Bắt lỗi from tap.
+
+Name is a local variable holding the message.
+
+Examples
+
+Basic
+
+--- CODE ---
+tap
+    paw x = 1 / 0
+hiss e
+    meow "Error: " + e
+--- CODE ---
+
+Result: Error: Chia for 0
+
+============================================================
+
+hungry
+
+Category: Value  
+Syntax: hungry
+
+Description
+
+Empty value (null).
+
+Functions without give return hungry.
+
+Examples
+
+Dùng
+
+--- CODE ---
+meow hungry
+--- CODE ---
+
+Result: hungry
+
+============================================================
+
+kin
+
+Category: OOP  
+Syntax: cat <Name> kin <Cha>
+
+Description
+
+Kế thừa.
+
+Child class inherits parent fields and methods.
+
+Examples
+
+Kế thừa
+
+--- CODE ---
+cat A
+    paw n
+    purr new(x)
+        me.n = x
+cat B kin A
+    purr hi()
+        give me.n
+meow B("Bob").hi()
+--- CODE ---
+
+Result: Bob
+
+============================================================
+
+kit
+
+Category: Function  
+Syntax: kit(<ts>) => <bt>
+
+Description
+
+Lambda — function ẩn danh.
+
+Used in chase/sift/curl or assigned to a variable.
+
+Examples
+
+Lambda
+
+--- CODE ---
+paw double = kit(x) => x * 2
+meow double(21)
+--- CODE ---
+
+Result: 42
+
+============================================================
+
+knead
+
+Category: Control  
+Syntax: knead <condition>
+
+Description
+
+Loop while condition is true.
+
+Limit 1 million iterations. Supports sit/leap.
+
+Examples
+
+Đếm
+
+--- CODE ---
+paw i = 1
+knead i <= 3
+    meow i
+    paw i = i + 1
+--- CODE ---
+
+Result: 1
+2
+3
+
+============================================================
+
+leap
+
+Category: Control  
+Syntax: leap
+
+Description
+
+Skip iteration hiện tại.
+
+Does not exit the loop.
+
+Examples
+
+Bỏ 2
+
+--- CODE ---
+paw i = 0
+knead i < 4
+    paw i = i + 1
+    sniff i == 2
+        leap
+    meow i
+--- CODE ---
+
+Result: 1
+3
+4
+
+============================================================
+
+litter
+
+Category: OOP  
+Syntax: litter <Name>
+
+Description
+
+Define enum.
+
+Access via Name.thànhviên.
+
+Examples
+
+Enum
+
+--- CODE ---
+litter Color
+    red
+    green
+    blue
+meow Color.red
+--- CODE ---
+
+Result: Color.red
+
+============================================================
+
+me
+
+Category: OOP  
+Syntax: me.<field>
+
+Description
+
+Tham chiếu instance hiện tại.
+
+Equivalent to self in Python.
+
+Examples
+
+Dùng
+
+--- CODE ---
+cat P
+    paw x
+    purr new(a)
+        me.x = a
+paw p = P(5)
+meow p.x
+--- CODE ---
+
+Result: 5
+
+============================================================
+
+meow
+
+Category: I/O  
+Syntax: meow <expression>
+
+Description
+
+Print to screen.
+
+Auto-converts to string. nod/shake for boolean, hungry for null.
+
+Examples
+
+String
+
+--- CODE ---
+meow "Hello, Cat++!"
+--- CODE ---
+
+Result: Hello, Cat++!
+
+Number
+
+--- CODE ---
+meow 42
+--- CODE ---
+
+Result: 42
+
+Expression
+
+--- CODE ---
+meow 3 + 4 * 2
+--- CODE ---
+
+Result: 11
+
+============================================================
+
+never
+
+Category: Logic  
+Syntax: never <a>
+
+Description
+
+Printvert boolean.
+
+High precedence.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow never nod
+--- CODE ---
+
+Result: shake
+
+============================================================
+
+nod
+
+Category: Value  
+Syntax: nod
+
+Description
+
+Boolean true.
+
+Print ra là nod.
+
+Examples
+
+Dùng
+
+--- CODE ---
+meow nod
+--- CODE ---
+
+Result: nod
+
+============================================================
+
+of
+
+Category: Control  
+Syntax: groom x of <ds>
+
+Description
+
+Helper keyword for groom.
+
+Only used in groom.
+
+============================================================
+
+paw
+
+Category: Declaration  
+Syntax: paw <name> = <expression>
+
+Description
+
+Declare a variable.
+
+Same scope, overrides. Different scope, new binding (shadowing).
+
+Examples
+
+Number
+
+--- CODE ---
+paw x = 10
+meow x
+--- CODE ---
+
+Result: 10
+
+Reassign
+
+--- CODE ---
+paw x = 10
+x = x + 5
+meow x
+--- CODE ---
+
+Result: 15
+
+Dict
+
+--- CODE ---
+paw d = {"a": 1}
+meow d["a"]
+--- CODE ---
+
+Result: 1
+
+============================================================
+
+purr
+
+Category: Declaration  
+Syntax: purr <name>(<parameters>)
+
+Description
+
+Define a function.
+
+Define before calling. No give → returns hungry. Recursion up to 500 levels.
+
+Examples
+
+Basic
+
+--- CODE ---
+purr greet(name)
+    meow "Hi, " + name
+greet("Tom")
+--- CODE ---
+
+Result: Hi, Tom
+
+Return
+
+--- CODE ---
+purr add(a, b)
+    give a + b
+meow add(3, 4)
+--- CODE ---
+
+Result: 7
+
+Đệ quy
+
+--- CODE ---
+purr fact(n)
+    sniff n <= 1
+        give 1
+    give n * fact(n - 1)
+meow fact(5)
+--- CODE ---
+
+Result: 120
+
+============================================================
+
+shake
+
+Category: Value  
+Syntax: shake
+
+Description
+
+Boolean false.
+
+Print ra là shake.
+
+Examples
+
+Dùng
+
+--- CODE ---
+meow shake
+--- CODE ---
+
+Result: shake
+
+============================================================
+
+sit
+
+Category: Control  
+Syntax: sit
+
+Description
+
+Break loop gần nhất.
+
+Only affects the enclosing loop.
+
+Examples
+
+Thoát
+
+--- CODE ---
+paw i = 1
+knead i <= 5
+    sniff i == 3
+        sit
+    meow i
+    paw i = i + 1
+--- CODE ---
+
+Result: 1
+2
+
+============================================================
+
+sniff
+
+Category: Control  
+Syntax: sniff <condition>
+
+Description
+
+Branch if condition is true.
+
+Condition evaluates to nod/shake. Block indented 4 spaces.
+
+Examples
+
+Basic
+
+--- CODE ---
+sniff 5 > 3
+    meow "đúng"
+--- CODE ---
+
+Result: đúng
+
+Yes swat
+
+--- CODE ---
+sniff shake
+    meow "a"
+swat
+    meow "b"
+--- CODE ---
+
+Result: b
+
+============================================================
+
+swat
+
+Category: Control  
+Syntax: swat
+
+Description
+
+Khối chạy khi sniff sai.
+
+Must accompany sniff. No elif — use nested sniff.
+
+Examples
+
+Basic
+
+--- CODE ---
+sniff shake
+    meow "a"
+swat
+    meow "b"
+--- CODE ---
+
+Result: b
+
+============================================================
+
+tap
+
+Category: Error  
+Syntax: tap ... hiss
+
+Description
+
+Catch runtime error.
+
+Not có hiss → lỗi bị bỏ qua.
+
+Examples
+
+Bắt lỗi
+
+--- CODE ---
+tap
+    paw x = 1 / 0
+hiss e
+    meow e
+--- CODE ---
+
+Result: Chia for 0
+
+============================================================
+
+with
+
+Category: Logic  
+Syntax: <a> with <b>
+
+Description
+
+True when both are true.
+
+Short-circuit evaluation.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow nod with shake
+--- CODE ---
+
+Result: shake
+
+============================================================
+
+Builtins
+
+============================================================
+
+bolt()
+
+Category: Math  
+Signature: bolt(x)
+
+Description
+
+Absolute value.
+
+Examples
+
+Âm
+
+--- CODE ---
+meow bolt(-5)
+--- CODE ---
+
+Result: 5
+
+============================================================
+
+bound()
+
+Category: Math  
+Signature: bound(a, b)
+
+Description
+
+a to the power of b.
+
+Examples
+
+2^10
+
+--- CODE ---
+meow bound(2, 10)
+--- CODE ---
+
+Result: 1024
+
+============================================================
+
+chase()
+
+Category: Higher-order  
+Signature: chase(ds, f)
+
+Description
+
+Apply f (map).
+
+Examples
+
+Bình phương
+
+--- CODE ---
+meow chase([1,2,3], kit(x) => x*x)
+--- CODE ---
+
+Result: [1, 4, 9]
+
+============================================================
+
+collar()
+
+Category: Dict  
+Signature: collar(d)
+
+Description
+
+List of keys.
+
+Examples
+
+Basic
+
+--- CODE ---
+paw d = {"a":1,"b":2}
+meow collar(d)
+--- CODE ---
+
+Result: [a, b]
+
+============================================================
+
+curl()
+
+Category: Higher-order  
+Signature: curl(ds, f, init)
+
+Description
+
+Reduce.
+
+Examples
+
+Tổng
+
+--- CODE ---
+meow curl([1,2,3], kit(a,b) => a+b, 0)
+--- CODE ---
+
+Result: 6
+
+============================================================
+
+dice()
+
+Category: Random  
+Signature: dice(a, b)
+
+Description
+
+Random integer.
+
+Examples
+
+1..6
+
+--- CODE ---
+paw r = dice(1, 6)
+meow r
+--- CODE ---
+
+Result: (ngẫu nhiên)
+
+============================================================
+
+drip()
+
+Category: Conversion  
+Signature: drip(x)
+
+Description
+
+To float.
+
+Examples
+
+String
+
+--- CODE ---
+meow drip("3.14")
+--- CODE ---
+
+Result: 3.14
+
+============================================================
+
+flip()
+
+Category: List  
+Signature: flip(ds)
+
+Description
+
+Reverse.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow flip([1,2,3])
+--- CODE ---
+
+Result: [3, 2, 1]
+
+============================================================
+
+flop()
+
+Category: Math  
+Signature: flop(x)
+
+Description
+
+Floor.
+
+Examples
+
+3.9
+
+--- CODE ---
+meow flop(3.9)
+--- CODE ---
+
+Result: 3
+
+============================================================
+
+grow()
+
+Category: Math  
+Signature: grow(x)
+
+Description
+
+log tự nhiên.
+
+Examples
+
+1
+
+--- CODE ---
+meow grow(1)
+--- CODE ---
+
+Result: 0
+
+============================================================
+
+head()
+
+Category: List  
+Signature: head(ds)
+
+Description
+
+First element.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow head([1,2,3])
+--- CODE ---
+
+Result: 1
+
+============================================================
+
+hunt()
+
+Category: String  
+Signature: hunt(s, sub)
+
+Description
+
+Check substring.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow hunt("hello", "ell")
+--- CODE ---
+
+Result: nod
+
+============================================================
+
+kits()
+
+Category: Dict  
+Signature: kits(d)
+
+Description
+
+List of values.
+
+Examples
+
+Basic
+
+--- CODE ---
+paw d = {"a":1,"b":2}
+meow kits(d)
+--- CODE ---
+
+Result: [1, 2]
+
+============================================================
+
+kitten()
+
+Category: Math  
+Signature: kitten(a, b)
+
+Description
+
+Smaller.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow kitten(3, 7)
+--- CODE ---
+
+Result: 3
+
+============================================================
+
+lick()
+
+Category: String  
+Signature: lick(s)
+
+Description
+
+Trim whitespace.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow lick("  hi  ")
+--- CODE ---
+
+Result: hi
+
+============================================================
+
+line()
+
+Category: List  
+Signature: line(ds)
+
+Description
+
+Sort.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow line([3,1,2])
+--- CODE ---
+
+Result: [1, 2, 3]
+
+============================================================
+
+lion()
+
+Category: Math  
+Signature: lion(a, b)
+
+Description
+
+Larger.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow lion(3, 7)
+--- CODE ---
+
+Result: 7
+
+============================================================
+
+melt()
+
+Category: String  
+Signature: melt(s)
+
+Description
+
+Lowercase.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow melt("HELLO")
+--- CODE ---
+
+Result: hello
+
+============================================================
+
+nip()
+
+Category: String  
+Signature: nip(s, a, b)
+
+Description
+
+Slice from a to b-1.
+
+Examples
+
+Đầu
+
+--- CODE ---
+meow nip("Hello, Cat!", 0, 5)
+--- CODE ---
+
+Result: Hello
+
+============================================================
+
+perch()
+
+Category: Math  
+Signature: perch(x)
+
+Description
+
+Ceiling.
+
+Examples
+
+3.1
+
+--- CODE ---
+meow perch(3.1)
+--- CODE ---
+
+Result: 4
+
+============================================================
+
+pile()
+
+Category: List  
+Signature: pile(ds)
+
+Description
+
+Sum of list.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow pile([1,2,3,4])
+--- CODE ---
+
+Result: 10
+
+============================================================
+
+puff()
+
+Category: String  
+Signature: puff(s)
+
+Description
+
+Uppercase.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow puff("hello")
+--- CODE ---
+
+Result: HELLO
+
+============================================================
+
+rear()
+
+Category: List  
+Signature: rear(ds)
+
+Description
+
+Last element.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow rear([1,2,3])
+--- CODE ---
+
+Result: 3
+
+============================================================
+
+say()
+
+Category: Conversion  
+Signature: say(x)
+
+Description
+
+To string.
+
+Examples
+
+Number
+
+--- CODE ---
+meow say(42)
+--- CODE ---
+
+Result: 42
+
+============================================================
+
+scratch()
+
+Category: Math  
+Signature: scratch(x)
+
+Description
+
+Square root.
+
+Examples
+
+16
+
+--- CODE ---
+meow scratch(16)
+--- CODE ---
+
+Result: 4
+
+============================================================
+
+seek()
+
+Category: Dict  
+Signature: seek(d, k)
+
+Description
+
+Check key.
+
+Examples
+
+Basic
+
+--- CODE ---
+paw d = {"a":1}
+meow seek(d, "a")
+--- CODE ---
+
+Result: nod
+
+============================================================
+
+shred()
+
+Category: String  
+Signature: shred(s, sep)
+
+Description
+
+Split string.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow shred("a,b,c", ",")
+--- CODE ---
+
+Result: [a, b, c]
+
+============================================================
+
+sift()
+
+Category: Higher-order  
+Signature: sift(ds, f)
+
+Description
+
+Filter.
+
+Examples
+
+Chẵn
+
+--- CODE ---
+meow sift([1,2,3,4], kit(x) => x%2==0)
+--- CODE ---
+
+Result: [2, 4]
+
+============================================================
+
+slant()
+
+Category: Math  
+Signature: slant(x)
+
+Description
+
+tan(x).
+
+Examples
+
+0
+
+--- CODE ---
+meow slant(0)
+--- CODE ---
+
+Result: 0
+
+============================================================
+
+snatch()
+
+Category: List  
+Signature: snatch(ds)
+
+Description
+
+Get last element.
+
+Examples
+
+Basic
+
+--- CODE ---
+paw a = [1,2,3]
+meow snatch(a)
+--- CODE ---
+
+Result: 3
+
+============================================================
+
+stash()
+
+Category: List  
+Signature: stash(ds, v)
+
+Description
+
+Append element.
+
+Examples
+
+Basic
+
+--- CODE ---
+paw a = [1,2]
+stash(a, 3)
+meow a
+--- CODE ---
+
+Result: [1, 2, 3]
+
+============================================================
+
+swap()
+
+Category: String  
+Signature: swap(s, a, b)
+
+Description
+
+Replace.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow swap("hello", "l", "L")
+--- CODE ---
+
+Result: heLLo
+
+============================================================
+
+sway()
+
+Category: Math  
+Signature: sway(x)
+
+Description
+
+sin(x).
+
+Examples
+
+0
+
+--- CODE ---
+meow sway(0)
+--- CODE ---
+
+Result: 0
+
+============================================================
+
+tail()
+
+Category: Basic  
+Signature: tail(x)
+
+Description
+
+Length of string or list.
+
+Examples
+
+String
+
+--- CODE ---
+meow tail("hello")
+--- CODE ---
+
+Result: 5
+
+List
+
+--- CODE ---
+meow tail([1,2,3])
+--- CODE ---
+
+Result: 3
+
+============================================================
+
+tally()
+
+Category: Conversion  
+Signature: tally(x)
+
+Description
+
+To integer.
+
+Examples
+
+String
+
+--- CODE ---
+meow tally("42")
+--- CODE ---
+
+Result: 42
+
+============================================================
+
+walk()
+
+Category: List  
+Signature: walk(a, b)
+
+Description
+
+Create number range.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow walk(1, 5)
+--- CODE ---
+
+Result: [1, 2, 3, 4]
+
+============================================================
+
+wander()
+
+Category: Random  
+Signature: wander()
+
+Description
+
+Random number 0..1.
+
+============================================================
+
+wave()
+
+Category: Math  
+Signature: wave(x)
+
+Description
+
+cos(x).
+
+Examples
+
+0
+
+--- CODE ---
+meow wave(0)
+--- CODE ---
+
+Result: 1
+
+============================================================
+
+weave()
+
+Category: String  
+Signature: weave(ds, sep)
+
+Description
+
+Join list.
+
+Examples
+
+Basic
+
+--- CODE ---
+meow weave(["a","b"], "-")
+--- CODE ---
+
+Result: a-b
+
+============================================================
+
+Specification
+
+============================================================
+
+EBNF Grammar
+
+Program
+
+--- CODE ---
+program    = { statement } ;
+statement  = let_stmt | assign_stmt | print_stmt | listen_stmt
+           | fn_stmt | return_stmt | if_stmt | while_stmt
+           | each_stmt | try_stmt | stop_stmt | skip_stmt
+           | class_stmt | enum_stmt | expr_stmt ;
+
+let_stmt   = "paw" IDENT "=" expr NEWLINE ;
+print_stmt = "meow" expr NEWLINE ;
+fn_stmt    = "purr" IDENT [ params ] NEWLINE INDENT { stmt } DEDENT ;
+if_stmt    = "sniff" expr NEWLINE INDENT { stmt } DEDENT
+             [ "swat" NEWLINE INDENT { stmt } DEDENT ] ;
+while_stmt = "knead" expr NEWLINE INDENT { stmt } DEDENT ;
+each_stmt  = "groom" IDENT "of" expr NEWLINE INDENT { stmt } DEDENT ;
+try_stmt   = "tap" NEWLINE INDENT { stmt } DEDENT
+             [ "hiss" [ IDENT ] NEWLINE INDENT { stmt } DEDENT ] ;
+class_stmt = "cat" IDENT [ "kin" IDENT ] NEWLINE INDENT { member } DEDENT ;
+enum_stmt  = "litter" IDENT NEWLINE INDENT { IDENT NEWLINE } DEDENT ;
+--- CODE ---
+
+Expression
+
+--- CODE ---
+expr     = or_expr ;
+or_expr  = and_expr { "either" and_expr } ;
+and_expr = not_expr { "with" not_expr } ;
+not_expr = "never" not_expr | cmp_expr ;
+cmp_expr = add_expr { cmp_op add_expr } ;
+add_expr = mul_expr { ("+" | "-") mul_expr } ;
+mul_expr = unary { ("*" | "/" | "%") unary } ;
+primary  = NUMBER | STRING | "nod" | "shake" | "hungry"
+         | IDENT | "me" | "(" expr ")" | list_lit
+         | dict_lit | lambda ;
+lambda   = "kit" "(" [ params ] ")" "=>" expr ;
+--- CODE ---
+
+============================================================
+
+Semantics
+
+Expression evaluation
+
+Left to right, respecting precedence:
+
+- ()
+
+- never, negative sign
+
+- * / %
+
+- + -
+
+- < > <= >=
+
+- == !=
+
+- with
+
+- either
+
+Short-circuit assessment
+
+--- CODE ---
+a with b    # a false → not evaluated b
+a either b  # a → right to evaluate b
+--- CODE ---
+
+Ép type
+
+- + with string → press the remaining part to string
+
+- Other permissions require both to be numeric
+
+- Comparison not pressed: 42 == "42" is shake
+
+Truthiness
+
+- nod → right, shake → wrong
+
+- Non-zero number → true
+
+- Other String/DS is empty → correctly
+
+- hungry → sai
+
+Scope
+
+- Each function has its own scope
+
+- Variable in function sees variable outside (lexical scope)
+
+- None keyword global
+
+============================================================
+
+Code conventions
+
+Naming
+
+Indent
+
+4 spaces, no tabs, no mixing.
+
+Line length
+
+Maximum 80 characters.
+
+Comment
+
+Explanation why does the, must notWhat u do for earnings.
+
+============================================================
+

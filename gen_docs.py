@@ -265,7 +265,7 @@ def build_lang(lang_code, data_module):
     with open(site + '/style.css', 'w', encoding='utf-8') as f: f.write(CSS)
     with open(site + '/app.js', 'w', encoding='utf-8') as f: f.write(JS)
 
-    if lang_code == 'vi':
+    if False:
         TXT = {
             'overview':'Tổng quan','home':'Trang chủ','tutorial':'Tutorial',
             'keyword':'Từ khóa','builtin':'Hàm có sẵn','spec':'Đặc tả',
@@ -518,7 +518,7 @@ def build():
   location.replace('/docs/' + lang + '/');
 </script>
 </head><body>
-<p>Redirecting... <a href="/docs/vi/">VI</a> | <a href="/docs/en/">EN</a></p>
+<p>Redirecting to <a href="/docs/en/">/docs/en/</a>...</p>
 </body></html>'''
         with open(SITE + '/index.html', 'w', encoding='utf-8') as f:
             f.write(redirect)

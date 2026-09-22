@@ -2,7 +2,7 @@
 import sys, os, re, io
 import html as htmllib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import docs_data_vi, docs_data_en
+import docs_data_en
 
 def strip_tags(s):
     s = re.sub(r'<pre><code>(.*?)</code></pre>',
@@ -24,7 +24,7 @@ def strip_tags(s):
     return re.sub(r'\n{3,}', '\n\n', s).strip()
 
 def build_md(lang):
-    m = docs_data_vi if lang == 'vi' else docs_data_en
+    m = docs_data_en
     K, B, TUT, SP = m.KEYWORDS, m.BUILTINS, m.TUTORIAL, m.SPEC
     if lang == 'vi':
         T = {'title':'Cat++ Documentation — Tiếng Việt','toc':'Mục lục',
@@ -90,7 +90,7 @@ def build_txt(lang):
 
 if __name__ == '__main__':
     os.makedirs('static/docs', exist_ok=True)
-    for lang in ['vi', 'en']:
+    for lang in ['en']:
         md = build_md(lang)
         with open('static/docs/catpp-docs-' + lang + '.md', 'w', encoding='utf-8') as f:
             f.write(md)
