@@ -20,3 +20,17 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+
+# Build artifacts
+*.o
+*.obj
+*.elf
+*.iso
+*.exe
+*.so
+*.a
+
+# Test binaries
+test[0-9]
+test[0-9].c

@@ -170,7 +170,6 @@ class Handler(SimpleHTTPRequestHandler):
             body = json.loads(self.rfile.read(n) or b'{}')
             code = body.get('code', '')
             results = {}
-            import time
             try:
                 from interpreter import run_catpp
                 t0 = time.perf_counter()

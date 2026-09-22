@@ -1,0 +1,47 @@
+cat Point
+    paw x
+    paw y
+    purr new(a, b)
+        me.x = a
+        me.y = b
+    purr info()
+        give "(" + say(me.x) + ", " + say(me.y) + ")"
+    purr move(dx, dy)
+        me.x = me.x + dx
+        me.y = me.y + dy
+
+paw p = Point(3, 4)
+meow p.info()
+p.move(10, 20)
+meow p.info()
+
+cat Animal
+    paw name
+    purr new(n)
+        me.name = n
+
+cat Dog kin Animal
+    purr new(n)
+        me.name = n
+    purr speak()
+        give me.name + " says woof"
+
+paw d = Dog("Rex")
+meow d.speak()
+
+paw x = 2
+match x
+    case 1
+        meow "one"
+    case 2
+        meow "two"
+    case _
+        meow "other"
+
+tap
+    paw z = 1 / 0
+hiss e
+    meow "bat duoc loi"
+
+meow cast(int, "42")
+meow sizeof(42)
