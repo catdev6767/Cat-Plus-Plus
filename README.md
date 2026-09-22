@@ -4,6 +4,9 @@ A programming language with cat-themed syntax.
 **4 engines**, **149 builtins**, **native C compilation**,
 **terminal editor**, and **CLI tooling**.
 
+> 🌐 **Website:** https://catdev6767.github.io/Cat-Plus-Plus/
+> 📦 **GitHub:** https://github.com/catdev6767/Cat-Plus-Plus
+
 ## Quick install
 
 One line (Linux / macOS):
