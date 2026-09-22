@@ -488,47 +488,33 @@ def build():
     if os.path.exists(SITE): shutil.move(SITE, backup)
     try:
         os.makedirs(SITE, exist_ok=True)
-        import docs_data_vi as docs_data_en
-        importlib.reload(docs_data_vi)
-        pass  # EN removed
+        import docs_data_en
+        importlib.reload(docs_data_en)
         # Merge extra
         try:
-            import docs_extra_vi, docs_extra_en
-            importlib.reload(docs_extra_vi)
+            import docs_extra_en
             importlib.reload(docs_extra_en)
-            docs_data_vi.KEYWORDS = {**docs_data_vi.KEYWORDS, **docs_extra_vi.KEYWORDS_EXTRA}
-            docs_data_vi.BUILTINS = {**docs_data_vi.BUILTINS, **docs_extra_vi.BUILTINS_EXTRA}
             docs_data_en.KEYWORDS = {**docs_data_en.KEYWORDS, **docs_extra_en.KEYWORDS_EXTRA}
             docs_data_en.BUILTINS = {**docs_data_en.BUILTINS, **docs_extra_en.BUILTINS_EXTRA}
             # Merge tutorial
-            if hasattr(docs_extra_vi, 'TUTORIAL_EXTRA'):
-                docs_data_vi.TUTORIAL = list(docs_data_vi.TUTORIAL) + list(docs_extra_vi.TUTORIAL_EXTRA)
             if hasattr(docs_extra_en, 'TUTORIAL_EXTRA'):
                 docs_data_en.TUTORIAL = list(docs_data_en.TUTORIAL) + list(docs_extra_en.TUTORIAL_EXTRA)
             # Merge cookbook + errors
-            if hasattr(docs_extra_vi, 'COOKBOOK_EXTRA'):
-                docs_data_vi.COOKBOOK = list(docs_extra_vi.COOKBOOK_EXTRA)
             if hasattr(docs_extra_en, 'COOKBOOK_EXTRA'):
                 docs_data_en.COOKBOOK = list(docs_extra_en.COOKBOOK_EXTRA)
-            if hasattr(docs_extra_vi, 'ERRORS_EXTRA'):
-                docs_data_vi.ERRORS = list(docs_extra_vi.ERRORS_EXTRA)
             if hasattr(docs_extra_en, 'ERRORS_EXTRA'):
                 docs_data_en.ERRORS = list(docs_extra_en.ERRORS_EXTRA)
-            if hasattr(docs_extra_vi, 'GUIDE_EXTRA'):
-                docs_data_vi.GUIDE = list(docs_extra_vi.GUIDE_EXTRA)
             if hasattr(docs_extra_en, 'GUIDE_EXTRA'):
                 docs_data_en.GUIDE = list(docs_extra_en.GUIDE_EXTRA)
-            print(f'  + Merged extras: {len(docs_data_vi.KEYWORDS)} kw, {len(docs_data_vi.BUILTINS)} bi, {len(docs_data_vi.TUTORIAL)} tut')
+            print(f'  + Merged extras: {len(docs_data_en.KEYWORDS)} kw, {len(docs_data_en.BUILTINS)} bi, {len(docs_data_en.TUTORIAL)} tut')
         except Exception as e:
             print(f'  ⚠ Không merge extra: {e}')
         print('Build docs:')
-        build_lang('vi', docs_data_vi)
-        # build_lang('en', docs_data_en)
         build_lang('en', docs_data_en)
         redirect = '''<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Cat++ Docs</title>
 <script>
-  var lang = localStorage.getItem('catpp:lang') || 'vi';
+  var lang = 'en';
   location.replace('/docs/' + lang + '/');
 </script>
 </head><body>

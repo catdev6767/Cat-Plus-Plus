@@ -101,7 +101,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _serve_text(self, fmt):
         # Parse ?lang=vi|en
-        lang = 'vi'
+        lang = 'en'
         if '?' in self.path:
             qs = self.path.split('?', 1)[1]
             for pair in qs.split('&'):
