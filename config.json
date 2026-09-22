@@ -4,7 +4,7 @@
       "enabled": true
     },
     "server": {
-      "enabled": false
+      "enabled": true
     },
     "cli": {
       "enabled": true

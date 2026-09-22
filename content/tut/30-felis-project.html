@@ -1,0 +1,74 @@
+<p>Đồ án tổng hợp — tạo một mini game or ứng dụng chạy in Felis OS.</p>
+
+<h2>1. Đề lesson: Game đoán số</h2>
+<p>Viết lệnh<code>guess</code>để chơi đoán số. Máy chọn số 1-100, người use đoán.</p>
+
+<h3>Yêu cầu</h3>
+<ul>
+<li>Lưu số bí mật in variable static</li>
+<li>Mỗi lần gọi<code>guess N</code> → check</li>
+<li>Print "cao hon" or "thap hon"</li>
+<li>True → in số lần đoán</li>
+</ul>
+
+<h2>2. Gợi ý code</h2>
+<pre><code>static int secret = 0;
+static int tries = 0;
+
+static void cmd_guess(char* arg) {
+    if (secret == 0) {
+        /* Khởi tạo */
+        secret = 42;
+        tries = 0;
+        catpp_print_str("Da forn so 1-100. Doan di!");
+        return;
+    }
+    int n = 0;
+    while (*arg >= '0' && *arg<= '9') {
+        n = n * 10 + (*arg - '0');
+        arg++;
+    }
+    tries++;
+    if (n < secret) catpp_print_str("Cao hon");
+    else if (n >secret) catpp_print_str("Thap hon");
+    else {
+        catpp_print_str("Dung roi!");
+        /* Printing numbers lần đoán */
+        secret = 0;
+    }
+}</code></pre>
+
+<h2>3. Test</h2>
+<pre><code>felis$ guess
+Da forn so 1-100. Doan di!
+felis$ guess 50
+Thap hon
+felis$ guess 25
+Cao hon
+felis$ guess 42
+Dung roi!</code></pre>
+
+<h2>4. Mở rộng</h2>
+<ul>
+<li>Thêm menu nhiều game</li>
+<li>Lưu high score ando file</li>
+<li>Đổi secret each time chơi</li>
+</ul>
+
+<h2>5. Đồ án khác</h2>
+<table>
+<tr><th>Đề tài</th><th>Độ khó</th></tr>
+<tr><td>Đồng hồ đếm ngược</td><td>Dễ</td></tr>
+<tr><td>Todo list (lưu file)</td><td>Trung bình</td></tr>
+<tr><td>Text editor simple</td><td>Trung bình</td></tr>
+<tr><td>Calculator with parser</td><td>Khó</td></tr>
+<tr><td>Snake game (VGA)</td><td>Rất khó</td></tr>
+</table>
+
+<h2>6. Nộp lesson</h2>
+<ol>
+<li>Code in <code>kernel/commands.c</code></li>
+<li>Build: <code>bash build_felis.sh</code></li>
+<li>Test QEMU</li>
+<li>Chụp màn hình output</li>
+</ol>

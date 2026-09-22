@@ -1,0 +1,192 @@
+<h1>Performance Guide</h1>
+<p>How to write fast Cat++ code.</p>
+
+<h2>1. Current Performance</h2>
+<p>Cat++ runs through Python interpreter. Slower than C approx.<b>100x</b>.</p>
+
+<table>
+<tr><th>Task</th><th>Cat++</th><th>Python</th><th>C</th></tr>
+<tr><td>Fibonacci 30</td><td>2s</td><td>0.5s</td><td>0.02s</td></tr>
+<tr><td>Loop 1M</td><td>3s</td><td>0.3s</td><td>0.005s</td></tr>
+<tr><td>Sort 10k</td><td>5s</td><td>0.1s</td><td>0.001s</td></tr>
+</table>
+
+<h2>general rule</h2>
+
+<h3>Avoid re-calculating loop printing</h3>
+<pre><code># Ugly — arr each time
+paw i = 0
+knead i< len(arr)
+    meow arr[i]
+    i++
+
+# Tốt — cache lại
+paw n = len(arr)
+paw i = 0
+knead i < n
+    meow arr[i]
+    i++</code></pre>
+
+<h3>Use temporary variable for loop nested</h3>
+<pre><code># Bad
+paw i = 0
+knead i< n
+    paw j = 0
+    knead j < len(arr) - i - 1
+        ...
+        j++
+    i++
+
+# Tốt
+paw i = 0
+knead i < n
+    paw limit = len(arr) - i - 1
+    paw j = 0
+    knead j < limit
+        ...
+        j++
+    i++</code></pre>
+
+<h3>Choose the right structure</h3>
+<pre><code># Search in list — slow O(n)
+sniff hunt(arr, target)...
+
+
+# Lookup in dict — fast O(1)
+sniff seek(dict, key)
+    ...</code></pre>
+
+<h2>3. Use builtin instead of writing your own</h2>
+<pre><code># Bad — egocentric
+paw sum = 0
+groom x of arr
+    paw sum = sum + x
+
+# Good — use builtin (written in Python, faster)
+paw sum = pile(arr)</code></pre>
+
+<h3>Speed Comparison</h3>
+<table>
+<tr><th>Operation</th><th>Write your own</th><th>Builtin</th></tr>
+<tr><td>Calculated in total 10k</td><td>0.5s</td><td>0.01s</td></tr>
+<tr><td>Arrange 1k</td><td>1s</td><td>0.02s</td></tr>
+<tr><td>Map 10k</td><td>0.3s</td><td>0.005s</td></tr>
+</table>
+
+<h2>4. Recursion Restrictions</h2>
+<pre><code># Bad — slow recursion
+purr fib(n)
+    sniff n<= 1
+        give n
+    give fib(n - 1) + fib(n - 2)
+
+meow fib(30)   # ~2 giây</code></pre>
+
+<pre><code># Good — loop
+purr fib(n)
+    sniff n<= 1
+        give n
+    paw a = 0
+    paw b = 1
+    paw i = 2
+    knead i <= n
+        paw c = a + b
+        paw a = b
+        paw b = c
+        i++
+    give b
+
+meow fib(30)   # ~0.05 giây</code></pre>
+
+<h3>Memoization</h3>
+<pre><code>paw memo = {}
+
+purr fib(n)
+    sniff n <= 1
+        give n
+    sniff seek(memo, n)
+        give memo[n]
+    paw r = fib(n - 1) + fib(n - 2)
+    memo[n] = r
+    give r
+
+meow fib(100)   # nhanh</code></pre>
+
+<h2>5. Avoid creating redundant objects</h2>
+<pre><code># Bad — create a new list each round
+paw i = 0
+knead i< 1000
+    paw arr = []
+    paw arr = arr + [i]
+    i++
+
+# Tốt — tạo 1 lần
+paw arr = []
+paw i = 0
+knead i < 1000
+    arr.push(i)
+    i++</code></pre>
+
+<h2>6. Use the bit operator when can</h2>
+<pre><code># Bad
+paw half = x / 2
+paw double = x * 2
+
+# Good (only with positive integers)
+paw half = x >> 1
+paw double = x<< 1</code></pre>
+
+<h2>7. Break soon</h2>
+<pre><code># Bad — browse all to exit
+paw found = no
+groom x of arr
+    sniff x == target
+        paw found = yes
+
+# Good — get out now
+paw found = no
+groom x of arr
+    sniff x == target
+        paw found = yes
+        sit</code></pre>
+
+<h2>8. Benchmark</h2>
+<pre><code>paw start = now()
+
+# ... code to measure ...
+
+paw elapsed = now() - start
+meow "Mat " + cast(str, elapsed) + " giay"</code></pre>
+
+<h2>9. Faster when needed</h2>
+
+<h3>If code calculate heavy</h3>
+<ul>
+<li>Transpile to C use <code>tools/transpiler.py</code></li>
+<li>Use<code>cpp()</code>to call C library</li>
+<li>Write heavy section in C, call from Cat++</li>
+</ul>
+
+<h3>Examples: calculating prime numbers</h3>
+<pre><code># Cat++ net — 5 seconds for 100K numbers
+purr is_prime(n)
+    sniff n< 2
+        give no
+    paw i = 2
+    knead i * i <= n
+        sniff n % i == 0
+            give no
+        i++
+    give yes
+
+# Transpile to C — 0.1 giây
+# bash build_catos.sh && chạy kernel</code></pre>
+
+<h2>10. Conclusion</h2>
+<p>Cat++ not allowed to design for performance. If you need to quickly:</p>
+<ol>
+<li>Use builtin instead of writing your own</li>
+<li>Avoid deep recursion</li>
+<li>Cache value in loop</li>
+<li>If still slow → transpile to C</li>
+</ol>

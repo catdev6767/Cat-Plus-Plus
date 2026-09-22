@@ -1,0 +1,52 @@
+<h2>Syntax error</h2>
+
+<h3>1. Incorrect Indentation</h3>
+<pre><code>purr test()
+meow "hi"</code></pre>
+<p><b>Error:</b> <code>Can 'NEWLINE', gap 'MEOW'</code></p>
+<p><b>Edit</b></p>
+<pre><code>purr test()
+    meow "hi"</code></pre>
+
+<h3>2. Mix tabs and space</h3>
+<pre><code>purr test()
+\tmeow "hi"    # tab
+    meow "yo"  # space</code></pre>
+<p><b>Edit</b>Use space only. 4 spaces per level.</p>
+
+<h3>3. Missing brackets</h3>
+<pre><code>paw x = (5 + 3</code></pre>
+<p><b>Error:</b> <code>Can ')', gap 'NEWLINE'</code></p>
+<p><b>Edit</b> <code>paw x = (5 + 3)</code></p>
+
+<h3>4. Use the keyword as a name variable</h3>
+<pre><code>paw meow = "hi"</code></pre>
+<p><b>Error:</b> Not parse is — <code>meow</code>is the keyword.</p>
+<p><b>Edit</b> <code>paw greeting = "hi"</code></p>
+
+<h3>5. Forgetting to print a colon in struct</h3>
+<pre><code>struct Point
+    x i32
+    y i32</code></pre>
+<p><b>Error:</b> <code>Can ':', gap 'IDENT'</code></p>
+<p><b>Edit</b></p>
+<pre><code>struct Point
+    x: i32
+    y: i32</code></pre>
+
+<h3>6. String not closed</h3>
+<pre><code>meow "hello</code></pre>
+<p><b>Error:</b> <code>Unterminated string</code></p>
+<p><b>Edit</b> <code>meow "hello"</code></p>
+
+<h3>7. Use<code>=</code>instead<code>==</code></h3>
+<pre><code>sniff x = 5
+    meow "yes"</code></pre>
+<p><b>Error:</b>Parse to assign, not compare.</p>
+<p><b>Edit</b> <code>sniff x == 5</code></p>
+
+<h3>8. Excess semicolon</h3>
+<pre><code>paw x = 5;
+meow x;</code></pre>
+<p><b>Error:</b>Cat++ don't use<code>;</code>as C.</p>
+<p><b>Edit</b>Just dump it.<code>;</code>.</p>

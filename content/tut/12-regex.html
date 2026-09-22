@@ -1,0 +1,79 @@
+<p>Regex (regular expression) is a powerful tool for sample string processing.</p>
+
+<h2>1. Ba function regex</h2>
+<table>
+<tr><th>Function</th><th>Function</th></tr>
+<tr><td><code>match(pattern, s)</code></td><td>Check if it matches</td></tr>
+<tr><td><code>find_all(pattern, s)</code></td><td>Find all matching strings</td></tr>
+<tr><td><code>replace_all(pattern, s, sub)</code></td><td>Replace &All</td></tr>
+</table>
+
+<h2>2. match — sample check</h2>
+<pre><code>sniff match("[0-9]+", "abc123")
+    meow "co so"
+swat
+    meow "khong co so"
+
+sniff match("^[a-z]+$", "hello")
+    meow "toan chu thuong"
+
+sniff match("@", "user@example.com")
+    meow "co @ in email"</code></pre>
+
+<h2>3. find_all — find all</h2>
+<pre><code>meow find_all("[0-9]+", "toi co 3 con meo va 5 con for")
+# [3, 5]
+
+meow find_all("[a-z]+", "Hello World Foo")
+# [ello, orld, oo]
+
+meow find_all("\\w+@\\w+\\.\\w+", "lien he a@x.com hoac b@y.org")
+# [a@x.com, b@y.org]</code></pre>
+
+<h2>4. replace_all — replace</h2>
+<pre><code>meow replace_all("[0-9]", "abc123def", "#")
+# abc###def
+
+meow replace_all("\\s+", "hello   world  foo", " ")
+# hello world foo
+
+meow replace_all("[aeiou]", "hello world", "*")
+# h*ll* w*rld</code></pre>
+
+<h2>5. Syntax regex is often used</h2>
+<table>
+<tr><th>Templates</th><th>Nghia</th></tr>
+<tr><td><code>.</code></td><td>Any text value</td></tr>
+<tr><td><code>\\d</code></td><td>Digit</td></tr>
+<tr><td><code>\\w</code></td><td>Letters, numbers, _</td></tr>
+<tr><td><code>\\s</code></td><td>Spaces</td></tr>
+<tr><td><code>*</code></td><td>0 or more</td></tr>
+<tr><td><code>+</code></td><td>1 or more</td></tr>
+<tr><td><code>?</code></td><td>0 or 1</td></tr>
+<tr><td><code>[abc]</code></td><td>a, b, or c</td></tr>
+<tr><td><code>[^abc]</code></td><td>Not must a, b, c</td></tr>
+<tr><td><code>^</code></td><td>Start string</td></tr>
+<tr><td><code>$</code></td><td>End string</td></tr>
+<tr><td><code>()</code></td><td>Group</td></tr>
+<tr><td><code>|</code></td><td>or</td></tr>
+</table>
+
+<h2>6. Actual examples: check email</h2>
+<pre><code>purr is_email(s)
+    give match("^[\\w.]+@[\\w.]+\\.[a-z]+$", s)
+
+meow is_email("user@example.com")   # yes
+meow is_email("invalid")            # no</code></pre>
+
+<h2>7. Examples: phone number extraction</h2>
+<pre><code>paw text = "Lien he: 0912345678 hoac 0987654321"
+paw phones = find_all("[0-9]{10}", text)
+groom p of phones
+    meow p</code></pre>
+
+<h2>Exercises</h2>
+<ol>
+<li>Check string must have a Vietnamese phone number (10 numbers, starts with 0).</li>
+<li>Count the number of words in a paragraph.</li>
+<li>Normalize string: remove extra whitespace, capitalize the sentence.</li>
+</ol>

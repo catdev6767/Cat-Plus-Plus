@@ -1,0 +1,769 @@
+var LANG = localStorage.getItem('catpp:lang') || 'vi';
+function T(path) {
+  var parts = path.split('.');
+  var cur = (window.I18N && window.I18N[LANG]) || {};
+  for (var i = 0; i < parts.length; i++) {
+    if (cur == null) return path;
+    cur = cur[parts[i]];
+  }
+  return cur || path;
+}
+function setLang(code) {
+  LANG = code;
+  localStorage.setItem('catpp:lang', code);
+  var flag = document.getElementById('lang-flag');
+  if (flag && window.I18N[code]) flag.textContent = window.I18N[code].flag;
+  applyLang();
+}
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    el.textContent = T(el.dataset.i18n);
+  });
+}
+var CATPP_KEYWORDS = ['paw','meow','purr','give','hiss','tap','sit','leap','listen',
+  'sniff','swat','knead','groom','of','nod','shake','hungry',
+  'with','either','never','cat','me','kin','kit','litter'];
+var CATPP_BUILTINS = ['tail','puff','melt','nip','bolt','kitten','lion',
+  'scratch','flop','perch','say','tally','drip','collar','kits','seek',
+  'shred','weave','swap','lick','hunt','stash','snatch','line','flip',
+  'head','rear','pile','walk','chase','sift','curl','sway','wave','slant',
+  'grow','bound','wander','dice'];
+
+var EXAMPLES = {};
+EXAMPLES['hello.cat'] = [
+'# Chao mung den Cat++ — ngon ngu cua meo',
+'meow "Meow! Hello, Cat++!"',
+'',
+'paw x = 10',
+'paw name = "Whiskers"',
+'',
+'purr add(a, b)',
+'    give a + b',
+'',
+'meow add(x, 5)',
+'meow "Name: " + name',
+'',
+'sniff x > 5',
+'    meow "meo lon"',
+'swat',
+'    meow "meo con"',
+'',
+'paw i = 1',
+'knead i <= 5',
+'    meow i',
+'    paw i = i + 1',
+''].join('\n');
+
+EXAMPLES['fizzcat.cat'] = [
+'purr fizzcat(n)',
+'    sniff n % 15 == 0',
+'        give "FizzCat"',
+'    sniff n % 3 == 0',
+'        give "Fizz"',
+'    sniff n % 5 == 0',
+'        give "Cat"',
+'    give n',
+'',
+'paw i = 1',
+'knead i <= 20',
+'    meow fizzcat(i)',
+'    paw i = i + 1',
+''].join('\n');
+
+EXAMPLES['fibonacci.cat'] = [
+'purr fib(n)',
+'    sniff n <= 1',
+'        give n',
+'    give fib(n - 1) + fib(n - 2)',
+'',
+'paw i = 0',
+'knead i < 20',
+'    meow fib(i)',
+'    paw i = i + 1',
+''].join('\n');
+
+EXAMPLES['prime.cat'] = [
+'purr isprime(n)',
+'    sniff n < 2',
+'        give shake',
+'    paw i = 2',
+'    knead i * i <= n',
+'        sniff n % i == 0',
+'            give shake',
+'        paw i = i + 1',
+'    give nod',
+'',
+'paw n = 2',
+'knead n <= 30',
+'    sniff isprime(n)',
+'        meow n',
+'    paw n = n + 1',
+''].join('\n');
+
+EXAMPLES['class.cat'] = [
+'# Class — cat, me, kin',
+'cat Point',
+'    paw x',
+'    paw y',
+'',
+'    purr new(a, b)',
+'        me.x = a',
+'        me.y = b',
+'',
+'    purr dist()',
+'        give scratch(me.x * me.x + me.y * me.y)',
+'',
+'    purr info()',
+'        give "({me.x}, {me.y})"',
+'',
+'paw p = Point(3, 4)',
+'meow "Diem: " + p.info()',
+'meow "Khoang cach: " + p.dist()',
+'',
+'cat Animal',
+'    paw name',
+'    purr new(n)',
+'        me.name = n',
+'    purr speak()',
+'        give "..."',
+'',
+'cat Dog kin Animal',
+'    purr speak()',
+'        give me.name + " says woof!"',
+'',
+'cat Cat kin Animal',
+'    purr speak()',
+'        give me.name + " says meow"',
+'',
+'paw d = Dog("Rex")',
+'paw c = Cat("Whiskers")',
+'meow d.speak()',
+'meow c.speak()',
+''].join('\n');
+
+EXAMPLES['kit.cat'] = [
+'# Lambda — kit',
+'paw double = kit(x) => x * 2',
+'paw square = kit(x) => x * x',
+'paw add = kit(a, b) => a + b',
+'',
+'meow double(21)',
+'meow square(5)',
+'meow add(3, 4)',
+'',
+'paw nums = [1, 2, 3, 4, 5, 6]',
+'',
+'meow "Binh phuong:"',
+'meow chase(nums, kit(x) => x * x)',
+'',
+'meow "So chan:"',
+'meow sift(nums, kit(x) => x % 2 == 0)',
+'',
+'meow "Tong:"',
+'meow curl(nums, kit(a, b) => a + b, 0)',
+''].join('\n');
+
+EXAMPLES['litter.cat'] = [
+'# Enum — litter',
+'litter Color',
+'    red',
+'    green',
+'    blue',
+'',
+'litter Status',
+'    pending',
+'    active',
+'    done',
+'',
+'meow Color.red',
+'meow Color.green',
+'meow Color.blue',
+'',
+'meow Status.active',
+'meow Status.done',
+'',
+'paw current = Color.green',
+'sniff current == Color.green',
+'    meow "Mau xanh"',
+''].join('\n');
+
+EXAMPLES['stdlib.cat'] = [
+'# Ham meo',
+'paw nums = [5, 2, 8, 1, 9, 3]',
+'',
+'meow "Line: " + say(line(nums))',
+'meow "Flip: " + say(flip(nums))',
+'meow "Pile: " + say(pile(nums))',
+'meow "Head: " + say(head(nums))',
+'meow "Rear: " + say(rear(nums))',
+'meow "Walk: " + say(walk(1, 6))',
+'',
+'meow "sway(0) = " + say(sway(0))',
+'meow "wave(0) = " + say(wave(0))',
+'meow "2^10 = " + say(bound(2, 10))',
+'',
+'paw r = dice(1, 100)',
+'meow "Meo ngau nhien: " + say(r)',
+''].join('\n');
+
+EXAMPLES['dict.cat'] = [
+'# Dict',
+'paw person = {"name": "Tom", "age": 3, "city": "Hanoi"}',
+'',
+'meow person["name"]',
+'meow person.age',
+'',
+'person["age"] = 4',
+'meow person["age"]',
+'',
+'meow collar(person)',
+'meow kits(person)',
+'',
+'sniff seek(person, "name")',
+'    meow "Co truong name"',
+''].join('\n');
+
+EXAMPLES['interp.cat'] = [
+'# String interpolation',
+'paw name = "Tom"',
+'paw age = 3',
+'',
+'meow "Xin chao, {name}!"',
+'meow "{name} nam nay {age} tuoi"',
+'',
+'paw i = 1',
+'knead i <= 3',
+'    meow "Lan thu {i}"',
+'    paw i = i + 1',
+''].join('\n');
+
+EXAMPLES['slice.cat'] = [
+'# Nip — cat chuoi',
+'paw s = "Hello, Cat++!"',
+'',
+'meow s[0:5]',
+'meow s[7:10]',
+'meow s[:5]',
+'meow s[7:]',
+'',
+'paw arr = [10, 20, 30, 40, 50]',
+'meow arr[1:3]',
+'meow arr[:2]',
+'meow arr[2:]',
+''].join('\n');
+
+EXAMPLES['sort.cat'] = [
+'paw arr = [5, 2, 8, 1, 9, 3, 7, 4, 6]',
+'paw n = tail(arr)',
+'',
+'paw i = 0',
+'knead i < n',
+'    paw j = 0',
+'    knead j < n - i - 1',
+'        sniff arr[j] > arr[j + 1]',
+'            paw tmp = arr[j]',
+'            arr[j] = arr[j + 1]',
+'            arr[j + 1] = tmp',
+'        paw j = j + 1',
+'    paw i = i + 1',
+'',
+'meow "Mang da line:"',
+'groom x of arr',
+'    meow x',
+''].join('\n');
+
+EXAMPLES['trycatch.cat'] = [
+'tap',
+'    paw x = 1 / 0',
+'hiss e',
+'    meow "Da bat loi: " + e',
+'',
+'meow "Chuong trinh tiep tuc"',
+'',
+'paw i = 0',
+'knead i < 10',
+'    paw i = i + 1',
+'    sniff i == 3',
+'        leap',
+'    sniff i == 7',
+'        sit',
+'    meow i',
+''].join('\n');
+
+var STORAGE = 'catpp:cat2:files';
+var LS_ACTIVE = 'catpp:cat2:active';
+var LS_THEME = 'catpp:theme';
+var files = {};
+var openTabs = [];
+var activeTab = null;
+var editor, term;
+var currentFontSize = 14;
+var showMinimap = true;
+
+function loadFiles() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORAGE) || '{}');
+    if (saved && Object.keys(saved).length) files = saved;
+    else files = Object.assign({}, EXAMPLES);
+  } catch (e) { files = Object.assign({}, EXAMPLES); }
+  Object.keys(EXAMPLES).forEach(function(k) {
+    if (!(k in files)) files[k] = EXAMPLES[k];
+  });
+}
+function saveFiles() {
+  try { localStorage.setItem(STORAGE, JSON.stringify(files)); } catch (e) {}
+}
+
+function renderFileTree() {
+  var tree = document.getElementById('file-tree');
+  if (!tree) return;
+  tree.innerHTML = '<div class="folder">CATPP</div>';
+  Object.keys(files).sort().forEach(function(name) {
+    var div = document.createElement('div');
+    div.className = 'file' + (name === activeTab ? ' active' : '');
+    div.innerHTML = '<span>' + name + '</span>';
+    var del = document.createElement('span');
+    del.className = 'del';
+    del.innerHTML = '<i class="fas fa-times"></i>';
+    del.onclick = function(e) { e.stopPropagation(); deleteFile(name); };
+    div.appendChild(del);
+    div.onclick = function() { openFile(name); };
+    tree.appendChild(div);
+  });
+}
+function deleteFile(name) {
+  if (!confirm('Xoa "' + name + '"?')) return;
+  delete files[name];
+  openTabs = openTabs.filter(function(n) { return n !== name; });
+  saveFiles();
+  if (activeTab === name) {
+    if (openTabs.length) openFile(openTabs[openTabs.length - 1]);
+    else { activeTab = null; if (editor) editor.setValue(''); }
+  }
+  renderTabs(); renderFileTree();
+}
+function renderTabs() {
+  var el = document.getElementById('tabs');
+  if (!el) return;
+  el.innerHTML = '';
+  openTabs.forEach(function(name) {
+    var div = document.createElement('div');
+    div.className = 'tab' + (name === activeTab ? ' active' : '');
+    div.innerHTML = '<span>' + name + '</span>';
+    var x = document.createElement('span');
+    x.className = 'x';
+    x.innerHTML = '<i class="fas fa-times"></i>';
+    x.onclick = function(e) { e.stopPropagation(); closeTab(name); };
+    div.appendChild(x);
+    div.onclick = function() { openFile(name); };
+    el.appendChild(div);
+  });
+}
+function closeTab(name) {
+  openTabs = openTabs.filter(function(n) { return n !== name; });
+  if (activeTab === name) {
+    if (openTabs.length) openFile(openTabs[openTabs.length - 1]);
+    else { activeTab = null; if (editor) editor.setValue(''); }
+  }
+  renderTabs(); renderFileTree();
+}
+function openFile(name) {
+  if (!editor) { setTimeout(function() { openFile(name); }, 100); return; }
+  if (!(name in files)) return;
+  if (openTabs.indexOf(name) === -1) openTabs.push(name);
+  activeTab = name;
+  editor.setValue(files[name]);
+  renderTabs(); renderFileTree();
+  try { localStorage.setItem(LS_ACTIVE, name); } catch (e) {}
+  if (editor.getModel())
+    monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
+}
+
+function initTerminal() {
+  term = new Terminal({
+    theme: { background:'#1e1e1e', foreground:'#cccccc', cursor:'#007acc' },
+    fontSize:13, fontFamily:'Consolas, "Ubuntu Mono", monospace'
+  });
+  term.open(document.getElementById('terminal'));
+  term.writeln('\x1b[90mCat++ Terminal — Ctrl+Enter de chay.\x1b[0m');
+  term.writeln('');
+}
+
+function initMonaco() {
+  return new Promise(function(resolve) {
+    require.config({ paths: { vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+    require(['vs/editor/editor.main'], function() {
+      monaco.languages.register({ id:'catpp' });
+      monaco.languages.setLanguageConfiguration('catpp', {
+        comments: { lineComment: '#' },
+        brackets: [['(',')'], ['[',']'], ['{','}']],
+        autoClosingPairs: [
+          {open:'"',close:'"'},{open:'(',close:')'},
+          {open:'[',close:']'},{open:'{',close:'}'}
+        ],
+        indentationRules: {
+          increaseIndentPattern: /^\s*(purr|sniff|swat|knead|groom|tap|hiss|cat|litter)\b.*$/
+        }
+      });
+      monaco.languages.setMonarchTokensProvider('catpp', {
+        keywords: CATPP_KEYWORDS, builtins: CATPP_BUILTINS,
+        tokenizer: {
+          root: [
+            [/[a-zA-Z_]\w*/, { cases: {
+              '@keywords':'keyword', '@builtins':'type', '@default':'identifier' }}],
+            [/\d+(\.\d+)?/, 'number'],
+            [/"([^"\\]|\\.)*"/, 'string'],
+            [/#.*$/, 'comment'],
+            [/[+\-*\/%=<>!]+/, 'operator'],
+            [/[()\[\]{},.:]/, 'delimiter']
+          ]
+        }
+      });
+      monaco.languages.registerCompletionItemProvider('catpp', {
+        provideCompletionItems: function(model, position) {
+          var word = model.getWordUntilPosition(position);
+          var range = { startLineNumber: position.lineNumber, endLineNumber: position.lineNumber,
+                        startColumn: word.startColumn, endColumn: word.endColumn };
+          var snippets = {
+            'paw': 'paw ${1:name} = ${2:value}',
+            'meow': 'meow ${1:"text"}',
+            'purr': 'purr ${1:name}(${2:args})\n    ${3:give ${4:value}}',
+            'give': 'give ${1:value}',
+            'sniff': 'sniff ${1:condition}\n    ${2:meow "yes"}\nswat\n    ${3:meow "no"}',
+            'knead': 'knead ${1:condition}\n    ${2:body}',
+            'groom': 'groom ${1:item} of ${2:list}\n    ${3:meow ${1:item}}',
+            'tap': 'tap\n    ${1:code}\nhiss ${2:e}\n    meow ${2:e}',
+            'cat': 'cat ${1:Name}\n    paw ${2:field}\n    purr new(${3:args})\n        me.${2:field} = ${4:value}'
+          };
+          var suggestions = [];
+          Object.keys(snippets).forEach(function(k) {
+            suggestions.push({ label: k, kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: snippets[k],
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              range: range, documentation: 'Tu khoa Cat++: ' + k });
+          });
+          CATPP_BUILTINS.forEach(function(b) {
+            suggestions.push({ label: b, kind: monaco.languages.CompletionItemKind.Function,
+              insertText: b + '($0)',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              range: range, documentation: 'Ham co san Cat++' });
+          });
+          return { suggestions: suggestions };
+        }
+      });
+      monaco.editor.defineTheme('catpp-dark', {
+        base:'vs-dark', inherit:true,
+        rules:[
+          { token:'keyword', foreground:'c586c0', fontStyle:'bold' },
+          { token:'string',  foreground:'ce9178' },
+          { token:'number',  foreground:'b5cea8' },
+          { token:'comment', foreground:'6a9955', fontStyle:'italic' },
+          { token:'identifier', foreground:'9cdcfe' },
+          { token:'type', foreground:'4ec9b0' }
+        ],
+        colors:{ 'editor.background':'#1e1e1e' }
+      });
+      monaco.editor.defineTheme('catpp-light', {
+        base:'vs', inherit:true,
+        rules:[
+          { token:'keyword', foreground:'af00db', fontStyle:'bold' },
+          { token:'string',  foreground:'a31515' },
+          { token:'number',  foreground:'098658' },
+          { token:'comment', foreground:'008000', fontStyle:'italic' },
+          { token:'identifier', foreground:'001080' },
+          { token:'type', foreground:'267f99' }
+        ],
+        colors:{ 'editor.background':'#ffffff' }
+      });
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        value: '', language: 'catpp', theme: 'catpp-dark',
+        automaticLayout: true, fontSize: currentFontSize,
+        fontFamily: 'Consolas, "Ubuntu Mono", monospace',
+        minimap: { enabled: showMinimap },
+        scrollBeyondLastLine: false
+      });
+      editor.onDidChangeCursorPosition(function(e) {
+        document.getElementById('cursor-pos').textContent =
+          'Ln ' + e.position.lineNumber + ', Col ' + e.position.column;
+      });
+      editor.onDidChangeModelContent(function() {
+        if (!activeTab) return;
+        files[activeTab] = editor.getValue();
+        saveFiles();
+      });
+      applyTheme(localStorage.getItem(LS_THEME) || 'dark');
+      var last = null;
+      try { last = localStorage.getItem(LS_ACTIVE); } catch (e) {}
+      var keys = Object.keys(files);
+      openFile(last && last in files ? last : (keys[0] || 'hello.cat'));
+      resolve();
+    });
+  });
+}
+
+function applyTheme(mode) {
+  document.body.classList.toggle('theme-dark', mode === 'dark');
+  document.body.classList.toggle('theme-light', mode === 'light');
+  if (editor) monaco.editor.setTheme('catpp-' + mode);
+  if (term) term.options.theme = mode === 'dark'
+    ? { background:'#1e1e1e', foreground:'#cccccc' }
+    : { background:'#f8f8f8', foreground:'#333333' };
+  try { localStorage.setItem(LS_THEME, mode); } catch (e) {}
+}
+function toggleTheme() {
+  var cur = 'dark';
+  try { cur = localStorage.getItem(LS_THEME) || 'dark'; } catch (e) {}
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
+function runCode() {
+  if (!activeTab) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Dang chay ' + activeTab + '...\x1b[0m\r\n');
+  document.getElementById('status').textContent = 'Running...';
+  if (editor.getModel())
+    monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
+  fetch('/api/run', {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ code: code })
+  }).then(function(res) { return res.json(); }).then(function(data) {
+    if (data.output) term.writeln(data.output.replace(/\n/g, '\r\n'));
+    if (data.ok) {
+      term.writeln('\r\n\x1b[32mOK Hoan thanh\x1b[0m');
+      document.getElementById('status').textContent = 'Ready';
+    } else {
+      term.writeln('\r\n\x1b[31mLOI\x1b[0m');
+      document.getElementById('status').textContent = 'Error';
+      if (data.line && editor.getModel()) {
+        monaco.editor.setModelMarkers(editor.getModel(), 'catpp', [{
+          startLineNumber: data.line, startColumn: 1,
+          endLineNumber: data.line, endColumn: 999,
+          message: data.output, severity: monaco.MarkerSeverity.Error
+        }]);
+        editor.revealLineInCenter(data.line);
+      }
+    }
+  }).catch(function(e) {
+    term.writeln('\x1b[31mLoi ket noi: ' + e.message + '\x1b[0m');
+  });
+}
+
+function downloadFile() {
+  if (!activeTab) return;
+  var blob = new Blob([editor.getValue()], { type: 'text/plain' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = activeTab; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function uploadFile() { document.getElementById('file-input').click(); }
+document.getElementById('file-input').addEventListener('change', function(e) {
+  var file = e.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    var name = file.name.endsWith('.cat') ? file.name : file.name + '.cat';
+    files[name] = reader.result; saveFiles(); renderFileTree(); openFile(name);
+  };
+  reader.readAsText(file); e.target.value = '';
+});
+function shareLink() {
+  if (!activeTab) return;
+  try {
+    var enc = btoa(unescape(encodeURIComponent(editor.getValue())));
+    var url = location.origin + '/#' + enc;
+    navigator.clipboard.writeText(url).then(function() { alert('Da copy link!'); })
+      .catch(function() { prompt('Link:', url); });
+  } catch (e) { alert('Khong tao duoc link'); }
+}
+function newFile() {
+  var name = prompt('Ten file:', 'untitled' + Object.keys(files).length + '.cat');
+  if (!name || files[name]) return;
+  files[name] = '# File moi\nmeow "Xin chao!"\n';
+  saveFiles(); renderFileTree(); openFile(name);
+}
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-backdrop').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+}
+function openModal(title, html) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-backdrop').classList.add('open');
+  closeDrawer();
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+
+function examplesHtml() {
+  var html = '<h1>' + T('modal.examples') + '</h1><p>' + T('modal.click') + '</p>';
+  Object.keys(EXAMPLES).forEach(function(name) {
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--border);border-radius:4px;margin:8px 0;background:var(--bg-side)">' +
+      '<b style="color:var(--accent)">' + name + '</b>' +
+      '<button class="try-btn" onclick="loadExample(\'' + name + '\')">' + T('modal.open') + '</button></div>';
+  });
+  return html;
+}
+function cheatsheetHtml() {
+  return '<h1>' + T('modal.cheatsheet') + '</h1>' +
+    '<h2>' + T('cheat.syntax') + '</h2>' +
+    '<pre><code>meow "in ra"
+paw x = 10
+purr add(a, b)
+    give a + b
+
+sniff x > 5
+    meow "lon"
+swat
+    meow "nho"
+
+paw i = 0
+knead i < 5
+    meow i
+    paw i = i + 1
+
+groom c of [1, 2, 3]
+    meow c</code></pre>' +
+    '<h2>' + T('cheat.keyword') + '</h2>' +
+    '<table><tr><th>' + T('cheat.cat') + '</th><th>' + T('cheat.meaning') + '</th></tr>' +
+    '<tr><td><code>meow</code></td><td>' + T('cheat.in') + '</td></tr>' +
+    '<tr><td><code>paw</code></td><td>' + T('cheat.var') + '</td></tr>' +
+    '<tr><td><code>purr / give</code></td><td>' + T('cheat.fn') + '</td></tr>' +
+    '<tr><td><code>sniff / swat</code></td><td>' + T('cheat.if') + '</td></tr>' +
+    '<tr><td><code>knead</code></td><td>' + T('cheat.while') + '</td></tr>' +
+    '<tr><td><code>groom ... of</code></td><td>' + T('cheat.each') + '</td></tr>' +
+    '<tr><td><code>tap / hiss</code></td><td>' + T('cheat.try') + '</td></tr>' +
+    '<tr><td><code>sit / leap</code></td><td>' + T('cheat.stop') + '</td></tr>' +
+    '<tr><td><code>nod / shake / hungry</code></td><td>' + T('cheat.bool') + '</td></tr>' +
+    '<tr><td><code>with / either / never</code></td><td>' + T('cheat.logic') + '</td></tr>' +
+    '<tr><td><code>cat / me / kin</code></td><td>' + T('cheat.oop') + '</td></tr>' +
+    '<tr><td><code>litter</code></td><td>' + T('cheat.enum') + '</td></tr>' +
+    '<tr><td><code>kit</code></td><td>' + T('cheat.lambda') + '</td></tr>' +
+    '</table>' +
+    '<h2>' + T('cheat.builtins') + '</h2>' +
+    '<table><tr><th>' + T('cheat.cat') + '</th><th>' + T('cheat.meaning') + '</th></tr>' +
+    '<tr><td><code>tail(x)</code></td><td>' + T('cheat.len') + '</td></tr>' +
+    '<tr><td><code>puff / melt</code></td><td>' + T('cheat.case') + '</td></tr>' +
+    '<tr><td><code>nip(s, a, b)</code></td><td>' + T('cheat.slice') + '</td></tr>' +
+    '<tr><td><code>bolt / scratch</code></td><td>' + T('cheat.math') + '</td></tr>' +
+    '<tr><td><code>kitten / lion</code></td><td>' + T('cheat.math') + '</td></tr>' +
+    '<tr><td><code>say / tally / drip</code></td><td>' + T('cheat.num') + '</td></tr>' +
+    '<tr><td><code>line / flip</code></td><td>' + T('cheat.list') + '</td></tr>' +
+    '<tr><td><code>pile / walk</code></td><td>' + T('cheat.agg') + '</td></tr>' +
+    '<tr><td><code>chase / sift / curl</code></td><td>' + T('cheat.ho') + '</td></tr>' +
+    '<tr><td><code>wander / dice</code></td><td>' + T('cheat.rnd') + '</td></tr>' +
+    '</table>';
+}
+function shortcutsHtml() {
+  return '<h1>' + T('modal.shortcuts') + '</h1><table>' +
+    '<tr><th>Key</th><th>Action</th></tr>' +
+    '<tr><td><code>Ctrl+Enter</code></td><td>' + T('shortcuts.run') + '</td></tr>' +
+    '<tr><td><code>Ctrl+B</code></td><td>' + T('shortcuts.drawer') + '</td></tr>' +
+    '<tr><td><code>Ctrl+`</code></td><td>' + T('shortcuts.term') + '</td></tr>' +
+    '<tr><td><code>Ctrl+Shift+E</code></td><td>' + T('shortcuts.sidebar') + '</td></tr>' +
+    '<tr><td><code>Ctrl+N</code></td><td>' + T('shortcuts.newFile') + '</td></tr>' +
+    '<tr><td><code>Esc</code></td><td>' + T('shortcuts.esc') + '</td></tr>' +
+    '</table>';
+}
+
+window.loadExample = function(name) {
+  if (!editor || !(name in files)) return;
+  openFile(name); closeModal();
+  setTimeout(runCode, 300);
+};
+
+function handleMenu(name) {
+  if (name === 'examples') openModal('Vi du', examplesHtml());
+  else if (name === 'cheatsheet') openModal('Cheatsheet', cheatsheetHtml());
+  else if (name === 'shortcuts') openModal('Phim tat', shortcutsHtml());
+}
+
+function bindEvents() {
+  document.getElementById('hamburger').onclick = openDrawer;
+  document.getElementById('drawer-close').onclick = closeDrawer;
+  document.getElementById('drawer-backdrop').onclick = closeDrawer;
+  document.getElementById('modal-close').onclick = closeModal;
+  document.getElementById('modal-backdrop').onclick = function(e) {
+    if (e.target === document.getElementById('modal-backdrop')) closeModal();
+  };
+  document.getElementById('theme-btn').onclick = toggleTheme;
+  var langBtn = document.getElementById('lang-btn');
+  if (langBtn) langBtn.onclick = function() {
+    setLang(LANG === 'vi' ? 'en' : 'vi');
+  };
+  document.getElementById('zen-btn').onclick = function() {
+    document.body.classList.toggle('zen');
+  };
+  document.querySelectorAll('[data-menu]').forEach(function(el) {
+    el.onclick = function() { handleMenu(el.dataset.menu); };
+  });
+
+  function act(id, fn) {
+    var e = document.getElementById(id);
+    if (e) e.onclick = fn;
+  }
+  act('act-new', newFile);
+  act('act-download', downloadFile);
+  act('act-upload', uploadFile);
+  act('act-share', shareLink);
+  act('act-run', function() { closeDrawer(); runCode(); });
+  act('act-clear', function() { closeDrawer(); term.clear(); });
+  act('act-theme', function() { toggleTheme(); closeDrawer(); });
+  act('act-sidebar', function() {
+    document.getElementById('main-body').classList.toggle('hide-sidebar');
+    closeDrawer();
+  });
+  act('act-terminal', function() {
+    document.getElementById('main-col').classList.toggle('hide-panel');
+    closeDrawer();
+  });
+  act('act-minimap', function() {
+    showMinimap = !showMinimap;
+    if (editor) editor.updateOptions({ minimap: { enabled: showMinimap } });
+    closeDrawer();
+  });
+
+  document.getElementById('run-btn').onclick = runCode;
+  document.getElementById('clear-btn').onclick = function() { term.clear(); };
+
+  document.addEventListener('keydown', function(e) {
+    var mod = e.ctrlKey || e.metaKey;
+    if (mod && e.key === 'Enter') { e.preventDefault(); runCode(); }
+    if (mod && e.key.toLowerCase() === 'b') {
+      e.preventDefault();
+      if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
+      else openDrawer();
+    }
+    if (mod && e.key === '`') {
+      e.preventDefault();
+      document.getElementById('main-col').classList.toggle('hide-panel');
+    }
+    if (mod && e.shiftKey && e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      document.getElementById('main-body').classList.toggle('hide-sidebar');
+    }
+    if (mod && e.key.toLowerCase() === 'n') { e.preventDefault(); newFile(); }
+    if (e.key === 'Escape') {
+      if (document.getElementById('modal-backdrop').classList.contains('open')) closeModal();
+      else if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
+    }
+  });
+}
+
+(function boot() {
+  var lf = document.getElementById('lang-flag');
+  if (lf && window.I18N && window.I18N[LANG]) lf.textContent = window.I18N[LANG].flag;
+  applyLang();
+  try { loadFiles(); } catch (e) { console.error('loadFiles:', e); files = Object.assign({}, EXAMPLES); }
+  try { initTerminal(); } catch (e) { console.error('initTerminal:', e); }
+  try { bindEvents(); } catch (e) { console.error('bindEvents:', e); }
+  try { renderFileTree(); } catch (e) { console.error('renderFileTree:', e); }
+  try { renderTabs(); } catch (e) { console.error('renderTabs:', e); }
+  initMonaco().catch(function(e) { console.error('initMonaco:', e); });
+})();

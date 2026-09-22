@@ -1,0 +1,16 @@
+# sh.cat — FelisOS Shell
+meow "FelisOS Shell v0.1"
+meow "Go 'help' de xem lenh"
+meow ""
+
+paw running = nod
+knead running
+    paw cmd = readline("felis:/$ ")
+    sniff cmd == "exit"
+        running = shake
+    swat
+        sniff cmd == ""
+        swat
+            exec(cmd)
+
+meow "Bye!"

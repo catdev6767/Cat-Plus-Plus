@@ -1,0 +1,220 @@
+<h1>Best Practices</h1>
+<p>The Cat++ writing convention is clean, easy to read, easy to maintain.</p>
+
+<h2>1. Set name</h2>
+
+<h3>Variable — snake_case</h3>
+<pre><code># Good
+paw cat_name = "Tom"
+paw total_count = 0
+paw max_speed = 100
+
+# Bad
+paw catName = "Tom"
+paw TotalCount = 0
+paw x = 0</code></pre>
+
+<h3>Function — snake_case</h3>
+<pre><code># Good
+purr find_max(arr)
+purr read_config(path)
+purr is_valid_email(s)
+
+# Bad
+purr findMax(arr)
+purr FindMax(arr)
+purr f(arr)</code></pre>
+
+<h3>Class — PascalCase</h3>
+<pre><code># Good
+cat point
+cat animal
+cat HttpRequest
+
+# Bad
+cat point
+cat animal
+cat http_request</code></pre>
+
+<h3>Hang — UPPER_SNAKE_CASE</h3>
+<pre><code>paw MAX_SIZE = 100
+paw PI = 3.14159
+paw DEFAULT_TIMEOUT = 30</code></pre>
+
+<h3>Private field — underline</h3>
+<pre><code>cat Person
+    paw _name
+    paw _age
+
+    purr get name()
+        give me._name</code></pre>
+
+<h2>2. Indentation</h2>
+<pre><code># True — 4 spaces
+purr test()
+    sniff x > 0
+        meow "positive"
+    swat
+        meow "negative"
+
+# False — mix tab and space
+purr test()
+\tmeow "hi"
+    meow "world"</code></pre>
+
+<h2>3. Line length</h2>
+<pre><code># Good — less than 80 characters
+paw result = compute(
+    first_arg,
+    second_arg,
+    third_arg
+)
+
+# Bad — too long
+paw result = compute(first_arg, second_arg, third_arg, fourth_arg, fifth_arg, sixth_arg)</code></pre>
+
+<h2>4. Comment</h2>
+
+<h3>Explanation WHY, must not DO ANYTHING</h3>
+<pre><code># Good — explain why
+# Use sqrt to avoid trying to divide up to n
+# faster 10x for large numbers
+purr is_prime(n)
+    paw i = 2
+    knead i * i<= n
+        ...
+
+# Xấu — lặp lại code
+# Tăng i lên 1
+paw i = i + 1</code></pre>
+
+<h3>Comment for function complex</h3>
+<pre><code># Find the printed element section of the array already sorted by binary search.
+# Return index or -1 if not found.
+# Complexity: O(log n)
+purr binary_search(arr, target)
+    ...</code></pre>
+
+<h2>5. Subdivision of functions</h2>
+<pre><code># Good — 1 job per function
+purr read_scores(path)
+    give read_lines(path)
+
+purr parse_scores(lines)
+    paw scores = []
+    groom line of lines
+        paw scores = scores + [cast(float, line)]
+    give scores
+
+purr average(scores)
+    sniff len(scores) == 0
+        give 0
+    give pile(scores) / len(scores)
+
+# Use
+paw lines = read_scores("data.txt")
+paw scores = parse_scores(lines)
+meow average(scores)</code></pre>
+
+<h2>6. Dealing with errors</h2>
+
+<h3>Use try/hiss for error can code</h3>
+<pre><code># Good
+tap
+    paw n = cast(int, user_input)
+    meow n * 2
+hiss e
+    meow "Do not fade: " + user_input
+
+# Bad — code crash
+paw n = cast(int, user_input)</code></pre>
+
+<h3>Boundary condition check</h3>
+<pre><code># Good
+purr divide(a, b)
+    sniff b == 0
+        give hungry
+    give a / b
+
+# Bad
+purr divide(a, b)
+    give a / b   # Error if b == 0</code></pre>
+
+<h2>7. Avoid code duplication</h2>
+<pre><code># Bad — repeat 3 times
+meow "Ten: " + user1.name
+meow "Tuoi: " + cast(str, user1.age)
+meow "Dia chi: " + user1.address
+meow "Ten: " + user2.name
+meow "Tuoi: " + cast(str, user2.age)
+...
+
+# Good — function
+purr print_user(u)
+    meow "Ten: " + u.name
+    meow "Tuoi: " + cast(str, u.age)
+    meow "Dia chi: " + u.address
+
+print_user(user1)
+print_user(user2)</code></pre>
+
+<h2>8. Magic numbers</h2>
+<pre><code># Bad
+sniff score > 90
+    meow "A"
+sniff score > 80
+    meow "B"
+
+# Good
+paw GRADE_A = 90
+paw GRADE_B = 80
+
+sniff score > GRADE_A
+    meow "A"
+sniff score > GRADE_B
+    meow "B"</code></pre>
+
+<h2>9. List processing</h2>
+<pre><code># Good — use builtin
+paw nums = [1, 2, 3, 4, 5]
+paw squares = chase(nums, kit(x) => x * x)
+paw evens = sift(nums, kit(x) => x % 2 == 0)
+
+# Bad — write your own loop
+paw squares = []
+paw i = 0
+knead i< len(nums)
+    paw squares = squares + [nums[i] * nums[i]]
+    i++</code></pre>
+
+<h2>10. File structure</h2>
+<pre><code># 1. Comment at the beginning of the file
+# 2. Import
+use "mathlib.cat"
+
+# 3. Constant
+paw PI = 3.14159
+paw MAX = 100
+
+# 4. Utility Functions
+purr helper1()
+purr helper2()
+
+# 5. Main Function
+purr main()...
+
+
+# 6. Tremor
+main()</code></pre>
+
+<h2>11. Checklist before committing</h2>
+<ul>
+<li>Name variable/function definition</li>
+<li>Indent 4 spaces, no tab</li>
+<li>Line under 80 characters</li>
+<li>Comment explaining "why"</li>
+<li>Dealing with errors with try/hiss</li>
+<li>Not magic number</li>
+<li>Do not duplicate code</li>
+<li>Test with marginal input (0, negative, empty)</li>
+</ul>

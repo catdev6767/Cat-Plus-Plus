@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  function doRedirect() {
+    if (location.hash.length > 5) {
+      location.replace('/ide/' + location.hash);
+      return true;
+    }
+    return false;
+  }
+  if (doRedirect()) return;
+  window.addEventListener('hashchange', doRedirect);
+})();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat++ — A programming language with cat syntax</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
+a { color:#f97316; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+/* Navbar */
+.nav { padding:16px 0; border-bottom:1px solid #1e293b; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
+.nav-inner { display:flex; align-items:center; gap:24px; }
+.nav-logo { font-size:20px; font-weight:700; color:#f8fafc; margin-right:auto; }
+.nav-logo span { color:#f97316; }
+.nav-link { color:#94a3b8; font-size:14px; padding:8px 12px; border-radius:6px; transition:all 0.2s; }
+.nav-link:hover { color:#f97316; background:rgba(249,115,22,0.1); text-decoration:none; }
+.nav-cta { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; padding:8px 20px; border-radius:8px; font-weight:600; font-size:14px; }
+.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(249,115,22,0.4); text-decoration:none; color:#fff; }
+
+/* Hero */
+.hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#0a0e1a 60%); }
+.hero::before { content:"🐱"; position:absolute; top:40px; left:8%; font-size:80px; opacity:0.08; }
+.hero::after { content:"🐾"; position:absolute; bottom:40px; right:8%; font-size:60px; opacity:0.08; }
+.hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fbbf24 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
+.hero p { font-size:22px; color:#94a3b8; max-width:640px; margin:0 auto 40px; }
+.hero-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.btn { display:inline-flex; align-items:center; gap:10px; padding:16px 32px; border-radius:12px; font-size:16px; font-weight:600; transition:all 0.2s; cursor:pointer; border:none; }
+.btn-primary { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 8px 24px rgba(249,115,22,0.3); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(249,115,22,0.5); text-decoration:none; color:#fff; }
+.btn-secondary { background:rgba(255,255,255,0.06); color:#e2e8f0; border:1px solid rgba(255,255,255,0.1); }
+.btn-secondary:hover { background:rgba(255,255,255,0.1); text-decoration:none; color:#e2e8f0; }
+
+/* Sections */
+section { padding:80px 0; }
+h2 { font-size:40px; color:#f8fafc; margin-bottom:32px; border-left:4px solid #f97316; padding-left:20px; letter-spacing:-0.5px; }
+h3 { font-size:20px; color:#f97316; margin:24px 0 12px; }
+p { color:#cbd5e1; }
+
+/* Code block */
+pre { background:#0d1220; border:1px solid #1e293b; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
+code { font-family:ui-monospace,Consolas,monospace; }
+.kw { color:#f97316; font-weight:600; }
+.str { color:#fbbf24; }
+.num { color:#22d3ee; }
+.cmt { color:#64748b; font-style:italic; }
+.fn { color:#4ade80; }
+
+/* Grid */
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:40px; }
+.card { background:#111827; border:1px solid #1e293b; border-radius:16px; padding:28px; transition:all 0.25s; }
+.card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
+.card h3 { margin-top:0; font-size:20px; color:#f8fafc; }
+.card p { color:#94a3b8; font-size:14px; margin:0; }
+.card-icon { font-size:36px; margin-bottom:16px; display:block; }
+
+/* Stats */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; margin:48px 0; }
+.stat { background:#111827; border-radius:16px; padding:32px; text-align:center; border:1px solid #1e293b; }
+.stat .num { font-size:48px; font-weight:800; color:#f97316; display:block; line-height:1; }
+.stat .label { font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; margin-top:12px; display:block; }
+
+/* CTA section */
+.cta-box { background:linear-gradient(135deg,#1a1f2e 0%,#0d1220 100%); border:1px solid #1e293b; border-radius:20px; padding:60px; text-align:center; margin:60px 0; }
+.cta-box h2 { border:none; padding:0; margin-bottom:16px; }
+.cta-box p { font-size:18px; margin-bottom:32px; }
+
+/* Footer */
+footer { padding:60px 0 40px; text-align:center; border-top:1px solid #1e293b; color:#64748b; font-size:14px; }
+footer a { color:#94a3b8; }
+
+@media (max-width:700px) {
+  .hero h1 { font-size:48px; }
+  .hero p { font-size:18px; }
+  h2 { font-size:28px; }
+  .nav-link { display:none; }
+  .cta-box { padding:40px 20px; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="nav">
+  <div class="container nav-inner">
+    <div class="nav-logo">🐱 Cat++</div>
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#cli" class="nav-link">CLI</a>
+    <a href="/docs/" class="nav-link">Docs</a>
+    <a href="/learn/" class="nav-link">Learn</a>
+    <a href="/ide/" class="nav-cta">Open IDE →</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="container">
+    <h1>Cat++</h1>
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:1px solid rgba(249,115,22,0.3);font-size:14px;font-weight:600;color:#fb923c;margin-bottom:20px;">
+      ⚡ Native C transpiler — faster than interpreter <b style="color:#fbbf24;">13,635×</b>
+    </div>
+    <p>A programming language with cat-themed syntax. Easy to read, easy to learn, runs in the browser.<br>Now compiles to <b style="color:#fb923c;">native C</b> — nearly C++ speed.</p>
+    <div class="hero-btns">
+      <a href="/ide/" class="btn btn-primary">🚀 Open IDE</a>
+      <a href="#install" class="btn btn-secondary">📦 Install</a>
+      <a href="/docs/" class="btn btn-secondary">📖 Docs</a>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <h2>What is Cat++?</h2>
+    <p style="font-size:18px; max-width:800px;">
+      Cat++ is a small programming language that runs entirely in the browser. Syntax uses cat-themed keywords — easy to remember, fun, and great for beginners.
+      Can transpile to C to write OS kernels (Felis OS).
+    </p>
+
+    <h3>Example</h3>
+    <pre><code><span class="cmt"># Hello world</span>
+<span class="kw">meow</span> <span class="str">"Hello, Cat++!"</span>
+
+<span class="cmt"># Function with default parameter</span>
+<span class="kw">purr</span> <span class="fn">greet</span>(name, greeting = <span class="str">"Hello"</span>)
+    <span class="kw">give</span> greeting + <span class="str">", "</span> + name
+
+<span class="kw">meow</span> <span class="fn">greet</span>(<span class="str">"Tom"</span>)          <span class="cmt"># Hello, Tom</span>
+
+<span class="cmt"># Class with operator overload</span>
+<span class="kw">cat</span> Vec2
+    <span class="kw">paw</span> x
+    <span class="kw">paw</span> y
+    <span class="kw">purr</span> <span class="fn">new</span>(x, y)
+        me.x = x
+        me.y = y
+    <span class="kw">purr</span> <span class="fn">add</span>(o)
+        <span class="kw">give</span> Vec2(me.x + o.x, me.y + o.y)
+
+<span class="kw">paw</span> c = Vec2(<span class="num">1</span>, <span class="num">2</span>) + Vec2(<span class="num">3</span>, <span class="num">4</span>)</code></pre>
+  </div>
+</section>
+
+<section id="features" style="background:#0d1220;">
+  <div class="container">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="card"><span class="card-icon">🐱</span><h3>Cat syntax</h3><p>meow, paw, purr, sniff, knead... easy to remember, fun, friendly.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>Runs in browser</h3><p>No install. Just open the link. Zero-config.</p></div>
+      <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
+      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
+      <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in Felis OS kernel.</p></div>
+      <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
+      <div class="card"><span class="card-icon">📦</span><h3>149 builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="performance" style="background:#0d1220;">
+  <div class="container">
+    <h2>Performance — Nearly C++</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      Cat++ has 4 engines. Pick speed or flexibility as needed.
+      With <b style="color:#fb923c;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
+    </p>
+
+    <h3>Benchmark — 1 million iterations</h3>
+    <pre><code><span class="kw">purr</span> <span class="fn">sum_to</span>(n: i32) -> i64
+    <span class="kw">paw</span> total: i64 = 0
+    <span class="kw">paw</span> i: i32 = 1
+    <span class="kw">knead</span> i <= n
+        total = total + i
+        i = i + 1
+    <span class="kw">give</span> total
+
+<span class="kw">meow</span> <span class="fn">sum_to</span>(<span class="num">1000000</span>)</code></pre>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:32px 0;">
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Interpreter</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">5,547<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Bytecode VM</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">2,581<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">2.1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">C boxed</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:2px solid #f97316;border-radius:12px;padding:24px;position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:#f97316;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
+        <div style="font-size:14px;color:#fb923c;margin-bottom:8px;font-weight:600;">⚡ C native</div>
+        <div style="font-size:32px;font-weight:800;color:#fbbf24;">0.4<span style="font-size:16px;color:#fb923c;">ms</span></div>
+        <div style="font-size:13px;color:#fb923c;margin-top:8px;font-weight:600;">13,635×</div>
+      </div>
+    </div>
+
+    <h3>When to use what?</h3>
+    <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
+      <li><b>⚡ C native</b> — heavy arithmetic, algorithms (needs type annotations)</li>
+      <li><b>C boxed</b> — complex list/dict/class code (runs anything)</li>
+      <li><b>Interpreter/VM</b> — quick prototyping, no types needed</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <a href="/docs/vi/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Read native guide →</a>
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Statistics</h2>
+    <div class="stats">
+      <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
+      <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
+      <div class="stat"><span class="num">149</span><span class="label">Builtins</span></div>
+      <div class="stat"><span class="num">6</span><span class="label">CLI commands</span></div>
+      <div class="stat"><span class="num">184</span><span class="label">Test runs</span></div>
+      <div class="stat"><span class="num">171</span><span class="label">Trang docs</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="cli" style="background:#0d1220;">
+  <div class="container">
+    <h2>CLI — paw</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      <b style="color:#fb923c;">paw</b> is the official command-line tool.
+      Run scripts, create files, REPL, transpile, format, lint.
+    </p>
+
+    <pre><code><span class="cmt"># Run a script</span>
+paw run hello.cat
+
+<span class="cmt"># Create new file + open editor</span>
+paw new game.cat
+
+<span class="cmt"># Interactive REPL</span>
+paw repl
+
+<span class="cmt"># Transpile to C (13,635× faster)</span>
+paw build-fast calc.cat
+
+<span class="cmt"># Format + lint + check</span>
+paw fmt game.cat --write
+paw lint game.cat
+paw check game.cat</code></pre>
+
+    <div class="cards" style="margin-top:32px;">
+      <div class="card">
+        <h3>paw run</h3>
+        <p>Run Cat++ script via interpreter (or VM, PyCompiler)</p>
+      </div>
+      <div class="card">
+        <h3>paw build-fast</h3>
+        <p>Transpile to native C — 13,635× faster than interpreter</p>
+      </div>
+      <div class="card">
+        <h3>paw fmt / lint / check</h3>
+        <p>Format code, find errors, check type coverage</p>
+      </div>
+      <div class="card">
+        <h3>PawEditor</h3>
+        <p>Nano-like editor with Cat++ syntax highlight, written in Python + curses</p>
+      </div>
+    </div>
+
+    <p style="margin-top:32px;">
+      <a href="/docs/vi/guide/cli.html" class="btn btn-secondary">📖 Read CLI guide →</a>
+    </p>
+  </div>
+</section>
+
+<section id="install" style="background:#0d1220;">
+  <div class="container">
+    <h2>Install</h2>
+
+    <h3>Run directly (no install)</h3>
+    <p>Open <a href="/ide/">IDE</a> — works right in your browser.</p>
+
+    <h3>Install locally</h3>
+    <pre><code><span class="cmt"># Requires: Python 3.8+</span>
+git clone https://github.com/catpp/catpp.git
+cd catpp
+python3 catpp.py
+
+<span class="cmt"># Open: http://localhost:5000</span></code></pre>
+
+    <h3>Docker</h3>
+    <pre><code>docker build -t catpp:1.0 .
+docker run -p 5000:5000 catpp:1.0</code></pre>
+
+    <h3>CLI</h3>
+    <pre><code>python3 catpp.py repl              <span class="cmt"># REPL</span>
+python3 catpp.py run hello.cat     <span class="cmt"># Run file</span>
+python3 catpp.py fmt hello.cat -w  <span class="cmt"># Format</span>
+python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-box">
+      <h2>Ready to write Cat++?</h2>
+      <p>Open the IDE, pick an example, start immediately. Try ⚡ C fast to see the speed.</p>
+      <div class="hero-btns">
+        <a href="/ide/" class="btn btn-primary">🚀 Open IDE</a>
+        <a href="/docs/vi/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p style="font-size:16px; color:#f8fafc; margin-bottom:12px;">🐱 Cat++ v1.0.0</p>
+    <p>MIT License · Made with 🐱</p>
+    <p style="margin-top:16px;">
+      <a href="/ide/">IDE</a> ·
+      <a href="/docs/">Docs</a> ·
+      <a href="/docs/vi/guide/felis.html">Felis OS</a> ·
+      <a href="https://github.com/catpp">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+
+<script>
+// If there is a base64 hash → redirect to IDE
+if (location.hash.length > 5) {
+    location.replace('/ide/' + location.hash);
+}
+</script>
+</body>
+</html>

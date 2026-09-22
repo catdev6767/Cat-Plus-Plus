@@ -36,11 +36,6 @@ test[0-9]
 test[0-9].c
 
 
-# Phase 8c: dev-only (kept local, not in git)
-server.py
-static/
-content/
-felisos/
 felis/
 iso/
 patch_engine.py

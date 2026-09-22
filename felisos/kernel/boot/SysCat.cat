@@ -1,0 +1,7 @@
+# SysCat — init process
+meow "SysCat: khoi dong FelisOS..."
+meow ""
+meow "SysCat: nap shell"
+exec("/boot/sh.cat")
+meow "SysCat: shell ket thuc"
+meow "SysCat: system halt"

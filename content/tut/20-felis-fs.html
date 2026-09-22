@@ -1,0 +1,43 @@
+<p>Felis OS use <b>RAM filesystem</b>— lưu file in bộ nhớ.</p>
+
+<h2>1. Cấu trúc</h2>
+<pre><code>#define MAX_FILES 64
+#define MAX_NAME  32
+#define MAX_DATA  2048
+
+struct FileEntry {
+    char name[32];
+    char data[2048];
+    int size;
+    int used;
+    int is_dir;
+};
+FileEntry fs_files[64];</code></pre>
+
+<h2>2. Giới hạn</h2>
+<table>
+<tr><th>Thông số</th><th>Value</th></tr>
+<tr><td>Number file tối đa</td><td>64</td></tr>
+<tr><td>Name file</td><td>31 ký tự</td></tr>
+<tr><td>Kích thước file</td><td>2047 byte</td></tr>
+<tr><td>Thư mục</td><td>Chỉ flat (chưa có subdirs)</td></tr>
+</table>
+
+<h2>3. Hoạt động</h2>
+<ul>
+<li><b>Create file:</b> <code>touch name.txt</code></li>
+<li><b>Write:</b> <code>write name.txt content</code></li>
+<li><b>Read:</b> <code>cat name.txt</code></li>
+<li><b>Delete:</b> <code>rm name.txt</code></li>
+</ul>
+
+<h2>4. Note</h2>
+<div class="warn-box">
+<b>Mất khi tắt:</b>RAM filesystem mất hết khi reboot. None persistence.</div>
+
+<h2>Exercises</h2>
+<ol>
+<li>Create file <code>test.txt</code>, ghi 100 ký tự.</li>
+<li>Read lại bằng<code>cat</code>.</li>
+<li>Check kích thước bằng<code>wc</code>.</li>
+</ol>
