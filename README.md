@@ -39,11 +39,22 @@ Install: `ln -sf ~/catpp/paw/paw ~/.local/bin/paw`
 
 ## PawEditor
 
-Nano-like editor for Cat++ with syntax highlight. Written in Python + curses.
+Terminal editor for Cat++, written in Python + curses. Nano-like with
+full Cat++ syntax highlighting (keywords, builtins, strings, numbers,
+comments, operators).
 
-    pawedit hello.cat
+    python3 pawedit/pawedit.py              # empty buffer
+    python3 pawedit/pawedit.py hello.cat    # open file
 
-Shortcuts: ^S Save, ^O Save-As, ^W Find, ^G Goto, ^K Cut, ^U Paste, ^X Exit.
+Shortcuts:
+
+| Key      | Action       |
+|----------|--------------|
+| Ctrl+S   | Save         |
+| Ctrl+O   | Save as      |
+| Ctrl+G   | Go to line   |
+| Ctrl+K   | Delete line  |
+| Ctrl+X   | Exit         |
 
 ## Language
 
