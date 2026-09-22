@@ -3,48 +3,70 @@
 import sys, os, curses
 
 CATPP_KEYWORDS = {
-    'meow','paw','purr','give','sniff','swat','knead','groom','sit','leap',
-    'tap','hiss','nod','shake','hungry','with','either','never','cat','kin',
-    'me','kit','litter','use','match','case','in','cast','sizeof','asm','ptr',
-    'null','packed','struct','volatile','of','static','get','set','abstract',
+    'asm', 'case', 'cast', 'cat', 'either', 'give', 'groom', 'hiss',
+    'hungry', 'in', 'kin', 'kit', 'knead', 'leap', 'listen', 'litter',
+    'match', 'me', 'meow', 'never', 'nod', 'null', 'of', 'packed', 'paw',
+    'ptr', 'purr', 'shake', 'sit', 'sizeof', 'sniff', 'struct', 'swat',
+    'tap', 'use', 'volatile', 'with',
 }
 CATPP_BUILTINS = {
-    'tail','puff','melt','nip','bolt','kitten','lion','say','tally','drip',
-    'collar','kits','seek','shred','weave','swap','lick','hunt','stash','snatch',
-    'line','flip','head','rear','pile','walk','chase','sift','curl',
-    'scratch','flop','perch','bound','sway','wave','slant','grow',
-    'read_file','write_file','exists','env','cwd','now','sleep','unique',
+    'abs_path', 'acos', 'append_file', 'asin', 'assert_eq', 'assert_false',
+    'assert_true', 'atan', 'atan2', 'bolt', 'bound', 'capitalize_str',
+    'char_code', 'char_from', 'chars', 'chase', 'chdir', 'chunk', 'clamp',
+    'clear_list', 'cmd_args', 'collar', 'copy_shallow', 'cosh', 'count_sub',
+    'cpp', 'cube', 'curl', 'cwd', 'degrees', 'dice', 'dict_get', 'dict_has',
+    'difference', 'drip', 'e', 'ends_with', 'enumerate_list', 'env',
+    'exists', 'factorial', 'find_all', 'flatten', 'flip', 'flop',
+    'format_str', 'format_time', 'from_pairs', 'gcd', 'getenv', 'grow',
+    'head', 'hunt', 'hypot', 'index_of', 'insert_at', 'intersect',
+    'invert_dict', 'is_alpha', 'is_digit', 'is_dir', 'is_empty', 'is_file',
+    'is_null', 'is_prime', 'join_str', 'json_parse', 'json_pretty',
+    'json_stringify', 'kits', 'kitten', 'lcm', 'lerp', 'lick', 'line',
+    'lion', 'list_dir', 'log10', 'log2', 'make_dir', 'match', 'melt',
+    'merge_dict', 'nip', 'now', 'now_ms', 'pad_left', 'pad_right',
+    'path_basename', 'path_dirname', 'path_ext', 'path_join', 'perch', 'pi',
+    'pile', 'puff', 'radians', 'range_from_to', 'range_list', 'read_file',
+    'read_lines', 'rear', 'remove_at', 'remove_file', 'repeat',
+    'replace_all', 'reverse_str', 'round_to', 'say', 'scratch', 'seek',
+    'setenv', 'shell', 'shred', 'sift', 'sign', 'sinh', 'slant', 'sleep',
+    'sleep_ms', 'snatch', 'spawn', 'split_lines', 'square', 'starts_with',
+    'stash', 'substring', 'swap', 'sway', 'tail', 'tally', 'tanh',
+    'timestamp', 'title_case', 'to_float', 'to_int', 'to_set', 'to_str',
+    'type_of', 'union', 'unique', 'wait_all', 'walk', 'wander', 'wave',
+    'weave', 'write_file', 'write_lines', 'zip_lists',
 }
 
 def hl(line, ext):
-    if ext != '.cat':
-        return [(line, 0)]
     out, i, n = [], 0, len(line)
     while i < n:
         c = line[i]
-        if c == '#':
+        if c == chr(35):
             out.append((line[i:], 3)); break
-        if c == '"':
+        if c == chr(34):
             j = i + 1
-            while j < n and line[j] != '"':
-                j += 2 if (line[j] == '\\' and j+1 < n) else 1
+            while j < n and line[j] != chr(34):
+                j += 2 if (line[j] == chr(92) and j+1 < n) else 1
             if j < n: j += 1
             out.append((line[i:j], 2)); i = j; continue
-        if c.isdigit():
+        if c.isdigit() or (c == chr(46) and i+1 < n and line[i+1].isdigit()):
             j = i
-            while j < n and (line[j].isdigit() or line[j] == '.'): j += 1
+            if c == chr(48) and i+1 < n and line[i+1] in chr(120)+chr(88)+chr(98)+chr(66):
+                j = i + 2
+                while j < n and line[j] in chr(48)+chr(49)+chr(50)+chr(51)+chr(52)+chr(53)+chr(54)+chr(55)+chr(56)+chr(57)+chr(97)+chr(98)+chr(99)+chr(100)+chr(101)+chr(102)+chr(65)+chr(66)+chr(67)+chr(68)+chr(69)+chr(70)+chr(95): j += 1
+            else:
+                while j < n and (line[j].isdigit() or line[j] == chr(46)): j += 1
             out.append((line[i:j], 4)); i = j; continue
-        if c.isalpha() or c == '_':
+        if c.isalpha() or c == chr(95):
             j = i
-            while j < n and (line[j].isalnum() or line[j] == '_'): j += 1
+            while j < n and (line[j].isalnum() or line[j] == chr(95)): j += 1
             w = line[i:j]
             if w in CATPP_KEYWORDS: out.append((w, 5))
             elif w in CATPP_BUILTINS: out.append((w, 6))
             else: out.append((w, 0))
             i = j; continue
-        if c in '+-*/%=<>!&|^~?:':
+        if c in chr(43)+chr(45)+chr(42)+chr(47)+chr(37)+chr(61)+chr(60)+chr(62)+chr(33)+chr(38)+chr(124)+chr(94)+chr(126)+chr(63)+chr(58):
             j = i
-            while j < n and line[j] in '+-*/%=<>!&|^~?:': j += 1
+            while j < n and line[j] in chr(43)+chr(45)+chr(42)+chr(47)+chr(37)+chr(61)+chr(60)+chr(62)+chr(33)+chr(38)+chr(124)+chr(94)+chr(126)+chr(63)+chr(58): j += 1
             out.append((line[i:j], 7)); i = j; continue
         out.append((c, 0)); i += 1
     return out
