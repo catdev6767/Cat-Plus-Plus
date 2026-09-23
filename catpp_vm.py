@@ -144,6 +144,7 @@ class Compiler:
         line = stmt[-1] if isinstance(stmt[-1], int) else 0
 
         if t == 'func':
+            self.compile_function(stmt)
             return
 
         if t == 'class':
@@ -324,7 +325,25 @@ class Compiler:
         elif t == 'num':
             self.emit(OP_CONST, expr[1])
         elif t == 'str':
-            self.emit(OP_CONST, expr[1])
+            s = expr[1]
+            if '{' not in s:
+                self.emit(OP_CONST, s)
+            else:
+                import re as _re
+                parts = _re.split(r'\{([A-Za-z_][A-Za-z0-9_]*)\}', s)
+                first = True
+                for i, part in enumerate(parts):
+                    if i % 2 == 0:
+                        if not part:
+                            continue
+                        self.emit(OP_CONST, part)
+                    else:
+                        self.emit(OP_LOAD, part)
+                    if not first:
+                        self.emit(OP_ADD)
+                    first = False
+                if first:
+                    self.emit(OP_CONST, '')
         elif t == 'bool':
             self.emit(OP_CONST, expr[1])
         elif t == 'null':

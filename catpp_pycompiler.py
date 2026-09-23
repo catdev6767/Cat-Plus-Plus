@@ -184,8 +184,16 @@ class PyCompiler:
         members = s[2]
         self.emit(f'class {name}:')
         self.indent += 1
+        self.emit('    class _EnumVal:')
+        self.indent += 1
+        self.emit('        def __init__(self, n, v): self.name = n; self.value = v')
+        self.emit('        def __repr__(self): return self.name')
+        self.emit('        def __str__(self): return self.name')
+        self.emit('        def __eq__(self, o): return self.value == o if isinstance(o, int) else (self.name == getattr(o, "name", None))')
+        self.emit('        def __hash__(self): return self.value')
+        self.indent -= 1
         for i, m in enumerate(members):
-            self.emit(f'{m} = {i}')
+            self.emit(f'    {m} = _EnumVal("{name}.{m}", {i})')
         self.indent -= 1
         self.emit('')
 
