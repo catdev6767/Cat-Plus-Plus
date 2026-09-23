@@ -299,17 +299,20 @@ paw check game.cat</code></pre>
     <h3>Run directly (no install)</h3>
     <p>Open <a href="./ide/">IDE</a> — works right in your browser.</p>
 
-    <h3>Install locally</h3>
+    <h3>One-line install</h3>
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/catdev6767/Cat-Plus-Plus/main/install.sh | bash</code></pre>
+
+    <h3>Install manually</h3>
     <pre><code><span class="cmt"># Requires: Python 3.8+</span>
-git clone https://github.com/catpp/catpp.git
-cd catpp
+git clone https://github.com/catdev6767/Cat-Plus-Plus.git
+cd Cat-Plus-Plus
 python3 catpp.py
 
 <span class="cmt"># Open: http://localhost:5000</span></code></pre>
 
     <h3>Docker</h3>
-    <pre><code>docker build -t catpp:1.0 .
-docker run -p 5000:5000 catpp:1.0</code></pre>
+    <pre><code>docker build -t catpp:2.0 .
+docker run -p 5000:5000 catpp:2.0</code></pre>
 
     <h3>CLI</h3>
     <pre><code>python3 catpp.py repl              <span class="cmt"># REPL</span>
