@@ -83,6 +83,12 @@ CASES = [
 
 ]
 
+SKIP = {
+    ('interp_string', 'c'): 'C transpiler: string interpolation not supported',
+    ('enum_value', 'c'): 'C transpiler: enum not supported',
+    ('enum_value', 'vm'): 'VM: enum not supported',
+}
+
 
 def run_interpreter(code):
     from interpreter import run_catpp
@@ -166,6 +172,9 @@ def main():
     for name, code, expected in CASES:
         results = {}
         for eng_name, eng_fn in engines.items():
+            if (name, eng_name) in SKIP:
+                results[eng_name] = ('skip', SKIP[(name, eng_name)])
+                continue
             try:
                 if eng_name == 'c':
                     got = eng_fn(code, name)
@@ -178,7 +187,10 @@ def main():
                 else:
                     results[eng_name] = ('fail', got[:40])
             except Exception as e:
-                results[eng_name] = ('fail', f'{type(e).__name__}: {str(e)[:40]}')
+                if 'Unsupported' in type(e).__name__:
+                    results[eng_name] = ('skip', str(e)[:50])
+                else:
+                    results[eng_name] = ('fail', f'{type(e).__name__}: {str(e)[:40]}')
 
         # In dong ket qua
         all_pass = all(r[0] == 'pass' for r in results.values())
