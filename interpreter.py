@@ -984,8 +984,16 @@ def eval_(n, env, out, rt):
 
 def make_instance(cls, args, out, rt):
     inst = Instance(cls)
-    if 'new' in cls.methods:
-        params, body = cls.methods['new']
+    # Tim 'new' trong parent chain
+    c = cls
+    new_method = None
+    while c:
+        if 'new' in c.methods:
+            new_method = c.methods['new']
+            break
+        c = c.parent
+    if new_method:
+        params, body = new_method
         local = Env(cls.env); local.define('me', inst)
         for p, a in zip(params, args): local.define(p, a)
         try:
