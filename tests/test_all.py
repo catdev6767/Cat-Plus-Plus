@@ -75,6 +75,12 @@ CASES = [
     ('bi_say',           'meow say(42)', '42'),
     ('bi_shred',         'meow shred("a,b,c", ",")', '[a, b, c]'),
     ('bi_walk',          'meow walk(1, 4)', '[1, 2, 3]'),
+    # Phase 9a - Regression tests
+    ('inherit_field',      'cat A\n    paw n\n    purr new(v)\n        me.n = v\ncat B kin A\n    purr hi()\n        give me.n\nmeow B("Bob").hi()', 'Bob'),
+    ('nested_func',        'purr outer(n)\n    purr inner(x)\n        give x * 2\n    give inner(n)\nmeow outer(5)', '10'),
+    ('enum_value',         'litter Color\n    red\n    green\nmeow Color.green', 'Color.green'),
+    ('interp_string',      'paw n = "Tom"\nmeow "Hi, {n}!"', 'Hi, Tom!'),
+
 ]
 
 
