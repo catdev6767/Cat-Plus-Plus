@@ -1,19 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-(function() {
-  function doRedirect() {
-    if (location.hash.length > 5) {
-      location.replace('./ide/' + location.hash);
-      return true;
-    }
-    return false;
-  }
-  if (doRedirect()) return;
-  window.addEventListener('hashchange', doRedirect);
-})();
-</script>
+
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
