@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import time, math, random as _random, sys
+import os, time, math, random as _random, sys
 
 KEYWORDS = {'paw','meow','purr','give','hiss','tap','sit','leap','listen',
             'sniff','swat','knead','groom','of','nod','shake','hungry',
@@ -1301,7 +1301,6 @@ def exec_(s, env, out, rt):
                     break
         elif t == 'use':
             fname = s[1]
-            import os
             base_dir = os.path.dirname(os.path.abspath(__file__))
             candidates = [
                 os.path.join(base_dir, 'examples', fname),
