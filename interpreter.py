@@ -699,7 +699,6 @@ def make_builtins():
         'path_basename': lambda p: __import__('os').path.basename(str(p)),
         'path_dirname': lambda p: __import__('os').path.dirname(str(p)),
         'path_ext': lambda p: __import__('os').path.splitext(str(p))[1],
-        'abs_path': lambda p: __import__('os').path.abspath(str(p)),
         'format_time': lambda ts, fmt='%Y-%m-%d %H:%M:%S': __import__('datetime').datetime.fromtimestamp(float(ts)).strftime(str(fmt)),
         'now_ms': lambda: int(__import__('time').time() * 1000),
         'sleep_ms': lambda ms: (__import__('time').sleep(float(ms) / 1000.0), True)[1],
@@ -724,7 +723,7 @@ def make_builtins():
 
         # ═══ Phase 12b: File ops nang cao ═══
         'glob': _glob,
-        'walk': _walk,
+        'walk_dir': _walk,
         'copy_file': _copy_file,
         'move_file': _move_file,
         'mkdir_p': _mkdir_p,
