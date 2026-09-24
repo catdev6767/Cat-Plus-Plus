@@ -1,0 +1,14 @@
+# ip-info.cat — Show public IP info
+# Usage: catpp run examples/tools/ip-info.cat
+
+paw data = http_json("https://ipwho.is/")
+
+meow "🌐 IP Info"
+meow "─────────────────────────────"
+meow "  IP:      " + say(data["ip"])
+meow "  City:    " + say(data["city"])
+meow "  Region:  " + say(data["region"])
+meow "  Country: " + say(data["country"])
+meow "  ISP:     " + say(data["connection"]["isp"])
+meow "  Timezone:" + say(data["timezone"]["id"])
+meow "─────────────────────────────"

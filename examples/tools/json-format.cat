@@ -1,0 +1,11 @@
+# json-format.cat — Fetch URL and pretty-print JSON
+# Usage: catpp run examples/tools/json-format.cat
+
+paw URL = "https://api.github.com/repos/catdev6767/Cat-Plus-Plus"
+
+paw text = http_get(URL)
+paw data = json_parse(text)
+
+meow "📦 JSON from: " + URL
+meow "─────────────────────────────"
+meow json_pretty(data)

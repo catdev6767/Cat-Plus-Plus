@@ -1,0 +1,18 @@
+# github-stats.cat — Show GitHub user stats
+# Usage: catpp run examples/tools/github-stats.cat
+
+paw USER = "catdev6767"
+
+paw url = "https://api.github.com/users/" + USER
+paw data = http_json(url)
+
+meow "🐱 GitHub Stats: " + USER
+meow "─────────────────────────────"
+meow "  Name:      " + say(data["name"])
+meow "  Bio:       " + say(data["bio"])
+meow "  Public repos: " + say(data["public_repos"])
+meow "  Followers: " + say(data["followers"])
+meow "  Following: " + say(data["following"])
+meow "  Location:  " + say(data["location"])
+meow "  Created:   " + say(data["created_at"])
+meow "─────────────────────────────"

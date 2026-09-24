@@ -51,3 +51,7 @@ phase*.py
 Cat-Plus-Plus/
 
 assets/
+
+# Allow example tools
+!examples/tools/
+!examples/tools/**

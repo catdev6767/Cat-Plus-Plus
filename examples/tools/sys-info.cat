@@ -1,0 +1,12 @@
+# sys-info.cat — Show system info
+# Usage: catpp run examples/tools/sys-info.cat
+
+meow "🖥  System Info"
+meow "─────────────────────────────"
+meow "  User:  " + sh("whoami").strip()
+meow "  Host:  " + sh("hostname").strip()
+meow "  Kernel:" + sh("uname -r").strip()
+meow "  Uptime:" + sh("uptime -p").strip()
+meow "  Shell: " + sh("echo $SHELL").strip()
+meow "  CWD:   " + cwd()
+meow "─────────────────────────────"

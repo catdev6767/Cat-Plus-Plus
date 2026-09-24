@@ -1,0 +1,19 @@
+# weather.cat — Show weather (no API key)
+# Usage: catpp run examples/tools/weather.cat
+
+paw CITY = "Hanoi"
+
+paw url = "https://wttr.in/" + CITY + "?format=j1"
+paw data = http_json(url)
+
+paw current = data["current_condition"][0]
+paw area = data["nearest_area"][0]
+
+meow "🌤  Weather: " + CITY
+meow "─────────────────────────────"
+meow "  Temp:      " + say(current["temp_C"]) + "°C (feels " + say(current["FeelsLikeC"]) + "°C)"
+meow "  Humidity:  " + say(current["humidity"]) + "%"
+meow "  Wind:      " + say(current["windspeedKmph"]) + " km/h"
+meow "  Condition: " + say(current["weatherDesc"][0]["value"])
+meow "  Area:      " + say(area["areaName"][0]["value"])
+meow "─────────────────────────────"
