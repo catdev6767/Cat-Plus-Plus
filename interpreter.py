@@ -716,7 +716,106 @@ def make_builtins():
         'to_str': lambda x: str(x),
         'to_int': lambda x: int(x),
         'to_float': lambda x: float(x),
+
+        # ═══ Phase 12b: HTTP ═══
+        'http_get': _http_get,
+        'http_post': _http_post,
+        'http_json': _http_json,
+
+        # ═══ Phase 12b: File ops nang cao ═══
+        'glob': _glob,
+        'walk': _walk,
+        'copy_file': _copy_file,
+        'move_file': _move_file,
+        'mkdir_p': _mkdir_p,
+        'file_size': lambda p: os.path.getsize(str(p)),
+        'file_mtime': lambda p: os.path.getmtime(str(p)),
+        'basename': lambda p: os.path.basename(str(p)),
+        'dirname': lambda p: os.path.dirname(str(p)),
+        'ext': lambda p: os.path.splitext(str(p))[1],
+        'abs_path': lambda p: os.path.abspath(str(p)),
+
+        # ═══ Phase 12b: Process ═══
+        'sh': _sh,
+        'sh_code': _sh_code,
     }
+
+
+# ═══ Phase 12b: HTTP helpers ═══
+def _http_get(url, headers=None):
+    import urllib.request
+    req = urllib.request.Request(str(url), headers=headers or {})
+    req.add_header('User-Agent', 'Cat++/2.0')
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.read().decode('utf-8', errors='replace')
+    except Exception as e:
+        raise CatError(f'http_get failed: {e}')
+
+def _http_post(url, data='', headers=None):
+    import urllib.request
+    body = data.encode('utf-8') if isinstance(data, str) else data
+    req = urllib.request.Request(str(url), data=body, method='POST')
+    req.add_header('User-Agent', 'Cat++/2.0')
+    if headers:
+        for k, v in headers.items():
+            req.add_header(str(k), str(v))
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.read().decode('utf-8', errors='replace')
+    except Exception as e:
+        raise CatError(f'http_post failed: {e}')
+
+def _http_json(url, headers=None):
+    import json as _json
+    text = _http_get(url, headers=headers)
+    try:
+        return _json.loads(text)
+    except Exception as e:
+        raise CatError(f'http_json parse failed: {e}')
+
+# ═══ Phase 12b: File ops ═══
+def _glob(pattern):
+    import glob as _g
+    return sorted(_g.glob(str(pattern), recursive=True))
+
+def _walk(path):
+    result = []
+    for root, dirs, files in os.walk(str(path)):
+        for f in sorted(files):
+            result.append(os.path.join(root, f))
+    return result
+
+def _copy_file(src, dst):
+    import shutil as _s
+    _s.copy2(str(src), str(dst))
+    return True
+
+def _move_file(src, dst):
+    import shutil as _s
+    _s.move(str(src), str(dst))
+    return True
+
+def _mkdir_p(path):
+    os.makedirs(str(path), exist_ok=True)
+    return True
+
+# ═══ Phase 12b: Process ═══
+def _sh(cmd):
+    import subprocess as _sp
+    try:
+        r = _sp.run(str(cmd), shell=True, capture_output=True, text=True, timeout=300)
+        return r.stdout
+    except Exception as e:
+        raise CatError(f'sh failed: {e}')
+
+def _sh_code(cmd):
+    import subprocess as _sp
+    try:
+        r = _sp.run(str(cmd), shell=True, capture_output=True, text=True, timeout=300)
+        return r.returncode
+    except Exception as e:
+        raise CatError(f'sh_code failed: {e}')
 
 _threads = []
 
