@@ -82,6 +82,15 @@ class PawEditor:
         self.mode = 'edit'
         self.p_label = ''
         self.p_text = ''
+        self.p_action = ''
+        # Undo / redo
+        self.undo_stack = []
+        self.redo_stack = []
+        self.max_undo = 300
+        # Clipboard
+        self.clipboard = ''
+        # Find
+        self.find_query = ''
         if filename and os.path.exists(filename):
             try:
                 with open(filename, encoding='utf-8') as f:
@@ -93,7 +102,85 @@ class PawEditor:
             except Exception as e:
                 self.msg = f'Error: {e}'
 
-    def cur(self): return self.lines[self.row] if 0 <= self.row < len(self.lines) else ''
+    def cur(self):
+        return self.lines[self.row] if 0 <= self.row < len(self.lines) else ''
+
+    def snapshot(self):
+        self.undo_stack.append((list(self.lines), self.row, self.col))
+        if len(self.undo_stack) > self.max_undo:
+            self.undo_stack.pop(0)
+        self.redo_stack.clear()
+
+    def undo(self):
+        if not self.undo_stack:
+            self.msg = 'Nothing to undo'
+            return
+        self.redo_stack.append((list(self.lines), self.row, self.col))
+        self.lines, self.row, self.col = self.undo_stack.pop()
+        if self.row >= len(self.lines):
+            self.row = len(self.lines) - 1
+        self.dirty = True
+        self.msg = f'Undo ({len(self.undo_stack)} left)'
+
+    def redo(self):
+        if not self.redo_stack:
+            self.msg = 'Nothing to redo'
+            return
+        self.undo_stack.append((list(self.lines), self.row, self.col))
+        self.lines, self.row, self.col = self.redo_stack.pop()
+        if self.row >= len(self.lines):
+            self.row = len(self.lines) - 1
+        self.dirty = True
+        self.msg = f'Redo ({len(self.redo_stack)} left)'
+
+    def find_next(self, query):
+        if not query:
+            self.msg = 'Empty search'
+            return
+        self.find_query = query
+        n = len(self.lines)
+        sr, sc = self.row, self.col + 1
+        for i in range(n):
+            r = (sr + i) % n
+            line = self.lines[r]
+            start = sc if i == 0 else 0
+            idx = line.find(query, start)
+            if idx >= 0:
+                self.row = r
+                self.col = idx
+                self.msg = f'Found: {query}'
+                return
+        self.msg = f'Not found: {query}'
+
+    def copy_line(self):
+        self.clipboard = self.cur()
+        self.msg = f'Copied line ({len(self.clipboard)} chars)'
+
+    def paste(self):
+        if not self.clipboard:
+            self.msg = 'Clipboard empty'
+            return
+        self.snapshot()
+        line = self.cur()
+        self.lines[self.row] = line[:self.col] + self.clipboard + line[self.col:]
+        self.col += len(self.clipboard)
+        self.dirty = True
+        self.msg = f'Pasted ({len(self.clipboard)} chars)'
+
+    def cut_line(self):
+        if len(self.lines) <= 1:
+            self.snapshot()
+            self.clipboard = self.cur()
+            self.lines = ['']
+            self.row = self.col = 0
+        else:
+            self.snapshot()
+            self.clipboard = self.lines.pop(self.row)
+            if self.row >= len(self.lines):
+                self.row = len(self.lines) - 1
+            self.col = min(self.col, len(self.cur()))
+        self.dirty = True
+        self.msg = f'Cut ({len(self.clipboard)} chars)'
 
     def draw(self):
         self.stdscr.erase()
@@ -103,6 +190,7 @@ class PawEditor:
         st = f'  {name}'
         if self.dirty: st += ' *'
         st += f'   {self.row+1},{self.col+1}'
+        st += f'   {len(self.lines)}L'
         self.stdscr.addstr(0, 0, st.ljust(w-1)[:w-1], curses.A_REVERSE)
 
         ext = os.path.splitext(self.filename or '')[1].lower()
@@ -128,7 +216,7 @@ class PawEditor:
             try: self.stdscr.addstr(h-2, 0, self.msg.ljust(w-1)[:w-1], curses.color_pair(3))
             except curses.error: pass
 
-        menu = '^S Save  ^O Save-As  ^K Cut  ^X Exit'
+        menu = '^S Save ^O SaveAs ^W Find ^G Goto ^Z Undo ^Y Redo ^C Copy ^V Paste ^X Exit'
         try: self.stdscr.addstr(h-1, 0, menu.ljust(w-1)[:w-1], curses.A_REVERSE)
         except curses.error: pass
 
@@ -142,6 +230,7 @@ class PawEditor:
             self.mode = 'prompt'
             self.p_label = 'Save as: '
             self.p_text = ''
+            self.p_action = 'save'
             return
         try:
             with open(fn, 'w', encoding='utf-8') as f:
@@ -153,6 +242,7 @@ class PawEditor:
             self.msg = f'Save error: {e}'
 
     def ins(self, c):
+        self.snapshot()
         line = self.cur()
         self.lines[self.row] = line[:self.col] + c + line[self.col:]
         self.col += 1
@@ -160,11 +250,13 @@ class PawEditor:
 
     def bs(self):
         if self.col > 0:
+            self.snapshot()
             line = self.cur()
             self.lines[self.row] = line[:self.col-1] + line[self.col:]
             self.col -= 1
             self.dirty = True
         elif self.row > 0:
+            self.snapshot()
             prev = self.lines[self.row-1]
             cur = self.cur()
             self.col = len(prev)
@@ -174,6 +266,7 @@ class PawEditor:
             self.dirty = True
 
     def enter(self):
+        self.snapshot()
         line = self.cur()
         self.lines[self.row] = line[:self.col]
         self.lines.insert(self.row+1, line[self.col:])
@@ -188,45 +281,72 @@ class PawEditor:
             self.draw()
             ch = self.stdscr.getch()
 
+            # ─── Prompt mode ───
             if self.mode == 'prompt':
-                if ch == 27:
+                if ch == 27:  # ESC
                     self.mode = 'edit'
+                    self.p_action = ''
+                    self.p_text = ''
                 elif ch in (10, 13, curses.KEY_ENTER):
+                    action = self.p_action
+                    text = self.p_text
                     self.mode = 'edit'
-                    if self.p_label.startswith('Save'):
-                        self.save(self.p_text)
-                    else:
+                    self.p_action = ''
+                    self.p_text = ''
+                    if action == 'save':
+                        self.save(text)
+                    elif action == 'goto':
                         try:
-                            n = int(self.p_text) - 1
+                            n = int(text) - 1
                             if 0 <= n < len(self.lines):
                                 self.row = n; self.col = 0
-                        except ValueError: pass
+                                self.msg = f'Jump to line {n+1}'
+                            else:
+                                self.msg = f'Line out of range'
+                        except ValueError:
+                            self.msg = f'Invalid number'
+                    elif action == 'find':
+                        self.find_next(text)
                 elif ch in (curses.KEY_BACKSPACE, 127, 8):
                     self.p_text = self.p_text[:-1]
                 elif 32 <= ch < 127:
                     self.p_text += chr(ch)
                 continue
 
-            if ch == 24:
+            # ─── Edit mode ───
+            if ch == 24:  # Ctrl+X — Exit
                 if self.dirty:
-                    self.msg = 'Unsaved changes. Ctrl+X again to force exit.'
+                    self.msg = 'Unsaved changes! Ctrl+X again to force exit.'
                     self.dirty = False
                 else:
                     break
-            elif ch == 19: self.save()
-            elif ch == 15:
+            elif ch == 19:  # Ctrl+S — Save
+                self.save()
+            elif ch == 15:  # Ctrl+O — Save As
                 self.mode = 'prompt'
                 self.p_label = 'Save as: '
                 self.p_text = self.filename or ''
-            elif ch == 7:
+                self.p_action = 'save'
+            elif ch == 7:  # Ctrl+G — Goto
                 self.mode = 'prompt'
                 self.p_label = 'Go to line: '
                 self.p_text = ''
-            elif ch == 11:
-                if len(self.lines) > 1:
-                    del self.lines[self.row]
-                    if self.row >= len(self.lines): self.row = len(self.lines)-1
-                    self.dirty = True
+                self.p_action = 'goto'
+            elif ch == 23:  # Ctrl+W — Find
+                self.mode = 'prompt'
+                self.p_label = 'Find: '
+                self.p_text = self.find_query
+                self.p_action = 'find'
+            elif ch == 26:  # Ctrl+Z — Undo
+                self.undo()
+            elif ch == 25:  # Ctrl+Y — Redo
+                self.redo()
+            elif ch == 3:  # Ctrl+C — Copy line
+                self.copy_line()
+            elif ch == 22:  # Ctrl+V — Paste
+                self.paste()
+            elif ch == 11:  # Ctrl+K — Cut line
+                self.cut_line()
             elif ch == curses.KEY_UP:
                 if self.row > 0:
                     self.row -= 1
@@ -245,6 +365,12 @@ class PawEditor:
                     self.row += 1; self.col = 0
             elif ch == curses.KEY_HOME: self.col = 0
             elif ch == curses.KEY_END: self.col = len(self.cur())
+            elif ch == curses.KEY_PPAGE:
+                self.row = max(0, self.row - 10)
+                self.col = min(self.col, len(self.cur()))
+            elif ch == curses.KEY_NPAGE:
+                self.row = min(len(self.lines)-1, self.row + 10)
+                self.col = min(self.col, len(self.cur()))
             elif ch in (curses.KEY_BACKSPACE, 127, 8): self.bs()
             elif ch in (10, 13, curses.KEY_ENTER): self.enter()
             elif ch == 9:
@@ -252,10 +378,12 @@ class PawEditor:
             elif 32 <= ch < 127:
                 self.ins(chr(ch))
 
-            if self.row < self.top: self.top = self.row
-            if self.row >= self.top + (h:=self.stdscr.getmaxyx()[0]-3):
+            # Auto-scroll
+            h = self.stdscr.getmaxyx()[0] - 3
+            if self.row < self.top:
+                self.top = self.row
+            if self.row >= self.top + h:
                 self.top = self.row - h + 1
-
 
 def main(stdscr):
     curses.start_color()
