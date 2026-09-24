@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """PawEditor — nano-like editor for Cat++ on Linux."""
 import sys, os, curses
+import signal
 
 CATPP_KEYWORDS = {
     'asm', 'case', 'cast', 'cat', 'either', 'give', 'groom', 'hiss',
@@ -275,8 +276,17 @@ class PawEditor:
         self.dirty = True
 
     def run(self):
+        # Ignore Ctrl+Z (SIGTSTP) va Ctrl+C (SIGINT) trong curses mode
+        try:
+            signal.signal(signal.SIGTSTP, signal.SIG_IGN)
+        except Exception:
+            pass
         curses.curs_set(1)
         self.stdscr.keypad(True)
+        try:
+            curses.raw()  # nhan tat ca key, khong sinh signal
+        except Exception:
+            pass
         while True:
             self.draw()
             ch = self.stdscr.getch()
@@ -319,6 +329,10 @@ class PawEditor:
                     self.msg = 'Unsaved changes! Ctrl+X again to force exit.'
                     self.dirty = False
                 else:
+                    try:
+                        curses.noraw()
+                    except Exception:
+                        pass
                     break
             elif ch == 19:  # Ctrl+S — Save
                 self.save()
