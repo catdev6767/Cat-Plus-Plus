@@ -62,17 +62,136 @@ class LLVMCodegen:
         return base_t
 
     def compile(self, ast):
-        # Pass 1: collect function signatures
+        # Pass 0: collect classes and functions
+        self._collect(ast[1])
+
+        # Pass 1: emit class structs
+        for stmt in ast[1]:
+            if stmt[0] == 'class':
+                self._emit_class(stmt)
+
+        # Pass 2: declare function signatures
         for stmt in ast[1]:
             if stmt[0] == 'func':
                 self._declare_func(stmt)
 
-        # Pass 2: emit function bodies
+        # Pass 3: emit method functions (as ClassName__method(me, ...))
+        for stmt in ast[1]:
+            if stmt[0] == 'class':
+                self._emit_class_methods(stmt)
+
+        # Pass 4: emit function bodies
         for stmt in ast[1]:
             if stmt[0] == 'func':
                 self._emit_func(stmt)
 
         return str(self.module)
+
+    def _collect(self, stmts):
+        for s in stmts:
+            if s[0] == 'func':
+                _, ret_type, name, params, body = s
+                self.funcs[name] = (ret_type, params)
+            elif s[0] == 'class':
+                _, name, parent, members = s
+                fields = []
+                methods = {}
+                for m in members:
+                    if m[0] == 'field':
+                        fields.append((m[1], m[2]))
+                    elif m[0] == 'func':
+                        methods[m[2]] = m
+                self.classes[name] = {'parent': parent, 'fields': fields, 'methods': methods}
+
+    def _emit_class(self, stmt):
+        _, name, parent, members = stmt
+        cdata = self.classes[name]
+        # Collect all fields including parents
+        all_fields = []
+        chain = []
+        p = cdata['parent']
+        while p and p in self.classes:
+            chain.append(p)
+            p = self.classes[p]['parent']
+        for anc in reversed(chain):
+            for ftype, fname in self.classes[anc]['fields']:
+                all_fields.append((ftype, fname))
+        for ftype, fname in cdata['fields']:
+            all_fields.append((ftype, fname))
+
+        # Create struct type
+        struct_ty = ir.LiteralStructType([self._basic_type(ft) for ft, _ in all_fields])
+        self._class_types[name] = struct_ty
+
+        # Emit C struct
+        self.emit(f'struct {name} {{')
+        self.indent += 1
+        for ftype, fname in all_fields:
+            self.emit(f'{self._basic_c_type(ftype)} {fname};')
+        if not all_fields:
+            self.emit('int _dummy;')
+        self.indent -= 1
+        self.emit(f'}};')
+        self.emit('')
+
+    def _basic_type(self, vtype):
+        """Get LLVM type for basic type (no pointers)."""
+        base = vtype[0]
+        if base in ('int', 'bool'): return self.i32
+        if base == 'long': return self.i64
+        if base in ('float', 'double'): return self.f64
+        if base == 'char': return self.i8
+        if base == 'str': return self.i8ptr
+        return self.i32
+
+    def _basic_c_type(self, vtype):
+        """Get C type string."""
+        base = vtype[0]
+        if base in ('int', 'bool'): return 'int'
+        if base == 'long': return 'long long'
+        if base in ('float', 'double'): return 'double'
+        if base == 'char': return 'char'
+        if base == 'str': return 'char*'
+        return 'int'
+
+    def _emit_class_methods(self, stmt):
+        _, cname, parent, members = stmt
+        cdata = self.classes[cname]
+        struct_ty = self._class_types[cname]
+        me_ptr_ty = ir.PointerType(struct_ty)
+
+        for mname, m in cdata['methods'].items():
+            _, mret, _, mparams, mbody = m
+            # C-style method: ret ClassName__method(ClassName* me, params...)
+            fn_name = f'{cname}__{mname}'
+            param_types = [me_ptr_ty] + [self._basic_type(pt) for pt, _ in mparams]
+            ret_ty = self._basic_type(mret)
+            fn_ty = ir.FunctionType(ret_ty, param_types)
+            fn = ir.Function(self.module, fn_ty, name=fn_name)
+            fn.args[0].name = 'me'
+            for i, (_, pname) in enumerate(mparams):
+                fn.args[i+1].name = pname
+
+            # Body
+            entry = fn.append_basic_block(name='entry')
+            self.builder = ir.IRBuilder(entry)
+            self.env = {}
+            self._current_class = cname
+
+            # Alloc params
+            for i, ((ptype, pname), arg) in enumerate(zip([('ptr_me', 'me')] + mparams, fn.args)):
+                alloca = self.builder.alloca(arg.type, name=pname)
+                self.builder.store(arg, alloca)
+                self.env[pname] = (alloca, arg.type)
+
+            for st in mbody:
+                self._emit_stmt(st)
+
+            if not self.builder.block.is_terminated:
+                if mret[0] == 'void':
+                    self.builder.ret_void()
+                else:
+                    self.builder.ret(ir.Constant(ret_ty, 0))
 
     def _declare_func(self, s):
         _, ret_type, name, params, body = s

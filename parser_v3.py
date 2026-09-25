@@ -69,9 +69,24 @@ class Parser:
     # ═══ FUNCTION ═══
     def parse_function(self):
         self.expect('PURR')
+        # Constructor: purr ClassName(args) { ... }
+        if self.at('IDENT') and self.peek(1).type == '(':
+            name_tok = self.next()
+            self.expect('(')
+            params = self.parse_params()
+            self.expect(')')
+            body = self.parse_block()
+            return ('func', ('void', 0, None, None), name_tok.value, params, body)
+        # Regular function: purr <type> name(args) { ... }
         ret_type = self.parse_type()
         name_tok = self.expect('IDENT')
         self.expect('(')
+        params = self.parse_params()
+        self.expect(')')
+        body = self.parse_block()
+        return ('func', ret_type, name_tok.value, params, body)
+
+    def parse_params(self):
         params = []
         if not self.at(')'):
             while True:
@@ -80,9 +95,7 @@ class Parser:
                 params.append((ptype, pname))
                 if not self.match(','):
                     break
-        self.expect(')')
-        body = self.parse_block()
-        return ('func', ret_type, name_tok.value, params, body)
+        return params
 
     # ═══ CLASS ═══
     def parse_class(self):
