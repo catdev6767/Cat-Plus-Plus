@@ -46,6 +46,8 @@ class LLVMCodegen:
         self.lines = []
         self.indent = 0
         self._current_class = None
+        self._loop_end_stack = []
+        self._loop_cond_stack = []
         self._var_classes = {}
 
     def _get_all_fields(self, cls_name):
@@ -479,7 +481,11 @@ class LLVMCodegen:
             self.builder.cbranch(cond_val, body_bb, end_bb)
 
             self.builder.position_at_end(body_bb)
+            self._loop_end_stack.append(end_bb)
+            self._loop_cond_stack.append(cond_bb)
             for st in body: self._emit_stmt(st)
+            self._loop_end_stack.pop()
+            self._loop_cond_stack.pop()
             if not self.builder.block.is_terminated:
                 self.builder.branch(cond_bb)
 
@@ -488,6 +494,24 @@ class LLVMCodegen:
 
         if t == 'expr_stmt':
             self._emit_expr(s[1])
+            return None
+
+        if t == 'delete':
+            ptr = self._emit_expr(s[1])
+            free = self._get_or_declare('free', ir.VoidType(), [self.i8ptr])
+            if isinstance(ptr.type, ir.PointerType):
+                raw = self.builder.bitcast(ptr, self.i8ptr)
+                self.builder.call(free, [raw])
+            return None
+
+        if t == 'break':
+            if hasattr(self, '_loop_end_stack') and self._loop_end_stack:
+                self.builder.branch(self._loop_end_stack[-1])
+            return None
+
+        if t == 'continue':
+            if hasattr(self, '_loop_cond_stack') and self._loop_cond_stack:
+                self.builder.branch(self._loop_cond_stack[-1])
             return None
 
         raise CodegenError(f'Unknown stmt: {t}')
