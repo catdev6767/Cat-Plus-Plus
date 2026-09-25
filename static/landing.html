@@ -1,479 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cat++ v3 — C++-like syntax, LLVM native</title>
-<meta name="description" content="A scripting language with C++-like syntax and cat-themed keywords. Compiles to native binary via LLVM. Runs in browser.">
+<title>Cat++ — A programming language with cat syntax</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
+a { color:#f97316; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
 
-:root {
-  --bg:        #282c34;
-  --bg-2:      #2c313a;
-  --bg-3:      #3e4451;
-  --bg-title:  #21252b;
-  --border:    #3e4451;
-  --border-2:  #3e4451;
-  --fg:        #abb2bf;
-  --fg-dim:    #5c6370;
-  --fg-bright: #d7dae0;
-  --blue:      #61afef;
-  --blue-2:    #d19a66;
-  --blue-3:    #528bff;
-  --green:     #98c379;
-  --purple:    #c678dd;
-  --cyan:      #d19a66;
-  --orange:    #98c379;
-}
+/* Navbar */
+.nav { padding:16px 0; border-bottom:1px solid #1e293b; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
+.nav-inner { display:flex; align-items:center; gap:24px; }
+.nav-logo { font-size:20px; font-weight:700; color:#f8fafc; margin-right:auto; }
+.nav-logo span { color:#f97316; }
+.nav-link { color:#94a3b8; font-size:14px; padding:8px 12px; border-radius:6px; transition:all 0.2s; }
+.nav-link:hover { color:#f97316; background:rgba(249,115,22,0.1); text-decoration:none; }
+.nav-cta { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; padding:8px 20px; border-radius:8px; font-weight:600; font-size:14px; }
+.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(249,115,22,0.4); text-decoration:none; color:#fff; }
 
-html { scroll-behavior: smooth; }
+/* Hero */
+.hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#0a0e1a 60%); }
+.hero::before { content:"🐱"; position:absolute; top:40px; left:8%; font-size:80px; opacity:0.08; }
+.hero::after { content:"🐾"; position:absolute; bottom:40px; right:8%; font-size:60px; opacity:0.08; }
+.hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fbbf24 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
+.hero p { font-size:22px; color:#94a3b8; max-width:640px; margin:0 auto 40px; }
+.hero-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.btn { display:inline-flex; align-items:center; gap:10px; padding:16px 32px; border-radius:12px; font-size:16px; font-weight:600; transition:all 0.2s; cursor:pointer; border:none; }
+.btn-primary { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 8px 24px rgba(249,115,22,0.3); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(249,115,22,0.5); text-decoration:none; color:#fff; }
+.btn-secondary { background:rgba(255,255,255,0.06); color:#e2e8f0; border:1px solid rgba(255,255,255,0.1); }
+.btn-secondary:hover { background:rgba(255,255,255,0.1); text-decoration:none; color:#e2e8f0; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--fg);
-  line-height: 1.65;
-  font-size: 15px;
-}
+/* Sections */
+section { padding:80px 0; }
+h2 { font-size:40px; color:#f8fafc; margin-bottom:32px; border-left:4px solid #f97316; padding-left:20px; letter-spacing:-0.5px; }
+h3 { font-size:20px; color:#f97316; margin:24px 0 12px; }
+p { color:#cbd5e1; }
 
-a { color: var(--blue-2); text-decoration: none; transition: color 0.15s; }
-a:hover { color: var(--blue); }
+/* Code block */
+pre { background:#0d1220; border:1px solid #1e293b; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
+code { font-family:ui-monospace,Consolas,monospace; }
+.kw { color:#f97316; font-weight:600; }
+.str { color:#fbbf24; }
+.num { color:#22d3ee; }
+.cmt { color:#64748b; font-style:italic; }
+.fn { color:#4ade80; }
 
-code, pre { font-family: 'JetBrains Mono', 'Cascadia Code', ui-monospace, Consolas, monospace; }
+/* Grid */
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:40px; }
+.card { background:#111827; border:1px solid #1e293b; border-radius:16px; padding:28px; transition:all 0.25s; }
+.card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
+.card h3 { margin-top:0; font-size:20px; color:#f8fafc; }
+.card p { color:#94a3b8; font-size:14px; margin:0; }
+.card-icon { font-size:36px; margin-bottom:16px; display:block; }
 
-.container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+/* Stats */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; margin:48px 0; }
+.stat { background:#111827; border-radius:16px; padding:32px; text-align:center; border:1px solid #1e293b; }
+.stat .num { font-size:48px; font-weight:800; color:#f97316; display:block; line-height:1; }
+.stat .label { font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; margin-top:12px; display:block; }
 
-/* NAV */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(10, 22, 40, 0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 0;
-}
-.nav-inner { display: flex; align-items: center; gap: 20px; }
-.nav-logo {
-  font-weight: 700; font-size: 16px; color: var(--fg-bright);
-  display: flex; align-items: center; gap: 8px; margin-right: auto;
-}
-.nav-logo::before { content: '🐱'; font-size: 20px; }
-.nav-logo .ver {
-  font-size: 11px; color: var(--blue-2);
-  padding: 2px 7px; border-radius: 4px;
-  background: rgba(97, 175, 239, 0.12);
-  border: 1px solid rgba(97, 175, 239, 0.3);
-  font-weight: 600;
-}
-.nav-link {
-  color: var(--fg-dim); font-size: 13.5px;
-  padding: 6px 12px; border-radius: 4px;
-  transition: all 0.15s;
-}
-.nav-link:hover {
-  color: var(--fg-bright);
-  background: rgba(97, 175, 239, 0.12);
-  text-decoration: none;
-}
-.nav-cta {
-  background: var(--blue); color: #fff !important;
-  padding: 6px 16px !important; border-radius: 4px;
-  font-weight: 600; font-size: 13.5px;
-}
-.nav-cta:hover {
-  background: var(--blue-3) !important;
-  text-decoration: none !important;
-  color: #fff !important;
-}
+/* CTA section */
+.cta-box { background:linear-gradient(135deg,#1a1f2e 0%,#0d1220 100%); border:1px solid #1e293b; border-radius:20px; padding:60px; text-align:center; margin:60px 0; }
+.cta-box h2 { border:none; padding:0; margin-bottom:16px; }
+.cta-box p { font-size:18px; margin-bottom:32px; }
 
-/* HERO */
-.hero {
-  padding: 80px 0 60px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -100px; left: 50%;
-  transform: translateX(-50%);
-  width: 800px; height: 500px;
-  background: radial-gradient(ellipse, rgba(97, 175, 239, 0.12), transparent 60%);
-  pointer-events: none;
-}
-.hero-content { position: relative; z-index: 1; }
-.hero h1 {
-  font-size: 60px; font-weight: 800;
-  color: var(--fg-bright);
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-bottom: 16px;
-}
-.hero h1 .cat { color: var(--blue); }
-.hero .tagline {
-  font-size: 20px; color: var(--fg-dim);
-  max-width: 660px; margin: 0 auto 32px;
-  line-height: 1.5;
-}
-.hero .tagline b { color: var(--fg-bright); font-weight: 600; }
-.hero-btns {
-  display: flex; gap: 12px;
-  justify-content: center; flex-wrap: wrap;
-}
+/* Footer */
+footer { padding:60px 0 40px; text-align:center; border-top:1px solid #1e293b; color:#64748b; font-size:14px; }
+footer a { color:#94a3b8; }
 
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 24px; border-radius: 6px;
-  font-weight: 600; font-size: 14.5px;
-  transition: all 0.2s; cursor: pointer;
-  border: none; font-family: inherit;
-}
-.btn-primary { background: var(--blue); color: #fff; }
-.btn-primary:hover {
-  background: var(--blue-3);
-  transform: translateY(-1px);
-  text-decoration: none; color: #fff;
-  box-shadow: 0 8px 24px rgba(97, 175, 239, 0.35);
-}
-.btn-secondary {
-  background: rgba(255,255,255,0.05);
-  color: var(--fg-bright);
-  border: 1px solid var(--border);
-}
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.1);
-  text-decoration: none; color: var(--fg-bright);
-}
-
-/* CODE DEMO */
-.demo-wrap { margin: 60px 0; }
-.demo-window {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-.demo-titlebar {
-  background: var(--bg-title);
-  padding: 10px 16px;
-  display: flex; align-items: center; gap: 8px;
-  border-bottom: 1px solid var(--border);
-}
-.demo-dots { display: flex; gap: 6px; }
-.demo-dots span { width: 12px; height: 12px; border-radius: 50%; }
-.demo-dots .red { background: #ff5f57; }
-.demo-dots .yellow { background: #febc2e; }
-.demo-dots .green { background: #28c840; }
-.demo-title {
-  margin-left: 12px; font-size: 13px;
-  color: var(--fg-dim);
-  font-family: 'JetBrains Mono', monospace;
-}
-.demo-body {
-  padding: 20px 24px;
-  background: var(--bg);
-  overflow-x: auto;
-}
-.demo-body pre {
-  font-size: 13.5px; line-height: 1.7;
-  color: var(--fg);
-}
-.kw   { color: var(--purple); }
-.fn   { color: #61afef; }
-.str  { color: var(--orange); }
-.num  { color: #d19a66; }
-.cmt  { color: #5c6370; font-style: italic; }
-.type { color: var(--cyan); }
-
-/* SECTIONS */
-section { padding: 60px 0; }
-section h2 {
-  font-size: 32px; font-weight: 700;
-  color: var(--fg-bright);
-  letter-spacing: -0.02em; margin-bottom: 12px;
-}
-section h2 .accent { color: var(--blue); }
-section .subtitle {
-  color: var(--fg-dim); font-size: 16px;
-  margin-bottom: 32px; max-width: 660px;
-}
-
-/* FEATURES */
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-.feature {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
-  transition: all 0.2s;
-}
-.feature:hover {
-  border-color: rgba(97, 175, 239, 0.5);
-  transform: translateY(-2px);
-}
-.feature-icon { font-size: 28px; margin-bottom: 12px; display: block; }
-.feature h3 {
-  font-size: 16px; font-weight: 600;
-  color: var(--fg-bright); margin-bottom: 8px;
-}
-.feature p { font-size: 13.5px; color: var(--fg-dim); line-height: 1.55; }
-.feature code {
-  color: var(--blue-2); font-size: 12.5px;
-  background: rgba(97, 175, 239, 0.1);
-  padding: 1px 5px; border-radius: 3px;
-}
-
-/* INSTALL */
-.install-box {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px; margin-top: 20px;
-}
-.install-box h3 {
-  color: var(--fg-bright); font-size: 15px;
-  margin-bottom: 12px; font-weight: 600;
-}
-.install-box pre {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px 20px;
-  overflow-x: auto;
-  font-size: 13.5px;
-  color: var(--fg);
-}
-
-/* STATS */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px; margin-top: 24px;
-}
-.stat {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px; text-align: center;
-}
-.stat .num {
-  font-size: 32px; font-weight: 700;
-  color: var(--blue); display: block;
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1;
-}
-.stat .label {
-  font-size: 12px; color: var(--fg-dim);
-  text-transform: uppercase; letter-spacing: 0.06em;
-  margin-top: 8px; display: block;
-}
-
-/* CTA */
-.cta {
-  text-align: center;
-  padding: 60px 24px;
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin: 40px 0;
-}
-.cta h2 { margin-bottom: 12px; }
-.cta p {
-  color: var(--fg-dim);
-  margin-bottom: 24px;
-  max-width: 500px;
-  margin-left: auto; margin-right: auto;
-}
-
-/* FOOTER */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 0 30px;
-  text-align: center;
-  color: var(--fg-dim);
-  font-size: 13px;
-}
-footer a { color: var(--fg-dim); }
-footer a:hover { color: var(--blue-2); }
-
-/* MOBILE */
-@media (max-width: 640px) {
-  .hero h1 { font-size: 38px; }
-  .hero .tagline { font-size: 17px; }
-  section h2 { font-size: 26px; }
-  .nav-link { display: none; }
+@media (max-width:700px) {
+  .hero h1 { font-size:48px; }
+  .hero p { font-size:18px; }
+  h2 { font-size:28px; }
+  .nav-link { display:none; }
+  .cta-box { padding:40px 20px; }
 }
 </style>
+
 </head>
 <body>
 
-<nav>
+<div class="nav">
   <div class="container nav-inner">
-    <a href="./" class="nav-logo">Cat++ <span class="ver">v3</span></a>
+    <div class="nav-logo">🐱 Cat++</div>
     <a href="#features" class="nav-link">Features</a>
-    <a href="#install" class="nav-link">Install</a>
-    <a href="./ide/" class="nav-link">IDE</a>
-    <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+    <a href="#cli" class="nav-link">CLI</a>
+    <a href="./docs/" class="nav-link">Docs</a>
+    <a href="/learn/" class="nav-link">Learn</a>
+    <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="nav-link" style="display:inline-flex;align-items:center;gap:6px" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      GitHub
+    </a>
     <a href="./ide/" class="nav-cta">Open IDE →</a>
   </div>
-</nav>
+</div>
 
-<div class="container">
+<div class="hero">
+  <div class="container">
+    <h1>Cat++</h1>
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:1px solid rgba(249,115,22,0.3);font-size:14px;font-weight:600;color:#fb923c;margin-bottom:20px;">
+      ⚡ Native C transpiler — faster than interpreter <b style="color:#fbbf24;">13,635×</b>
+    </div>
+    <p>Cat++ v3 — C++-like syntax, LLVM native, cat themed. Easy to read, easy to learn, runs in the browser.<br>Now compiles to <b style="color:#fb923c;">native C</b> — nearly C++ speed.</p>
+    <div class="hero-btns">
+      <a href="./ide/" class="btn btn-primary">🚀 Open IDE</a>
+      <a href="#install" class="btn btn-secondary">📦 Install</a>
+      <a href="./docs/" class="btn btn-secondary">📖 Docs</a>
+    </div>
+  </div>
+</div>
 
-  <section class="hero">
-    <div class="hero-content">
-      <h1><span class="cat">🐱</span> Cat++ v3</h1>
-      <p class="tagline">
-        A scripting language with <b>C++-like syntax</b> and <b>cat-themed keywords</b>.
-        Compiles to native binary via <b>LLVM</b> — no C transpilation needed.
-      </p>
-      <div class="hero-btns">
-        <a href="./ide/" class="btn btn-primary">Try in browser →</a>
-        <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="btn btn-secondary" target="_blank" rel="noopener">GitHub</a>
+<section>
+  <div class="container">
+    <h2>What is Cat++?</h2>
+    <p style="font-size:18px; max-width:800px;">
+      Cat++ is a small programming language that runs entirely in the browser. Syntax uses cat-themed keywords — easy to remember, fun, and great for beginners.
+      Can transpile to C to write OS kernels ().
+    </p>
+
+    <h3>Example</h3>
+    <pre><code><span class="cmt"># Hello world</span>
+<span class="kw">meow</span> <span class="str">"Hello, Cat++!"</span>
+
+<span class="cmt"># Function with default parameter</span>
+<span class="kw">purr</span> <span class="fn">greet</span>(name, greeting = <span class="str">"Hello"</span>)
+    <span class="kw">give</span> greeting + <span class="str">", "</span> + name
+
+<span class="kw">meow</span> <span class="fn">greet</span>(<span class="str">"Tom"</span>)          <span class="cmt"># Hello, Tom</span>
+
+<span class="cmt"># Class with operator overload</span>
+<span class="kw">cat</span> Vec2
+    <span class="kw">paw</span> x
+    <span class="kw">paw</span> y
+    <span class="kw">purr</span> <span class="fn">new</span>(x, y)
+        me.x = x
+        me.y = y
+    <span class="kw">purr</span> <span class="fn">add</span>(o)
+        <span class="kw">give</span> Vec2(me.x + o.x, me.y + o.y)
+
+<span class="kw">paw</span> c = Vec2(<span class="num">1</span>, <span class="num">2</span>) + Vec2(<span class="num">3</span>, <span class="num">4</span>)</code></pre>
+  
+      <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="btn btn-secondary" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:middle"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+        Star on GitHub
+      </a>
+    </div>
+</section>
+
+<section id="features" style="background:#0d1220;">
+  <div class="container">
+    <h2>Features</h2>
+    <div class="grid">
+      <div class="card"><span class="card-icon">🐱</span><h3>Cat syntax</h3><p>meow, paw, purr, sniff, knead... easy to remember, fun, friendly.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>Runs in browser</h3><p>No install. Just open the link. Zero-config.</p></div>
+      <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
+      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
+      <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in kernel.</p></div>
+      <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
+      <div class="card"><span class="card-icon">📦</span><h3>149 builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="performance" style="background:#0d1220;">
+  <div class="container">
+    <h2>Performance — Nearly C++</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      Cat++ has 4 engines. Pick speed or flexibility as needed.
+      With <b style="color:#fb923c;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
+    </p>
+
+    <h3>Benchmark — 1 million iterations</h3>
+    <pre><code><span class="kw">purr</span> <span class="fn">sum_to</span>(n: i32) -> i64
+    <span class="kw">paw</span> total: i64 = 0
+    <span class="kw">paw</span> i: i32 = 1
+    <span class="kw">knead</span> i <= n
+        total = total + i
+        i = i + 1
+    <span class="kw">give</span> total
+
+<span class="kw">meow</span> <span class="fn">sum_to</span>(<span class="num">1000000</span>)</code></pre>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:32px 0;">
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Interpreter</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">5,547<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Bytecode VM</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">2,581<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">2.1×</div>
+      </div>
+      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">C boxed</div>
+        <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
+        <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:2px solid #f97316;border-radius:12px;padding:24px;position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:#f97316;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
+        <div style="font-size:14px;color:#fb923c;margin-bottom:8px;font-weight:600;">⚡ C native</div>
+        <div style="font-size:32px;font-weight:800;color:#fbbf24;">0.4<span style="font-size:16px;color:#fb923c;">ms</span></div>
+        <div style="font-size:13px;color:#fb923c;margin-top:8px;font-weight:600;">13,635×</div>
       </div>
     </div>
-  </section>
 
-  <div class="demo-wrap">
-    <div class="demo-window">
-      <div class="demo-titlebar">
-        <div class="demo-dots">
-          <span class="red"></span><span class="yellow"></span><span class="green"></span>
-        </div>
-        <span class="demo-title">hello.cat — Cat++ v3</span>
+    <h3>When to use what?</h3>
+    <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
+      <li><b>⚡ C native</b> — heavy arithmetic, algorithms (needs type annotations)</li>
+      <li><b>C boxed</b> — complex list/dict/class code (runs anything)</li>
+      <li><b>Interpreter/VM</b> — quick prototyping, no types needed</li>
+    </ul>
+
+    <p style="margin-top:24px;">
+      <a href="./docs/guide/native.html" class="btn btn-secondary" style="display:inline-flex;">📖 Read native guide →</a>
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Statistics</h2>
+    <div class="stats">
+      <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
+      <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
+      <div class="stat"><span class="num">149</span><span class="label">Builtins</span></div>
+      <div class="stat"><span class="num">6</span><span class="label">CLI commands</span></div>
+      <div class="stat"><span class="num">184</span><span class="label">Test runs</span></div>
+      <div class="stat"><span class="num">171</span><span class="label">Trang docs</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="cli" style="background:#0d1220;">
+  <div class="container">
+    <h2>CLI — paw</h2>
+    <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
+      <b style="color:#fb923c;">paw</b> is the official command-line tool.
+      Run scripts, create files, REPL, transpile, format, lint.
+    </p>
+
+    <pre><code><span class="cmt"># Run a script</span>
+paw run hello.cat
+
+<span class="cmt"># Create new file + open editor</span>
+paw new game.cat
+
+<span class="cmt"># Interactive REPL</span>
+paw repl
+
+<span class="cmt"># Transpile to C (13,635× faster)</span>
+paw build-fast calc.cat
+
+<span class="cmt"># Format + lint + check</span>
+paw fmt game.cat --write
+paw lint game.cat
+paw check game.cat</code></pre>
+
+    <div class="cards" style="margin-top:32px;">
+      <div class="card">
+        <h3>paw run</h3>
+        <p>Run Cat++ script via interpreter (or VM, PyCompiler)</p>
       </div>
-      <div class="demo-body">
-<pre><span class="cmt">// Cat++ v3 — C++-like syntax, cat keywords</span>
-<span class="kw">cat</span> <span class="type">Point</span> {
-    <span class="kw">paw</span> <span class="type">int</span> x;
-    <span class="kw">paw</span> <span class="type">int</span> y;
+      <div class="card">
+        <h3>paw build-fast</h3>
+        <p>Transpile to native C — 13,635× faster than interpreter</p>
+      </div>
+      <div class="card">
+        <h3>paw fmt / lint / check</h3>
+        <p>Format code, find errors, check type coverage</p>
+      </div>
+      <div class="card">
+        <h3>PawEditor</h3>
+        <p>Nano-like editor with Cat++ syntax highlight, written in Python + curses</p>
+      </div>
+    </div>
 
-    <span class="kw">purr</span> <span class="fn">Point</span>(<span class="type">int</span> a, <span class="type">int</span> b) {
-        me.x = a;
-        me.y = b;
-    }
+    <p style="margin-top:32px;">
+      <a href="./docs/guide/cli.html" class="btn btn-secondary">📖 Read CLI guide →</a>
+    </p>
+  </div>
+</section>
 
-    <span class="kw">purr</span> <span class="type">int</span> <span class="fn">sum</span>() {
-        <span class="kw">give</span> me.x + me.y;
-    }
-};
+<section id="install" style="background:#0d1220;">
+  <div class="container">
+    <h2>Install</h2>
 
-<span class="kw">purr</span> <span class="type">int</span> <span class="fn">main</span>() {
-    <span class="kw">paw</span> <span class="type">Point</span> p = <span class="fn">Point</span>(<span class="num">3</span>, <span class="num">4</span>);
-    <span class="kw">meow</span>(p.<span class="fn">sum</span>());  <span class="cmt">// 7</span>
-    <span class="kw">give</span> <span class="num">0</span>;
-}</pre>
+    <h3>Run directly (no install)</h3>
+    <p>Open <a href="./ide/">IDE</a> — works right in your browser.</p>
+
+    <h3>One-line install</h3>
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/catdev6767/Cat-Plus-Plus/main/install.sh | bash</code></pre>
+
+    <h3>Install manually</h3>
+    <pre><code><span class="cmt"># Requires: Python 3.8+</span>
+git clone https://github.com/catdev6767/Cat-Plus-Plus.git
+cd Cat-Plus-Plus
+python3 catpp.py
+
+<span class="cmt"># Open: http://localhost:5000</span></code></pre>
+
+    <h3>Docker</h3>
+    <pre><code>docker build -t catpp:2.0 .
+docker run -p 5000:5000 catpp:2.0</code></pre>
+
+    <h3>CLI</h3>
+    <pre><code>python3 catpp.py repl              <span class="cmt"># REPL</span>
+python3 catpp.py run hello.cat     <span class="cmt"># Run file</span>
+python3 catpp.py fmt hello.cat -w  <span class="cmt"># Format</span>
+python3 catpp.py lint hello.cat    <span class="cmt"># Lint</span></code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-box">
+      <h2>Ready to write Cat++?</h2>
+      <p>Open the IDE, pick an example, start immediately. Try ⚡ C fast to see the speed.</p>
+      <div class="hero-btns">
+        <a href="./ide/" class="btn btn-primary">🚀 Open IDE</a>
+        <a href="./docs/tutorial/01-hello.html" class="btn btn-secondary">📖 Lesson 1 — Hello Cat</a>
       </div>
     </div>
   </div>
-
-  <section id="features">
-    <h2>Built <span class="accent">seriously</span>, named silly.</h2>
-    <p class="subtitle">
-      Cat++ v3 is a real programming language with cat-themed keywords.
-      LLVM backend, classes, pointers, arrays, and a browser IDE.
-    </p>
-
-    <div class="features">
-      <div class="feature">
-        <span class="feature-icon">⚡</span>
-        <h3>LLVM native</h3>
-        <p>Compiles directly to native binary via LLVM. No gcc, no C transpilation. ~2× slower than C, 1000× faster than interpreter.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🎯</span>
-        <h3>C++-like syntax</h3>
-        <p>Curly braces, semicolons, line comments. Classes, inheritance, pointers, arrays, structs, enums.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🐱</span>
-        <h3>Cat keywords</h3>
-        <p><code>meow</code> print · <code>paw</code> var · <code>purr</code> func · <code>give</code> return · <code>sniff</code> if · <code>swat</code> else</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🌐</span>
-        <h3>Browser IDE</h3>
-        <p>Run Cat++ in your browser via Pyodide. No install. Powered by Monaco editor, syntax highlight for v2 + v3.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">📦</span>
-        <h3>Multi-engine</h3>
-        <p>Interpreter (dev), bytecode VM (medium), PyCompiler (fast), LLVM native (fastest). Pick per task.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🛠️</span>
-        <h3>Real stdlib</h3>
-        <p>File I/O, math, strings, crypto, HTTP, SQLite. <code>sqrt</code>, <code>pow</code>, <code>read_file</code>, <code>upper</code>, <code>substr</code>, and more.</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>By the <span class="accent">numbers</span></h2>
-    <div class="stats">
-      <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
-      <div class="stat"><span class="num">170+</span><span class="label">Builtins</span></div>
-      <div class="stat"><span class="num">~2×</span><span class="label">vs C</span></div>
-      <div class="stat"><span class="num">1000×</span><span class="label">vs Interp</span></div>
-    </div>
-  </section>
-
-  <section id="install">
-    <h2>Get <span class="accent">started</span></h2>
-    <p class="subtitle">Try in browser — no install. Or compile native locally.</p>
-
-    <div class="install-box">
-      <h3>🌐 In browser</h3>
-      <p style="color:var(--fg-dim);font-size:14px;margin-bottom:12px">Cat++ runs entirely in your browser via Pyodide.</p>
-      <a href="./ide/" class="btn btn-primary">Open IDE →</a>
-    </div>
-
-    <div class="install-box">
-      <h3>📦 Local (v3 — LLVM native)</h3>
-      <pre><span class="cmt"># Clone</span>
-git clone https://github.com/catdev6767/Cat-Plus-Plus
-cd Cat-Plus-Plus
-
-<span class="cmt"># Run v3 (interpreter)</span>
-python3 interpreter_v3.py hello.cat
-
-<span class="cmt"># Compile to native binary (LLVM)</span>
-python3 codegen_llvm_v3.py hello.cat --build hello
-./hello</pre>
-    </div>
-  </section>
-
-  <section>
-    <div class="cta">
-      <h2>Ready to <span class="accent">meow</span>?</h2>
-      <p>Write Cat++, compile native, or run directly in your browser.</p>
-      <div class="hero-btns">
-        <a href="./ide/" class="btn btn-primary">Open IDE</a>
-        <a href="https://github.com/catdev6767/Cat-Plus-Plus" class="btn btn-secondary" target="_blank" rel="noopener">View source</a>
-      </div>
-    </div>
-  </section>
-
-</div>
+</section>
 
 <footer>
   <div class="container">
-    <p style="margin-bottom:12px"><b style="color:var(--fg-bright)">Cat++ v3</b> — C++-like syntax, LLVM native</p>
-    <p>
+    <p style="font-size:16px; color:#f8fafc; margin-bottom:12px;">🐱 Cat++ v3.0.0</p>
+    <p>MIT License · Made with 🐱</p>
+    <p style="margin-top:16px;">
       <a href="./ide/">IDE</a> ·
       <a href="./docs/">Docs</a> ·
-      <a href="https://github.com/catdev6767/Cat-Plus-Plus" target="_blank" rel="noopener">GitHub</a> ·
-      <a href="https://github.com/catdev6767/Cat-Plus-Plus/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a>
+      <a href="https://github.com/catdev6767/Cat-Plus-Plus">GitHub</a>
     </p>
-    <p style="margin-top:16px;color:var(--fg-dim);font-size:12px">Made with 🐱 by catdev6767</p>
   </div>
 </footer>
+
 
 </body>
 </html>

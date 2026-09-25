@@ -71,12 +71,11 @@ var BI = ['tail','puff','melt','nip','bolt','kitten','lion','scratch','flop',
   'chase','sift','curl','sway','wave','slant','grow','bound','wander','dice'];
 
 var EXAMPLES = {};
-EXAMPLES['hello.cat'] = '// Hello World — Cat++ v3\npurr int main() {\n    meow("Hello, Cat++ v3!");\n    give 0;\n}\n';
-EXAMPLES['class.cat'] = '// Class + Inheritance\ncat Point {\n    paw int x;\n    paw int y;\n\n    purr Point(int a, int b) {\n        me.x = a;\n        me.y = b;\n    }\n\n    purr int sum() {\n        give me.x + me.y;\n    }\n};\n\npurr int main() {\n    paw Point p = Point(3, 4);\n    meow(p.sum());\n    give 0;\n}\n';
-EXAMPLES['fibonacci.cat'] = '// Fibonacci — recursion\npurr int fib(int n) {\n    sniff (n < 2) {\n        give n;\n    }\n    give fib(n - 1) + fib(n - 2);\n}\n\npurr int main() {\n    for (paw int i = 0; i < 10; i = i + 1) {\n        meow(fib(i));\n    }\n    give 0;\n}\n';
-EXAMPLES['array.cat'] = '// Arrays\npurr int main() {\n    paw int arr[5];\n    for (paw int i = 0; i < 5; i = i + 1) {\n        arr[i] = i * i;\n    }\n    for (paw int i = 0; i < 5; i = i + 1) {\n        meow(arr[i]);\n    }\n    give 0;\n}\n';
-EXAMPLES['pointer.cat'] = '// Pointers\npurr int main() {\n    paw int x = 42;\n    paw int* p = &x;\n    *p = 100;\n    meow(x);\n    give 0;\n}\n';
-EXAMPLES['fizzcat.cat'] = '// FizzCat\npurr str fizzcat(int n) {\n    sniff (n % 15 == 0) { give "FizzCat"; }\n    sniff (n % 3 == 0) { give "Fizz"; }\n    sniff (n % 5 == 0) { give "Cat"; }\n    give "?";\n}\n\npurr int main() {\n    for (paw int i = 1; i <= 20; i = i + 1) {\n        meow(fizzcat(i));\n    }\n    give 0;\n}\n';
+EXAMPLES['hello.cat'] = '# Welcome to Cat++\nmeow "Meow! Hello, Cat++!"\n\npaw x = 10\npaw name = "Whiskers"\n\npurr add(a, b)\n    give a + b\n\nmeow add(x, 5)\nmeow "Name: " + name\n\nsniff x > 5\n    meow "big cat"\nswat\n    meow "small cat"\n\npaw i = 1\nknead i <= 5\n    meow i\n    paw i = i + 1\n';
+EXAMPLES['fizzcat.cat'] = 'purr fizzcat(n)\n    sniff n % 15 == 0\n        give "FizzCat"\n    sniff n % 3 == 0\n        give "Fizz"\n    sniff n % 5 == 0\n        give "Cat"\n    give n\n\npaw i = 1\nknead i <= 20\n    meow fizzcat(i)\n    paw i = i + 1\n';
+EXAMPLES['fibonacci.cat'] = 'purr fib(n)\n    sniff n <= 1\n        give n\n    give fib(n - 1) + fib(n - 2)\n\npaw i = 0\nknead i < 20\n    meow fib(i)\n    paw i = i + 1\n';
+EXAMPLES['class.cat'] = 'cat Point\n    paw x\n    paw y\n    purr new(a, b)\n        me.x = a\n        me.y = b\n    purr dist()\n        give scratch(me.x * me.x + me.y * me.y)\n\npaw p = Point(3, 4)\nmeow p.dist()\n';
+EXAMPLES['kit.cat'] = 'paw double = kit(x) => x * 2\nmeow double(21)\n\npaw nums = [1, 2, 3, 4, 5]\nmeow chase(nums, kit(x) => x * x)\nmeow sift(nums, kit(x) => x % 2 == 0)\n';
 
 // ============ STATE ============
 var LANG = 'vi';
@@ -465,10 +464,10 @@ function applyTheme(mode) {
   }
   if (term) {
     if (document.body.classList.contains('cat-theme')) {
-      term.options.theme = { background:'#282c34', foreground:'#abb2bf', cursor:'#f97316' };
+      term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#f97316' };
     } else {
       term.options.theme = mode === 'dark'
-        ? { background:'#282c34', foreground:'#abb2bf' }
+        ? { background:'#1e1e1e', foreground:'#cccccc' }
         : { background:'#f8f8f8', foreground:'#333333' };
     }
   }
@@ -485,7 +484,7 @@ function applyCatTheme(on) {
     document.body.classList.remove('theme-dark');
     document.body.classList.remove('theme-light');
     if (editor) monaco.editor.setTheme('catpp-cat');
-    if (term) term.options.theme = { background:'#282c34', foreground:'#abb2bf', cursor:'#f97316' };
+    if (term) term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#f97316' };
   } else {
     var mode = 'dark';
     try { mode = localStorage.getItem(STORAGE_THEME) || 'dark'; } catch (e) {}
@@ -504,7 +503,7 @@ function initTerminal() {
     return;
   }
   term = new Terminal({
-    theme: { background:'#282c34', foreground:'#abb2bf', cursor:'#528bff' },
+    theme: { background:'#1e1e1e', foreground:'#cccccc', cursor:'#007acc' },
     fontSize: 13,
     fontFamily: 'Consolas, "Ubuntu Mono", monospace'
   });
@@ -607,7 +606,7 @@ function initMonaco() {
           { token:'identifier', foreground:'9cdcfe' },
           { token:'type', foreground:'4ec9b0' }
         ],
-        colors: { 'editor.background':'#282c34' }
+        colors: { 'editor.background':'#1e1e1e' }
       });
       monaco.editor.defineTheme('catpp-light', {
         base: 'vs',
@@ -620,7 +619,7 @@ function initMonaco() {
           { token:'identifier', foreground:'001080' },
           { token:'type', foreground:'267f99' }
         ],
-        colors: { 'editor.background':'#d7dae0' }
+        colors: { 'editor.background':'#ffffff' }
       });
       monaco.editor.defineTheme('catpp-cat', {
         base: 'vs-dark',
@@ -635,13 +634,13 @@ function initMonaco() {
           { token:'operator', foreground:'f472b6' }
         ],
         colors: {
-          'editor.background': '#282c34',
-          'editor.foreground': '#abb2bf',
+          'editor.background': '#0a0e1a',
+          'editor.foreground': '#e2e8f0',
           'editorLineNumber.foreground': '#475569',
           'editorLineNumber.activeForeground': '#f97316',
           'editorCursor.foreground': '#f97316',
           'editor.selectionBackground': '#f9731666',
-          'editor.lineHighlightBackground': '#21252b'
+          'editor.lineHighlightBackground': '#0d1220'
         }
       });
 
