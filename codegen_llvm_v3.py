@@ -95,6 +95,24 @@ class LLVMCodegen:
                 break
         return (None, None)
 
+    def _size_of(self, ir_ty):
+        """Get size of LLVM type in bytes (approximate)."""
+        if isinstance(ir_ty, ir.IntType):
+            return ir.Constant(self.i64, max(1, ir_ty.width // 8))
+        if isinstance(ir_ty, ir.DoubleType):
+            return ir.Constant(self.i64, 8)
+        if isinstance(ir_ty, ir.PointerType):
+            return ir.Constant(self.i64, 8)
+        if isinstance(ir_ty, ir.LiteralStructType):
+            total = 0
+            for el in ir_ty.elements:
+                if isinstance(el, ir.IntType): total += max(1, el.width // 8)
+                elif isinstance(el, ir.DoubleType): total += 8
+                elif isinstance(el, ir.PointerType): total += 8
+                else: total += 8
+            return ir.Constant(self.i64, total)
+        return ir.Constant(self.i64, 8)
+
     def emit(self, line=''):
         self.lines.append('  ' * self.indent + line)
 
@@ -566,6 +584,27 @@ class LLVMCodegen:
         if t == 'null':
             return ir.Constant(self.i8ptr, None)
 
+        if t == 'new':
+            _, typename, args_expr = e
+            base = typename[0]
+            if base in self.classes and base in self._class_types:
+                struct_ty = self._class_types[base]
+                # malloc(sizeof(Struct))
+                size = self._size_of(struct_ty)
+                malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+                raw = self.builder.call(malloc, [size])
+                ptr = self.builder.bitcast(raw, ir.PointerType(struct_ty))
+                # Call constructor if args
+                if args_expr:
+                    args = [self._emit_expr(a) for a in args_expr]
+                    fn_name = base + '__' + base
+                    for f in self.module.functions:
+                        if f.name == fn_name:
+                            self.builder.call(f, [ptr] + args)
+                            break
+                return ptr
+            raise CodegenError(f'new: unknown class {base}')
+
         if t == 'me':
             if 'me' not in self.env:
                 raise CodegenError('me not in scope')
@@ -733,6 +772,20 @@ class LLVMCodegen:
             self.builder.store(value, alloca)
             return value
 
+        if t == 'arrow':
+            # p->field — like member but p is pointer
+            obj_expr = e[1]
+            field_name = e[2]
+            obj_ptr = self._emit_expr(obj_expr)
+            cls_name = self._infer_obj_class(obj_expr)
+            if cls_name:
+                all_fields = self._get_all_fields(cls_name)
+                if field_name in all_fields:
+                    idx = all_fields.index(field_name)
+                    ptr = self.builder.gep(obj_ptr, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
+                    return self.builder.load(ptr, name=field_name)
+            raise CodegenError(f'->: unknown field {field_name}')
+
         if t == 'member':
             obj_expr = e[1]
             field_name = e[2]
@@ -758,6 +811,22 @@ class LLVMCodegen:
         if t == 'call':
             fn_expr = e[1]
             args = [self._emit_expr(a) for a in e[2]]
+            # Method call: p->sum()
+            if fn_expr[0] == 'arrow':
+                obj_expr = fn_expr[1]
+                method_name = fn_expr[2]
+                obj_ptr = self._emit_expr(obj_expr)
+                cls_name = self._infer_obj_class(obj_expr)
+                if not cls_name:
+                    raise CodegenError('arrow: unknown class')
+                found_cls, fn = self._find_method(cls_name, method_name)
+                if fn is None:
+                    raise CodegenError(f'Unknown method: {method_name}')
+                fn_me_ty = fn.function_type.args[0]
+                if obj_ptr.type != fn_me_ty:
+                    obj_ptr = self.builder.bitcast(obj_ptr, fn_me_ty)
+                return self.builder.call(fn, [obj_ptr] + args)
+
             # Method call: p.sum() -> ClassName__sum(&p)
             if fn_expr[0] == 'member':
                 obj_expr = fn_expr[1]

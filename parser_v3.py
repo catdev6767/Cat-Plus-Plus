@@ -213,6 +213,13 @@ class Parser:
         if self.at('KNEAD'):
             return self.parse_while()
 
+        # delete expr;
+        if self.at('DELETE'):
+            self.next()
+            expr = self.parse_expr()
+            self.expect(';')
+            return ('delete', expr)
+
         # sit; leap;
         if self.at('SIT'):
             self.next(); self.expect(';')
