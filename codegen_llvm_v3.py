@@ -777,10 +777,18 @@ class LLVMCodegen:
             return value
 
         if t == 'arrow':
-            # p->field — like member but p is pointer
             obj_expr = e[1]
             field_name = e[2]
-            obj_ptr = self._emit_expr(obj_expr)
+            # Get the POINTER value (load from alloca if var, or use as-is if expr)
+            if obj_expr[0] == 'var':
+                alloca, ty = self.env[obj_expr[1]]
+                if isinstance(ty, ir.PointerType):
+                    # Load the pointer stored in alloca
+                    obj_ptr = self.builder.load(alloca, name=obj_expr[1])
+                else:
+                    obj_ptr = alloca
+            else:
+                obj_ptr = self._emit_expr(obj_expr)
             cls_name = self._infer_obj_class(obj_expr)
             if cls_name:
                 all_fields = self._get_all_fields(cls_name)
@@ -819,7 +827,14 @@ class LLVMCodegen:
             if fn_expr[0] == 'arrow':
                 obj_expr = fn_expr[1]
                 method_name = fn_expr[2]
-                obj_ptr = self._emit_expr(obj_expr)
+                if obj_expr[0] == 'var':
+                    alloca, ty = self.env[obj_expr[1]]
+                    if isinstance(ty, ir.PointerType):
+                        obj_ptr = self.builder.load(alloca, name=obj_expr[1])
+                    else:
+                        obj_ptr = alloca
+                else:
+                    obj_ptr = self._emit_expr(obj_expr)
                 cls_name = self._infer_obj_class(obj_expr)
                 if not cls_name:
                     raise CodegenError('arrow: unknown class')
