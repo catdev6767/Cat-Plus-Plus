@@ -147,12 +147,21 @@ class LLVMCodegen:
             if s[1] is None:
                 self.builder.ret_void()
             else:
-                self.builder.ret(self._emit_expr(s[1]))
+                val = self._emit_expr(s[1])
+                # Match return type
+                ret_ty = self.builder.function.function_type.return_type
+                if isinstance(ret_ty, ir.IntType) and isinstance(val.type, ir.IntType):
+                    if val.type.width != ret_ty.width:
+                        if val.type.width < ret_ty.width:
+                            val = self.builder.sext(val, ret_ty)
+                        else:
+                            val = self.builder.trunc(val, ret_ty)
+                self.builder.ret(val)
             return None
 
         if t == 'if':
             _, cond, then, els = s
-            cond_val = self._emit_expr(cond)
+            cond_val = self._to_i1(self._emit_expr(cond))
             then_bb = self.builder.function.append_basic_block(name='then')
             merge_bb = self.builder.function.append_basic_block(name='merge')
             if els:
@@ -185,7 +194,7 @@ class LLVMCodegen:
             self.builder.branch(cond_bb)
 
             self.builder.position_at_end(cond_bb)
-            cond_val = self._emit_expr(cond)
+            cond_val = self._to_i1(self._emit_expr(cond))
             self.builder.cbranch(cond_val, body_bb, end_bb)
 
             self.builder.position_at_end(body_bb)
@@ -246,8 +255,10 @@ class LLVMCodegen:
                     return self._str_cmp(a, b)
             if op == '!=':
                 if isinstance(a.type, ir.PointerType) and isinstance(b.type, ir.PointerType):
-                    cmp = self._str_cmp(a, b)
-                    return self.builder.xor(cmp, ir.Constant(self.i32, 1))
+                    cmp_i1 = self._str_cmp(a, b)
+                    # Extend i1 -> i32 truoc khi xor
+                    cmp_i32 = self.builder.zext(cmp_i1, self.i32)
+                    return self.builder.xor(cmp_i32, ir.Constant(self.i32, 1))
             if op == '+':
                 if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
                     return self.builder.fadd(a, b)
@@ -335,6 +346,18 @@ class LLVMCodegen:
         global_var.initializer = str_const
         return self.builder.gep(global_var, [ir.Constant(self.i32, 0), ir.Constant(self.i32, 0)], inbounds=True)
 
+
+
+    def _to_i1(self, val):
+        """Convert value to i1 (bool) for branching."""
+        if isinstance(val.type, ir.IntType) and val.type.width == 1:
+            return val
+        if isinstance(val.type, ir.IntType):
+            return self.builder.icmp_signed('!=', val, ir.Constant(val.type, 0))
+        if isinstance(val.type, ir.PointerType):
+            return self.builder.icmp_signed('!=', val, ir.Constant(val.type, None))
+        # Fallback
+        return val
 
     def _str_concat(self, a, b):
         """Concat 2 strings using malloc + strcat."""
