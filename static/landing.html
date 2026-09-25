@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cat++ — A programming language with cat syntax</title>
+<title>Cat++ v3 — C++-like syntax, LLVM native</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,"Segoe UI",sans-serif; background:#020408; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
@@ -105,7 +105,7 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h1>Cat++</h1>
     <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(251,191,36,0.15));border:1px solid rgba(59,130,246,0.3);font-size:14px;font-weight:600;color:#60a5fa;margin-bottom:20px;">
-      ⚡ Native C transpiler — faster than interpreter <b style="color:#60a5fa;">13,635×</b>
+      ⚡ Native C transpiler — faster than interpreter <b style="color:#60a5fa;">LLVM native</b>
     </div>
     <p>Cat++ v3 — C++-like syntax, LLVM native, cat themed. Easy to read, easy to learn, runs in the browser.<br>Now compiles to <b style="color:#60a5fa;">native C</b> — nearly C++ speed.</p>
     <div class="hero-btns">
@@ -162,9 +162,9 @@ footer a { color:#94a3b8; }
       <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
       <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
       <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
-      <div class="card"><span class="card-icon">⚡</span><h3>C native — 13,635×</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in kernel.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>C native — LLVM native</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in kernel.</p></div>
       <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
-      <div class="card"><span class="card-icon">📦</span><h3>149 builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
+      <div class="card"><span class="card-icon">📦</span><h3>170+ builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
     </div>
   </div>
 </section>
@@ -208,7 +208,7 @@ footer a { color:#94a3b8; }
         <div style="position:absolute;top:-10px;right:16px;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
         <div style="font-size:14px;color:#60a5fa;margin-bottom:8px;font-weight:600;">⚡ C native</div>
         <div style="font-size:32px;font-weight:800;color:#60a5fa;">0.4<span style="font-size:16px;color:#60a5fa;">ms</span></div>
-        <div style="font-size:13px;color:#60a5fa;margin-top:8px;font-weight:600;">13,635×</div>
+        <div style="font-size:13px;color:#60a5fa;margin-top:8px;font-weight:600;">LLVM native</div>
       </div>
     </div>
 
@@ -229,7 +229,7 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>Statistics</h2>
     <div class="stats">
-      <div class="stat"><span class="num">13,635×</span><span class="label">Native vs interp</span></div>
+      <div class="stat"><span class="num">LLVM native</span><span class="label">Native vs interp</span></div>
       <div class="stat"><span class="num">4</span><span class="label">Engines</span></div>
       <div class="stat"><span class="num">149</span><span class="label">Builtins</span></div>
       <div class="stat"><span class="num">6</span><span class="label">CLI commands</span></div>
@@ -256,7 +256,7 @@ paw new game.cat
 <span class="cmt"># Interactive REPL</span>
 paw repl
 
-<span class="cmt"># Transpile to C (13,635× faster)</span>
+<span class="cmt"># Transpile to C (LLVM native faster)</span>
 paw build-fast calc.cat
 
 <span class="cmt"># Format + lint + check</span>
@@ -271,7 +271,7 @@ paw check game.cat</code></pre>
       </div>
       <div class="card">
         <h3>paw build-fast</h3>
-        <p>Transpile to native C — 13,635× faster than interpreter</p>
+        <p>Transpile to native C — LLVM native faster than interpreter</p>
       </div>
       <div class="card">
         <h3>paw fmt / lint / check</h3>
