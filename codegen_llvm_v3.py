@@ -43,7 +43,12 @@ class LLVMCodegen:
         self.i8ptr = ir.PointerType(self.i8)
         self.str_count = 0
         self._class_types = {}
+        self.lines = []
+        self.indent = 0
         self._current_class = None
+
+    def emit(self, line=''):
+        self.lines.append('  ' * self.indent + line)
 
     def c_type(self, vtype):
         base, ptr_depth, array_size, generic = vtype
