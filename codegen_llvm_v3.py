@@ -294,7 +294,21 @@ class LLVMCodegen:
         if t == 'var_decl':
             _, vtype, name, init = s
             base = vtype[0]
+            ptr_depth = vtype[1]
             array_size = vtype[2]
+            # Pointer type: paw int* p = &x
+            if ptr_depth > 0:
+                ctype = self.c_type(vtype)
+                alloca = self.builder.alloca(ctype, name=name)
+                self.env[name] = (alloca, ctype)
+                if init is not None:
+                    val = self._emit_expr(init)
+                    if val.type != ctype:
+                        # Try cast
+                        if isinstance(val.type, ir.PointerType) and isinstance(ctype, ir.PointerType):
+                            val = self.builder.bitcast(val, ctype)
+                    self.builder.store(val, alloca)
+                return None
             # Array type: paw int arr[5]
             if array_size is not None:
                 # array_size may be ('num', 5) or int
@@ -458,6 +472,51 @@ class LLVMCodegen:
         if t == 'bool':
             return ir.Constant(self.i32, 1 if e[1] else 0)
 
+        if t == 'address_of':
+            inner = e[1]
+            if inner[0] == 'var':
+                name = inner[1]
+                if name in self.env:
+                    alloca, _ = self.env[name]
+                    return alloca
+                raise CodegenError(f'&: undefined {name}')
+            if inner[0] == 'index':
+                obj_expr = inner[1]
+                idx_expr = inner[2]
+                if obj_expr[0] == 'var':
+                    alloca, ty = self.env[obj_expr[1]]
+                    if isinstance(ty, ir.ArrayType):
+                        obj_ptr = self.builder.gep(alloca, [ir.Constant(self.i32, 0), ir.Constant(self.i32, 0)], inbounds=True)
+                    else:
+                        obj_ptr = alloca
+                else:
+                    obj_ptr = self._emit_expr(obj_expr)
+                idx = self._emit_expr(idx_expr)
+                if isinstance(idx.type, ir.IntType) and idx.type.width != 64:
+                    idx = self.builder.sext(idx, self.i64) if idx.type.width < 64 else self.builder.trunc(idx, self.i64)
+                return self.builder.gep(obj_ptr, [idx], inbounds=True)
+            if inner[0] == 'member':
+                # &obj.field
+                cls_name = self._infer_obj_class(inner[1])
+                if inner[1][0] == 'var':
+                    obj_ptr = self.env[inner[1][1]][0]
+                elif inner[1][0] == 'me':
+                    alloca, _ = self.env['me']
+                    obj_ptr = self.builder.load(alloca, name='me')
+                else:
+                    obj_ptr = self._emit_expr(inner[1])
+                all_fields = self._get_all_fields(cls_name)
+                field_name = inner[2]
+                idx = all_fields.index(field_name)
+                return self.builder.gep(obj_ptr, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
+            raise CodegenError('& only on var/index/member')
+
+        if t == 'deref':
+            ptr = self._emit_expr(e[1])
+            if not isinstance(ptr.type, ir.PointerType):
+                raise CodegenError(f'*: expected pointer, got {ptr.type}')
+            return self.builder.load(ptr, name='deref')
+
         if t == 'str':
             s = e[1]
             if not s.endswith('\0'):
@@ -589,6 +648,20 @@ class LLVMCodegen:
 
         if t == 'assign':
             op, target, value_expr = e[1], e[2], e[3]
+            # Deref assign: *p = val
+            if target[0] == 'deref':
+                ptr = self._emit_expr(target[1])
+                if not isinstance(ptr.type, ir.PointerType):
+                    raise CodegenError(f'*: expected pointer')
+                value = self._emit_expr(value_expr)
+                if value.type != ptr.type.pointee:
+                    if isinstance(value.type, ir.IntType) and isinstance(ptr.type.pointee, ir.IntType):
+                        if value.type.width < ptr.type.pointee.width:
+                            value = self.builder.sext(value, ptr.type.pointee)
+                        elif value.type.width > ptr.type.pointee.width:
+                            value = self.builder.trunc(value, ptr.type.pointee)
+                self.builder.store(value, ptr)
+                return value
             # Index assign: arr[i] = val
             if target[0] == 'index':
                 obj_expr = target[1]
