@@ -1157,6 +1157,63 @@ class LLVMCodegen:
             cond = self.builder.icmp_signed('!=', result, ir.Constant(self.i8ptr, None))
             return self.builder.select(cond, ir.Constant(self.i32, 1), ir.Constant(self.i32, 0))
 
+        if name == 'read_file':
+            # read_file(path) -> str
+            path = args[0]
+            fopen = self._get_or_declare('fopen', self.i8ptr, [self.i8ptr, self.i8ptr])
+            mode = self._global_string('r\0', name='.mode_r')
+            f = self.builder.call(fopen, [path, mode])
+            fseek = self._get_or_declare('fseek', self.i32, [self.i8ptr, self.i64, self.i32])
+            ftell = self._get_or_declare('ftell', self.i64, [self.i8ptr])
+            fread = self._get_or_declare('fread', self.i64, [self.i8ptr, self.i64, self.i64, self.i8ptr])
+            fclose = self._get_or_declare('fclose', self.i32, [self.i8ptr])
+            malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+            self.builder.call(fseek, [f, ir.Constant(self.i64, 0), ir.Constant(self.i32, 2)])
+            size = self.builder.call(ftell, [f])
+            self.builder.call(fseek, [f, ir.Constant(self.i64, 0), ir.Constant(self.i32, 0)])
+            one = self.builder.add(size, ir.Constant(self.i64, 1))
+            buf = self.builder.call(malloc, [one])
+            self.builder.call(fread, [buf, ir.Constant(self.i64, 1), size, f])
+            # null-terminate
+            end_ptr = self.builder.gep(buf, [size])
+            self.builder.store(ir.Constant(self.i8, 0), end_ptr)
+            self.builder.call(fclose, [f])
+            return buf
+
+        if name == 'write_file':
+            # write_file(path, content) -> int (bytes)
+            path = args[0]
+            content = args[1]
+            fopen = self._get_or_declare('fopen', self.i8ptr, [self.i8ptr, self.i8ptr])
+            mode = self._global_string('w\0', name='.mode_w')
+            f = self.builder.call(fopen, [path, mode])
+            strlen = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+            n = self.builder.call(strlen, [content])
+            fwrite = self._get_or_declare('fwrite', self.i64, [self.i8ptr, self.i64, self.i64, self.i8ptr])
+            written = self.builder.call(fwrite, [content, ir.Constant(self.i64, 1), n, f])
+            fclose = self._get_or_declare('fclose', self.i32, [self.i8ptr])
+            self.builder.call(fclose, [f])
+            return written
+
+        if name == 'append_file':
+            path = args[0]
+            content = args[1]
+            fopen = self._get_or_declare('fopen', self.i8ptr, [self.i8ptr, self.i8ptr])
+            mode = self._global_string('a\0', name='.mode_a')
+            f = self.builder.call(fopen, [path, mode])
+            strlen = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+            n = self.builder.call(strlen, [content])
+            fwrite = self._get_or_declare('fwrite', self.i64, [self.i8ptr, self.i64, self.i64, self.i8ptr])
+            written = self.builder.call(fwrite, [content, ir.Constant(self.i64, 1), n, f])
+            fclose = self._get_or_declare('fclose', self.i32, [self.i8ptr])
+            self.builder.call(fclose, [f])
+            return written
+
+        if name == 'printf':
+            # printf(fmt, args...) — first arg must be str
+            printf_fn = self._get_or_declare_printf()
+            return self.builder.call(printf_fn, args)
+
         raise CodegenError(f'Unknown builtin: {name}')
 
     def _get_or_declare(self, name, ret, args):
