@@ -465,10 +465,10 @@ function applyTheme(mode) {
   }
   if (term) {
     if (document.body.classList.contains('cat-theme')) {
-      term.options.theme = { background:'#22272e', foreground:'#adbac7', cursor:'#f97316' };
+      term.options.theme = { background:'#282c34', foreground:'#abb2bf', cursor:'#f97316' };
     } else {
       term.options.theme = mode === 'dark'
-        ? { background:'#22272e', foreground:'#adbac7' }
+        ? { background:'#282c34', foreground:'#abb2bf' }
         : { background:'#f8f8f8', foreground:'#333333' };
     }
   }
@@ -485,7 +485,7 @@ function applyCatTheme(on) {
     document.body.classList.remove('theme-dark');
     document.body.classList.remove('theme-light');
     if (editor) monaco.editor.setTheme('catpp-cat');
-    if (term) term.options.theme = { background:'#22272e', foreground:'#adbac7', cursor:'#f97316' };
+    if (term) term.options.theme = { background:'#282c34', foreground:'#abb2bf', cursor:'#f97316' };
   } else {
     var mode = 'dark';
     try { mode = localStorage.getItem(STORAGE_THEME) || 'dark'; } catch (e) {}
@@ -504,7 +504,7 @@ function initTerminal() {
     return;
   }
   term = new Terminal({
-    theme: { background:'#22272e', foreground:'#adbac7', cursor:'#316dca' },
+    theme: { background:'#282c34', foreground:'#abb2bf', cursor:'#528bff' },
     fontSize: 13,
     fontFamily: 'Consolas, "Ubuntu Mono", monospace'
   });
@@ -607,7 +607,7 @@ function initMonaco() {
           { token:'identifier', foreground:'9cdcfe' },
           { token:'type', foreground:'4ec9b0' }
         ],
-        colors: { 'editor.background':'#22272e' }
+        colors: { 'editor.background':'#282c34' }
       });
       monaco.editor.defineTheme('catpp-light', {
         base: 'vs',
@@ -620,7 +620,7 @@ function initMonaco() {
           { token:'identifier', foreground:'001080' },
           { token:'type', foreground:'267f99' }
         ],
-        colors: { 'editor.background':'#cdd9e5' }
+        colors: { 'editor.background':'#d7dae0' }
       });
       monaco.editor.defineTheme('catpp-cat', {
         base: 'vs-dark',
@@ -635,13 +635,13 @@ function initMonaco() {
           { token:'operator', foreground:'f472b6' }
         ],
         colors: {
-          'editor.background': '#22272e',
-          'editor.foreground': '#adbac7',
+          'editor.background': '#282c34',
+          'editor.foreground': '#abb2bf',
           'editorLineNumber.foreground': '#475569',
           'editorLineNumber.activeForeground': '#f97316',
           'editorCursor.foreground': '#f97316',
           'editor.selectionBackground': '#f9731666',
-          'editor.lineHighlightBackground': '#1c2128'
+          'editor.lineHighlightBackground': '#21252b'
         }
       });
 
