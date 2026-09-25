@@ -9,7 +9,7 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
-a { color:#f97316; text-decoration:none; }
+a { color:#e8b04d; text-decoration:none; }
 a:hover { text-decoration:underline; }
 .container { max-width:1100px; margin:0 auto; padding:0 24px; }
 
@@ -17,36 +17,36 @@ a:hover { text-decoration:underline; }
 .nav { padding:16px 0; border-bottom:1px solid #1e293b; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
 .nav-inner { display:flex; align-items:center; gap:24px; }
 .nav-logo { font-size:20px; font-weight:700; color:#f8fafc; margin-right:auto; }
-.nav-logo span { color:#f97316; }
+.nav-logo span { color:#e8b04d; }
 .nav-link { color:#94a3b8; font-size:14px; padding:8px 12px; border-radius:6px; transition:all 0.2s; }
-.nav-link:hover { color:#f97316; background:rgba(249,115,22,0.1); text-decoration:none; }
-.nav-cta { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; padding:8px 20px; border-radius:8px; font-weight:600; font-size:14px; }
-.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(249,115,22,0.4); text-decoration:none; color:#fff; }
+.nav-link:hover { color:#e8b04d; background:rgba(232,176,77,0.1); text-decoration:none; }
+.nav-cta { background:linear-gradient(135deg,#e8b04d,#c8922d); color:#fff; padding:8px 20px; border-radius:8px; font-weight:600; font-size:14px; }
+.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(232,176,77,0.4); text-decoration:none; color:#fff; }
 
 /* Hero */
 .hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#0a0e1a 60%); }
 .hero::before { content:"🐱"; position:absolute; top:40px; left:8%; font-size:80px; opacity:0.08; }
 .hero::after { content:"🐾"; position:absolute; bottom:40px; right:8%; font-size:60px; opacity:0.08; }
-.hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fbbf24 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
+.hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#e8b04d 0%,#f5c76b 50%,#e8b04d 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
 .hero p { font-size:22px; color:#94a3b8; max-width:640px; margin:0 auto 40px; }
 .hero-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
 .btn { display:inline-flex; align-items:center; gap:10px; padding:16px 32px; border-radius:12px; font-size:16px; font-weight:600; transition:all 0.2s; cursor:pointer; border:none; }
-.btn-primary { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 8px 24px rgba(249,115,22,0.3); }
-.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(249,115,22,0.5); text-decoration:none; color:#fff; }
+.btn-primary { background:linear-gradient(135deg,#e8b04d,#c8922d); color:#fff; box-shadow:0 8px 24px rgba(232,176,77,0.3); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(232,176,77,0.5); text-decoration:none; color:#fff; }
 .btn-secondary { background:rgba(255,255,255,0.06); color:#e2e8f0; border:1px solid rgba(255,255,255,0.1); }
 .btn-secondary:hover { background:rgba(255,255,255,0.1); text-decoration:none; color:#e2e8f0; }
 
 /* Sections */
 section { padding:80px 0; }
-h2 { font-size:40px; color:#f8fafc; margin-bottom:32px; border-left:4px solid #f97316; padding-left:20px; letter-spacing:-0.5px; }
-h3 { font-size:20px; color:#f97316; margin:24px 0 12px; }
+h2 { font-size:40px; color:#f8fafc; margin-bottom:32px; border-left:4px solid #e8b04d; padding-left:20px; letter-spacing:-0.5px; }
+h3 { font-size:20px; color:#e8b04d; margin:24px 0 12px; }
 p { color:#cbd5e1; }
 
 /* Code block */
 pre { background:#0d1220; border:1px solid #1e293b; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
 code { font-family:ui-monospace,Consolas,monospace; }
-.kw { color:#f97316; font-weight:600; }
-.str { color:#fbbf24; }
+.kw { color:#e8b04d; font-weight:600; }
+.str { color:#e8b04d; }
 .num { color:#60a5fa; }
 .cmt { color:#64748b; font-style:italic; }
 .fn { color:#4ade80; }
@@ -54,7 +54,7 @@ code { font-family:ui-monospace,Consolas,monospace; }
 /* Grid */
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:40px; }
 .card { background:#111827; border:1px solid #1e293b; border-radius:16px; padding:28px; transition:all 0.25s; }
-.card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
+.card:hover { border-color:#e8b04d; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
 .card h3 { margin-top:0; font-size:20px; color:#f8fafc; }
 .card p { color:#94a3b8; font-size:14px; margin:0; }
 .card-icon { font-size:36px; margin-bottom:16px; display:block; }
@@ -62,7 +62,7 @@ code { font-family:ui-monospace,Consolas,monospace; }
 /* Stats */
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; margin:48px 0; }
 .stat { background:#111827; border-radius:16px; padding:32px; text-align:center; border:1px solid #1e293b; }
-.stat .num { font-size:48px; font-weight:800; color:#f97316; display:block; line-height:1; }
+.stat .num { font-size:48px; font-weight:800; color:#e8b04d; display:block; line-height:1; }
 .stat .label { font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; margin-top:12px; display:block; }
 
 /* CTA section */
@@ -104,10 +104,10 @@ footer a { color:#94a3b8; }
 <div class="hero">
   <div class="container">
     <h1>Cat++</h1>
-    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:1px solid rgba(249,115,22,0.3);font-size:14px;font-weight:600;color:#fb923c;margin-bottom:20px;">
-      ⚡ Native C transpiler — faster than interpreter <b style="color:#fbbf24;">13,635×</b>
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(232,176,77,0.15),rgba(251,191,36,0.15));border:1px solid rgba(232,176,77,0.3);font-size:14px;font-weight:600;color:#f5c76b;margin-bottom:20px;">
+      ⚡ Native C transpiler — faster than interpreter <b style="color:#e8b04d;">13,635×</b>
     </div>
-    <p>Cat++ v3 — C++-like syntax, LLVM native, cat themed. Easy to read, easy to learn, runs in the browser.<br>Now compiles to <b style="color:#fb923c;">native C</b> — nearly C++ speed.</p>
+    <p>Cat++ v3 — C++-like syntax, LLVM native, cat themed. Easy to read, easy to learn, runs in the browser.<br>Now compiles to <b style="color:#f5c76b;">native C</b> — nearly C++ speed.</p>
     <div class="hero-btns">
       <a href="./ide/" class="btn btn-primary">🚀 Open IDE</a>
       <a href="#install" class="btn btn-secondary">📦 Install</a>
@@ -174,7 +174,7 @@ footer a { color:#94a3b8; }
     <h2>Performance — Nearly C++</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
       Cat++ has 4 engines. Pick speed or flexibility as needed.
-      With <b style="color:#fb923c;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
+      With <b style="color:#f5c76b;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
     </p>
 
     <h3>Benchmark — 1 million iterations</h3>
@@ -204,11 +204,11 @@ footer a { color:#94a3b8; }
         <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
         <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
       </div>
-      <div style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(251,191,36,0.15));border:2px solid #f97316;border-radius:12px;padding:24px;position:relative;">
-        <div style="position:absolute;top:-10px;right:16px;background:#f97316;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
-        <div style="font-size:14px;color:#fb923c;margin-bottom:8px;font-weight:600;">⚡ C native</div>
-        <div style="font-size:32px;font-weight:800;color:#fbbf24;">0.4<span style="font-size:16px;color:#fb923c;">ms</span></div>
-        <div style="font-size:13px;color:#fb923c;margin-top:8px;font-weight:600;">13,635×</div>
+      <div style="background:linear-gradient(135deg,rgba(232,176,77,0.15),rgba(251,191,36,0.15));border:2px solid #e8b04d;border-radius:12px;padding:24px;position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:#e8b04d;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
+        <div style="font-size:14px;color:#f5c76b;margin-bottom:8px;font-weight:600;">⚡ C native</div>
+        <div style="font-size:32px;font-weight:800;color:#e8b04d;">0.4<span style="font-size:16px;color:#f5c76b;">ms</span></div>
+        <div style="font-size:13px;color:#f5c76b;margin-top:8px;font-weight:600;">13,635×</div>
       </div>
     </div>
 
@@ -243,7 +243,7 @@ footer a { color:#94a3b8; }
   <div class="container">
     <h2>CLI — paw</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
-      <b style="color:#fb923c;">paw</b> is the official command-line tool.
+      <b style="color:#f5c76b;">paw</b> is the official command-line tool.
       Run scripts, create files, REPL, transpile, format, lint.
     </p>
 
