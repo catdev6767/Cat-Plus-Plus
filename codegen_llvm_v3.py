@@ -34,6 +34,8 @@ class LLVMCodegen:
         self.builder = None
         self.env = {}  # name → (alloca, ir_type)
         self.funcs = {}
+
+        self.classes = {}
         self.i32 = ir.IntType(32)
         self.i64 = ir.IntType(64)
         self.f64 = ir.DoubleType()
