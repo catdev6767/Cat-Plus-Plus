@@ -220,7 +220,15 @@ class Parser:
             self.expect(';')
             return ('delete', expr)
 
-        # sit; leap;
+        # break; continue;
+        if self.at('BREAK'):
+            self.next(); self.expect(';')
+            return ('break',)
+        if self.at('CONTINUE'):
+            self.next(); self.expect(';')
+            return ('continue',)
+
+        # sit; leap; (cat keywords)
         if self.at('SIT'):
             self.next(); self.expect(';')
             return ('break',)
