@@ -1,16 +1,16 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,"Segoe UI",Ubuntu,sans-serif; font-size:13px; height:100vh; overflow:hidden;
        display:grid; grid-template-rows:34px 1fr 22px; }
-body.theme-dark { --bg-title:#292e39; --bg-act:#333; --bg-side:#3b4252; --bg-edit:#2e3440;
-  --bg-tab:#2e3440; --bg-tab-a:#2e3440; --bg-panel:#2e3440; --bg-status:#5e81ac;
-  --bg-hover:#2a2d2e; --bg-selected:#094771; --bg-modal:#2e3440; --bg-modal-head:#3b4252;
-  --fg:#ccc; --fg-dim:#7b88a1; --fg-bright:#fff; --border:#292e39; --border-soft:#2b2b2b;
-  --accent:#5e81ac; --accent-h:#1177bb; }
+body.theme-dark { --bg-title:#1c2128; --bg-act:#333; --bg-side:#2d333b; --bg-edit:#22272e;
+  --bg-tab:#22272e; --bg-tab-a:#22272e; --bg-panel:#22272e; --bg-status:#316dca;
+  --bg-hover:#2a2d2e; --bg-selected:#094771; --bg-modal:#22272e; --bg-modal-head:#2d333b;
+  --fg:#ccc; --fg-dim:#768390; --fg-bright:#fff; --border:#1c2128; --border-soft:#2b2b2b;
+  --accent:#316dca; --accent-h:#1177bb; }
 body.theme-light { --bg-title:#ddd; --bg-act:#2c2c2c; --bg-side:#f3f3f3; --bg-edit:#fff;
-  --bg-tab:#ececec; --bg-tab-a:#fff; --bg-panel:#f8f8f8; --bg-status:#5e81ac;
+  --bg-tab:#ececec; --bg-tab-a:#fff; --bg-panel:#f8f8f8; --bg-status:#316dca;
   --bg-hover:#e8e8e8; --bg-selected:#cce4ff; --bg-modal:#fff; --bg-modal-head:#f3f3f3;
   --fg:#333; --fg-dim:#666; --fg-bright:#000; --border:#d4d4d4; --border-soft:#e8e8e8;
-  --accent:#5e81ac; --accent-h:#1177bb; }
+  --accent:#316dca; --accent-h:#1177bb; }
 body { background:var(--bg-edit); color:var(--fg); }
 .menubar { background:var(--bg-title); display:flex; align-items:center; padding:0 8px; gap:6px;
   font-size:12px; border-bottom:1px solid var(--border-soft); }
@@ -33,7 +33,7 @@ body.zen .main { grid-template-rows:0 1fr 0; }
 .activitybar { background:var(--bg-act); display:flex; flex-direction:column; align-items:center;
   padding:8px 0; gap:4px; border-right:1px solid var(--border-soft); }
 .act-icon { width:50px; height:46px; display:flex; align-items:center; justify-content:center;
-  color:#7b88a1; cursor:pointer; font-size:20px; border-left:2px solid transparent; text-decoration:none; }
+  color:#768390; cursor:pointer; font-size:20px; border-left:2px solid transparent; text-decoration:none; }
 .act-icon:hover { color:var(--fg-bright); }
 .act-icon.active { color:var(--fg-bright); border-left-color:var(--fg-bright); }
 .spacer { flex:1; }
@@ -103,7 +103,7 @@ body.zen .main { grid-template-rows:0 1fr 0; }
 .modal-body h1 { font-size:22px; color:var(--fg-bright); margin:0 0 16px; border-bottom:1px solid var(--border); padding-bottom:10px; }
 .modal-body h2 { font-size:17px; color:var(--accent); margin:24px 0 10px; border-left:3px solid var(--accent); padding-left:10px; }
 .modal-body pre { background:var(--bg-side); border:1px solid var(--border); border-radius:4px; padding:14px 16px; overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.5; }
-.modal-body code { background:var(--bg-side); color:#a3be8c; padding:2px 6px; border-radius:3px; font-family:Consolas,monospace; font-size:13px; }
+.modal-body code { background:var(--bg-side); color:#57ab5a; padding:2px 6px; border-radius:3px; font-family:Consolas,monospace; font-size:13px; }
 .modal-body pre code { background:transparent; color:var(--fg); padding:0; }
 .modal-body table { width:100%; border-collapse:collapse; margin:12px 0; font-size:13px; }
 .modal-body th,.modal-body td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
@@ -128,13 +128,13 @@ body.zen .main { grid-template-rows:0 1fr 0; }
     grid-column: 1 / -1;
 }
 .split-divider {
-    background: var(--border, #292e39);
+    background: var(--border, #1c2128);
     cursor: col-resize;
     position: relative;
     z-index: 10;
 }
 .split-divider:hover {
-    background: var(--accent, #5e81ac);
+    background: var(--accent, #316dca);
 }
 .split-divider::before {
     content: "";
@@ -155,5 +155,5 @@ body.zen .main { grid-template-rows:0 1fr 0; }
 
 /* Nút split trên tabs */
 .tab-action.split-active {
-    color: var(--accent, #5e81ac) !important;
+    color: var(--accent, #316dca) !important;
 }
