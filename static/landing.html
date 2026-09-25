@@ -160,10 +160,10 @@ footer a { color:#94a3b8; }
       <div class="card"><span class="card-icon">🐱</span><h3>Cat syntax</h3><p>meow, paw, purr, sniff, knead... easy to remember, fun, friendly.</p></div>
       <div class="card"><span class="card-icon">⚡</span><h3>Runs in browser</h3><p>No install. Just open the link. Zero-config.</p></div>
       <div class="card"><span class="card-icon">📝</span><h3>Built-in IDE</h3><p>Monaco Editor, terminal, Command Palette, Search, Format code.</p></div>
-      <div class="card"><span class="card-icon">🎓</span><h3>Learn Mode</h3><p>30 interactive lessons. Quiz, progress dashboard, certificate.</p></div>
-      <div class="card"><span class="card-icon">🌏</span><h3>Bilingual VI/EN</h3><p>Full docs in both languages. 171 pages per side.</p></div>
-      <div class="card"><span class="card-icon">⚡</span><h3>C native — LLVM native</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in kernel.</p></div>
-      <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark, light, and cat-night theme with animation.</p></div>
+      <div class="card"><span class="card-icon">🎓</span><h3>Learn online</h3><p>30 lessons with quiz, progress dashboard, and certificate.</p></div>
+      <div class="card"><span class="card-icon">🌏</span><h3>English docs</h3><p>Complete English documentation. 171 pages.</p></div>
+      <div class="card"><span class="card-icon">⚡</span><h3>LLVM native backend</h3><p>Transpile to native C (int32_t, double). Nearly C++ speed. Runs in kernel.</p></div>
+      <div class="card"><span class="card-icon">🎨</span><h3>Cat theme</h3><p>Dark theme with cat accents and animations.</p></div>
       <div class="card"><span class="card-icon">📦</span><h3>170+ builtins</h3><p>Math, string, list, dict, JSON, path, time, testing, and more.</p></div>
     </div>
   </div>
@@ -171,10 +171,9 @@ footer a { color:#94a3b8; }
 
 <section id="performance" style="background:#050810;">
   <div class="container">
-    <h2>Performance — Nearly C++</h2>
+    <h2>Performance — LLVM native</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
-      Cat++ has 4 engines. Pick speed or flexibility as needed.
-      With <b style="color:#60a5fa;">⚡ C native</b>, typed code compiles to pure C (<code>int32_t</code>, <code>double</code>) — gcc -O2 optimizes like real C++.
+      Cat++ v3 compiles to native binary via LLVM. No gcc needed. 4 engines: interpreter, bytecode VM, PyCompiler, and LLVM native.
     </p>
 
     <h3>Benchmark — 1 million iterations</h3>
@@ -200,13 +199,13 @@ footer a { color:#94a3b8; }
         <div style="font-size:13px;color:#64748b;margin-top:8px;">2.1×</div>
       </div>
       <div style="background:#020408;border:1px solid #0f1729;border-radius:12px;padding:24px;">
-        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">C boxed</div>
+        <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">PyCompiler</div>
         <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
         <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
       </div>
       <div style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(251,191,36,0.15));border:2px solid #3b82f6;border-radius:12px;padding:24px;position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">FASTEST</div>
-        <div style="font-size:14px;color:#60a5fa;margin-bottom:8px;font-weight:600;">⚡ C native</div>
+        <div style="font-size:14px;color:#60a5fa;margin-bottom:8px;font-weight:600;">⚡ LLVM native</div>
         <div style="font-size:32px;font-weight:800;color:#60a5fa;">0.4<span style="font-size:16px;color:#60a5fa;">ms</span></div>
         <div style="font-size:13px;color:#60a5fa;margin-top:8px;font-weight:600;">LLVM native</div>
       </div>
@@ -214,8 +213,8 @@ footer a { color:#94a3b8; }
 
     <h3>When to use what?</h3>
     <ul style="color:#cbd5e1;font-size:16px;line-height:1.9;">
-      <li><b>⚡ C native</b> — heavy arithmetic, algorithms (needs type annotations)</li>
-      <li><b>C boxed</b> — complex list/dict/class code (runs anything)</li>
+      <li><b>⚡ LLVM native</b> — heavy arithmetic, algorithms (needs type annotations)</li>
+      <li><b>PyCompiler</b> — complex list/dict/class code (runs anything)</li>
       <li><b>Interpreter/VM</b> — quick prototyping, no types needed</li>
     </ul>
 
