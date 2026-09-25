@@ -1,0 +1,51 @@
+# todo.cat — SQLite-backed todo CLI
+# Usage:
+#   catpp run examples/tools/todo.cat add "Buy milk"
+#   catpp run examples/tools/todo.cat list
+#   catpp run examples/tools/todo.cat done 1
+
+paw DB = "/tmp/todo.db"
+paw db = sqlite_open(DB)
+
+# Init table
+sqlite_exec(db, "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, done INT DEFAULT 0)")
+
+# Parse args
+paw args = cmd_args()
+sniff tail(args) == 0
+    meow "Usage:"
+    meow "  todo.cat add <title>"
+    meow "  todo.cat list"
+    meow "  todo.cat done <id>"
+    sqlite_close(db)
+    sit
+
+paw cmd = args[0]
+
+sniff cmd == "add"
+    sniff tail(args) < 2
+        meow "Error: need title"
+    swat
+        paw title = weave(nip(args, 1, tail(args)), " ")
+        sqlite_exec(db, "INSERT INTO tasks (title) VALUES (?)", [title])
+        meow "Added: " + title
+swat
+    sniff cmd == "list"
+        paw rows = sqlite_query(db, "SELECT id, title, done FROM tasks")
+        sniff tail(rows) == 0
+            meow "No tasks"
+        swat
+            groom r of rows
+                paw mark = r["done"] == 1 ? "[x]" : "[ ]"
+                meow mark + " " + say(r["id"]) + ". " + r["title"]
+    swat
+        sniff cmd == "done"
+            sniff tail(args) < 2
+                meow "Error: need id"
+            swat
+                sqlite_exec(db, "UPDATE tasks SET done = 1 WHERE id = ?", [int(args[1])])
+                meow "Done: " + args[1]
+        swat
+            meow "Unknown command: " + cmd
+
+sqlite_close(db)
