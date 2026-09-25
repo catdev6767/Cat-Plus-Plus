@@ -37,28 +37,28 @@ function shareLink() {
       var url = base.replace(/\/+$/, '') + '/ide/#' + enc;
       var note = '';
       if (!publicUrl) {
-        note = '\n\n⚠ Chưa có tunnel công khai.\n' +
-               'Link này chỉ máy bạn mở được.\n\n' +
-               'Để chia sẻ cho người khác:\n' +
+        note = '\n\n⚠ No public tunnel.\n' +
+               'This link works only on your machine.\n\n' +
+               'To share with others:\n' +
                '  cd ~/catpp && ./share.sh';
       } else {
-        note = '\n\n✓ Link công khai — ai cũng mở được.';
+        note = '\n\n✓ Public link — anyone can open.';
       }
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(function(){
-          alert('Đã copy link:\n\n' + url + note);
+          alert('Copied link:\n\n' + url + note);
         }).catch(function(){
-          prompt('Link (Ctrl+C để copy):', url);
+          prompt('Link (Ctrl+C to copy):', url);
         });
       } else {
-        prompt('Link (Ctrl+C để copy):', url);
+        prompt('Link (Ctrl+C to copy):', url);
       }
     });
   } catch (e) {
-    alert('Lỗi tạo link: ' + e.message);
+    alert('Error creating link: ' + e.message);
   }
 }
-/* Cat++ IDE v2.0 — app.js hoàn chỉnh */
+/* Cat++ IDE v2.0 — complete app.js */
 
 // ============ CONSTANTS ============
 var KW = ['paw','meow','purr','give','hiss','tap','sit','leap','listen','sniff',
@@ -71,7 +71,7 @@ var BI = ['tail','puff','melt','nip','bolt','kitten','lion','scratch','flop',
   'chase','sift','curl','sway','wave','slant','grow','bound','wander','dice'];
 
 var EXAMPLES = {};
-EXAMPLES['hello.cat'] = '# Chào mừng đến Cat++\nmeow "Meow! Hello, Cat++!"\n\npaw x = 10\npaw name = "Whiskers"\n\npurr add(a, b)\n    give a + b\n\nmeow add(x, 5)\nmeow "Name: " + name\n\nsniff x > 5\n    meow "mèo lớn"\nswat\n    meow "mèo con"\n\npaw i = 1\nknead i <= 5\n    meow i\n    paw i = i + 1\n';
+EXAMPLES['hello.cat'] = '# Welcome to Cat++\nmeow "Meow! Hello, Cat++!"\n\npaw x = 10\npaw name = "Whiskers"\n\npurr add(a, b)\n    give a + b\n\nmeow add(x, 5)\nmeow "Name: " + name\n\nsniff x > 5\n    meow "big cat"\nswat\n    meow "small cat"\n\npaw i = 1\nknead i <= 5\n    meow i\n    paw i = i + 1\n';
 EXAMPLES['fizzcat.cat'] = 'purr fizzcat(n)\n    sniff n % 15 == 0\n        give "FizzCat"\n    sniff n % 3 == 0\n        give "Fizz"\n    sniff n % 5 == 0\n        give "Cat"\n    give n\n\npaw i = 1\nknead i <= 20\n    meow fizzcat(i)\n    paw i = i + 1\n';
 EXAMPLES['fibonacci.cat'] = 'purr fib(n)\n    sniff n <= 1\n        give n\n    give fib(n - 1) + fib(n - 2)\n\npaw i = 0\nknead i < 20\n    meow fib(i)\n    paw i = i + 1\n';
 EXAMPLES['class.cat'] = 'cat Point\n    paw x\n    paw y\n    purr new(a, b)\n        me.x = a\n        me.y = b\n    purr dist()\n        give scratch(me.x * me.x + me.y * me.y)\n\npaw p = Point(3, 4)\nmeow p.dist()\n';
@@ -192,18 +192,18 @@ function switchProject(name) {
   if (keys.length) openFile(keys[0]);
 }
 function createProject() {
-  var name = prompt('Tên dự án mới:', 'project-' + (Object.keys(projects).length + 1));
+  var name = prompt('New project name:', 'project-' + (Object.keys(projects).length + 1));
   if (!name) return;
   name = name.trim().replace(/[^a-zA-Z0-9_-]/g, '-');
   if (!name) return;
-  if (projects[name]) { alert('Dự án đã tồn tại!'); return; }
+  if (projects[name]) { alert('Project already exists!'); return; }
   projects[name] = { files: {} };
   saveProjects();
   activeProject = name;
   files = {};
   openTabs = [];
   activeTab = null;
-  files['main.cat'] = '# Dự án ' + name + '\nmeow "Xin chào từ ' + name + '!"\n';
+  files['main.cat'] = '# Project ' + name + '\nmeow "Hello from ' + name + '!"\n';
   saveFiles();
   renderFileTree();
   renderTabs();
@@ -212,10 +212,10 @@ function createProject() {
 }
 function renameProject() {
   var oldName = activeProject;
-  var newName = prompt('Đổi tên dự án:', oldName);
+  var newName = prompt('Rename project:', oldName);
   if (!newName || newName === oldName) return;
   newName = newName.trim().replace(/[^a-zA-Z0-9_-]/g, '-');
-  if (!newName || projects[newName]) { alert('Tên không hợp lệ hoặc đã tồn tại'); return; }
+  if (!newName || projects[newName]) { alert('Invalid or duplicate name'); return; }
   projects[newName] = projects[oldName];
   delete projects[oldName];
   activeProject = newName;
@@ -223,8 +223,8 @@ function renameProject() {
   renderProjectSelector();
 }
 function deleteProject() {
-  if (Object.keys(projects).length <= 1) { alert('Không thể xóa dự án cuối cùng'); return; }
-  if (!confirm('Xóa dự án "' + activeProject + '" và TẤT CẢ file?')) return;
+  if (Object.keys(projects).length <= 1) { alert('Cannot delete the last project'); return; }
+  if (!confirm('Delete project "' + activeProject + '" and ALL files?')) return;
   delete projects[activeProject];
   activeProject = Object.keys(projects)[0];
   files = getActiveFiles();
@@ -309,7 +309,7 @@ function closeTab(name) {
   renderFileTree();
 }
 function deleteFile(name) {
-  if (!confirm('Xóa "' + name + '"?')) return;
+  if (!confirm('Delete "' + name + '"?')) return;
   delete files[name];
   openTabs = openTabs.filter(function(n) { return n !== name; });
   saveFiles();
@@ -321,9 +321,9 @@ function deleteFile(name) {
   renderFileTree();
 }
 function newFile() {
-  var name = prompt('Tên file:', 'untitled' + Object.keys(files).length + '.cat');
+  var name = prompt('File name:', 'untitled' + Object.keys(files).length + '.cat');
   if (!name || files[name]) return;
-  files[name] = '# File mới\nmeow "Xin chào!"\n';
+  files[name] = '# New file\nmeow "Hello!"\n';
   saveFiles();
   renderFileTree();
   openFile(name);
@@ -345,7 +345,7 @@ function exportProject() {
   a.download = 'catpp-' + activeProject + '-' + ts + '.catpp';
   a.click();
   URL.revokeObjectURL(a.href);
-  if (term) term.writeln('\x1b[32m✓ Đã xuất ' + Object.keys(files).length + ' file\x1b[0m');
+  if (term) term.writeln('\x1b[32m✓ Exported ' + Object.keys(files).length + ' file\x1b[0m');
 }
 function importProject() {
   var input = document.getElementById('file-import-input');
@@ -358,9 +358,9 @@ function handleImportFile(evt) {
   reader.onload = function(e) {
     try {
       var data = JSON.parse(e.target.result);
-      if (!data.files) { alert('File không hợp lệ'); return; }
+      if (!data.files) { alert('Invalid file'); return; }
       var count = Object.keys(data.files).length;
-      var overwrite = confirm('Nhập ' + count + ' file?\n\nOK = GHI ĐÈ (mất hết file hiện tại)\nCancel = GỘP (thêm vào)');
+      var overwrite = confirm('Import ' + count + ' file(s)?\n\nOK = OVERWRITE (lose current files)\nCancel = MERGE (add)');
       if (overwrite) { files = data.files; }
       else {
         for (var k in data.files) files[k] = data.files[k];
@@ -369,9 +369,9 @@ function handleImportFile(evt) {
       renderFileTree();
       var keys = Object.keys(files);
       if (keys.length) openFile(keys[0]);
-      if (term) term.writeln('\x1b[32m✓ Đã nhập ' + count + ' file\x1b[0m');
+      if (term) term.writeln('\x1b[32m✓ Imported ' + count + ' file(s)\x1b[0m');
     } catch (err) {
-      alert('Lỗi đọc file: ' + err.message);
+      alert('Error reading file: ' + err.message);
     }
     evt.target.value = '';
   };
@@ -418,20 +418,14 @@ function examplesHtml() {
 }
 function cheatsheetHtml() {
   return '<h1>' + T('modal.cheatsheet') + '</h1>' +
-    '<h2>' + T('cheat.syntax') + '</h2>' +
-    '<pre><code>meow "in ra"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "lớn"\nswat\n    meow "nhỏ"\n\npaw i = 0\nknead i < 5\n    meow i\n    paw i = i + 1</code></pre>' +
-    '<h2>' + T('cheat.keyword') + '</h2>' +
-    '<table><tr><th>' + T('cheat.cat') + '</th><th>' + T('cheat.meaning') + '</th></tr>' +
-    '<tr><td><code>meow</code></td><td>' + T('cheat.in') + '</td></tr>' +
-    '<tr><td><code>paw</code></td><td>' + T('cheat.var') + '</td></tr>' +
-    '<tr><td><code>purr / give</code></td><td>' + T('cheat.fn') + '</td></tr>' +
-    '<tr><td><code>sniff / swat</code></td><td>' + T('cheat.if') + '</td></tr>' +
-    '<tr><td><code>knead</code></td><td>' + T('cheat.while') + '</td></tr>' +
-    '<tr><td><code>groom ... of</code></td><td>' + T('cheat.each') + '</td></tr>' +
-    '<tr><td><code>tap / hiss</code></td><td>' + T('cheat.try') + '</td></tr>' +
-    '<tr><td><code>cat / me / kin</code></td><td>' + T('cheat.oop') + '</td></tr>' +
-    '</table>';
+    '<h2>Cat++ v3 — C++-like syntax</h2>' +
+    '<pre><code>purr int main() {\n    meow("Hello, v3!");\n    give 0;\n}\n\ncat Point {\n    paw int x;\n    paw int y;\n    purr Point(int a, int b) {\n        me.x = a;\n        me.y = b;\n    }\n    purr int sum() {\n        give me.x + me.y;\n    }\n};\n\npurr int main() {\n    paw Point p = Point(3, 4);\n    meow(p.sum());\n    give 0;\n}</code></pre>' +
+    '<h2>Pointers & Arrays (v3)</h2>' +
+    '<pre><code>paw int x = 42;\npaw int* p = &x;\n*p = 100;  // x = 100\n\npaw int arr[5];\nfor (paw int i = 0; i < 5; i = i + 1) {\n    arr[i] = i * i;\n}</code></pre>' +
+    '<h2>Cat++ v2 (Python-like) — vẫn hỗ trợ</h2>' +
+    '<pre><code>meow "print"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "big"\nswat\n    meow "small"</code></pre>';
 }
+
 function shortcutsHtml() {
   return '<h1>' + T('modal.shortcuts') + '</h1><table>' +
     '<tr><th>Key</th><th>Action</th></tr>' +
@@ -505,7 +499,7 @@ function toggleCatTheme() {
 // ============ EDITOR ============
 function initTerminal() {
   if (typeof Terminal === 'undefined') {
-    console.error('xterm.js chưa load');
+    console.error('xterm.js not loaded');
     return;
   }
   term = new Terminal({
@@ -516,14 +510,14 @@ function initTerminal() {
   var el = document.getElementById('terminal');
   if (el) {
     term.open(el);
-    term.writeln('\x1b[90mCat++ Terminal — Ctrl+Enter để chạy.\x1b[0m');
+    term.writeln('\x1b[90mCat++ Terminal — Ctrl+Enter to run.\x1b[0m');
     term.writeln('');
   }
 }
 
 function initMonaco() {
   return new Promise(function(resolve, reject) {
-    if (typeof require === 'undefined') { reject('require chưa load'); return; }
+    if (typeof require === 'undefined') { reject('require not loaded'); return; }
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
     require(['vs/editor/editor.main'], function() {
       monaco.languages.register({ id: 'catpp' });
@@ -651,7 +645,7 @@ function initMonaco() {
       });
 
       var el = document.getElementById('editor');
-      if (!el) { reject('Không có #editor'); return; }
+      if (!el) { reject('No #editor element'); return; }
       editor = monaco.editor.create(el, {
         value: '',
         language: 'catpp',
@@ -693,22 +687,112 @@ function initMonaco() {
   });
 }
 
-function runCode() {
-  if (!editor || !activeTab) return;
-  if (!term) { console.error('terminal chưa khởi tạo'); return; }
+function transpileCode() {
+  if (!editor || !activeTab || !term) return;
   var code = editor.getValue();
   term.clear();
-  term.writeln('\x1b[90m> Đang chạy ' + activeTab + '...\x1b[0m\r\n');
+  term.writeln('\x1b[90m> Compiling ' + activeTab + ' → C...\x1b[0m\r\n');
   var st = document.getElementById('status');
-  if (st) st.textContent = 'Running...';
-  if (editor.getModel()) monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
-
-  fetch('/api/run', {
+  if (st) st.textContent = 'Transpiling...';
+  fetch('/api/transpile-c', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: code })
   })
   .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var lines = data.c.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        term.writeln('\x1b[32m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
+      }
+      term.writeln('\r\n\x1b[32m✓ ' + lines.length + ' C lines\x1b[0m');
+      if (st) st.textContent = 'Ready';
+    } else {
+      term.writeln('\x1b[31m✗ ' + (data.error || 'unknown') + '\x1b[0m');
+      if (st) st.textContent = 'Error';
+    }
+  })
+  .catch(function(e) {
+    term.writeln('\x1b[31mError: ' + e.message + '\x1b[0m');
+  });
+}
+
+function transpileNativeCode() {
+  if (!editor || !activeTab || !term) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Compiling → C native...\x1b[0m\r\n');
+  var st = document.getElementById('status');
+  if (st) st.textContent = 'Transpiling native...';
+  fetch('/api/transpile-native', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var lines = data.c.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        term.writeln('\x1b[36m' + lines[i].replace(/\r/g, '') + '\x1b[0m');
+      }
+      term.writeln('\r\n\x1b[36m⚡ C native — ' + lines.length + ' lines\x1b[0m');
+      term.writeln('\x1b[90m  gcc -O2 → nearly C++ speed\x1b[0m');
+      if (st) st.textContent = 'Ready';
+    } else {
+      term.writeln('\x1b[33m⚠ ' + (data.error || 'unknown') + '\x1b[0m');
+      term.writeln('\x1b[90m  Add types: paw x: i32 = 5\x1b[0m');
+      term.writeln('\x1b[90m  or:        purr f(a: i32) -> i32\x1b[0m');
+      if (st) st.textContent = 'Need types';
+    }
+  })
+  .catch(function(e) {
+    term.writeln('\x1b[31mError: ' + e.message + '\x1b[0m');
+  });
+}
+
+function benchmarkCode() {
+  if (!editor || !activeTab || !term) return;
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Đang benchmark...\x1b[0m\r\n');
+  fetch('/api/benchmark', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.ok) { term.writeln('\x1b[31mError\x1b[0m'); return; }
+    var res = data.results;
+    var rows = [];
+    if (res.interp && res.interp.ok) rows.push(['Interpreter', res.interp.ms]);
+    if (res.vm && res.vm.ok) rows.push(['VM', res.vm.ms]);
+    if (rows.length === 0) { term.writeln('\x1b[33mNo engine available\x1b[0m'); return; }
+    var base = rows[0][1];
+    term.writeln('\x1b[36m═══ Benchmark ═══\x1b[0m');
+    for (var i = 0; i < rows.length; i++) {
+      var speed = base / rows[i][1];
+      term.writeln('  ' + rows[i][0].padEnd(14) + rows[i][1].toFixed(1).padStart(8) + ' ms   ' + speed.toFixed(1) + 'x');
+    }
+    term.writeln('');
+    term.writeln('\x1b[90mHint: ⚡ C fast is ~10000x faster than interpreter\x1b[0m');
+  });
+}
+
+function runCode() {
+  if (!editor || !activeTab) return;
+  if (!term) { console.error('terminal not initialized'); return; }
+  var code = editor.getValue();
+  term.clear();
+  term.writeln('\x1b[90m> Running ' + activeTab + '...\x1b[0m\r\n');
+  var st = document.getElementById('status');
+  if (st) st.textContent = 'Running...';
+  if (editor.getModel()) monaco.editor.setModelMarkers(editor.getModel(), 'catpp', []);
+
+  window.runCatppBrowser(code)
+  .then(function(da) { return { ok: da.ok, output: da.output, line: 0 }; })
   .then(function(data) {
     if (data.output) term.writeln(data.output.replace(/\n/g, '\r\n'));
     if (data.ok) {
@@ -729,7 +813,7 @@ function runCode() {
     }
   })
   .catch(function(e) {
-    term.writeln('\x1b[31mLỗi kết nối: ' + e.message + '\x1b[0m');
+    term.writeln('\x1b[31mConnection error: ' + e.message + '\x1b[0m');
   });
 }
 
@@ -753,17 +837,17 @@ function finishShare(base, enc) {
   var isLocal = base.indexOf('localhost') >= 0 || base.indexOf('127.0.0.1') >= 0;
   var msg = url;
   if (isLocal) {
-    msg = url + '\n\n⚠ CẢNH BÁO: Đây là link LOCAL — chỉ máy bạn mở được.\n' +
-          'Chạy ./share.sh để có link public.';
+    msg = url + '\n\n⚠ WARNING: This is a LOCAL link — only works on your machine.\n' +
+          'Run ./share.sh to get a public link.';
   }
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
-      alert('Đã copy link:\n\n' + msg);
+      alert('Copied link:\n\n' + msg);
     }).catch(function() {
-      prompt('Link (Ctrl+C để copy):', url);
+      prompt('Link (Ctrl+C to copy):', url);
     });
   } else {
-    prompt('Link (Ctrl+C để copy):', url);
+    prompt('Link (Ctrl+C to copy):', url);
   }
 }
 
@@ -786,6 +870,9 @@ function bindEvents() {
   on('cat-btn', 'click', toggleCatTheme);
   on('lang-btn', 'click', function() { setLang(LANG === 'vi' ? 'en' : 'vi'); });
   on('run-btn', 'click', runCode);
+  on('transpile-btn', 'click', transpileCode);
+  on('transpile-native-btn', 'click', transpileNativeCode);
+  on('benchmark-btn', 'click', benchmarkCode);
   on('clear-btn', 'click', function() { if (term) term.clear(); });
 
   // Menu items
@@ -856,6 +943,9 @@ function bindEvents() {
   document.addEventListener('keydown', function(e) {
     var mod = e.ctrlKey || e.metaKey;
     if (mod && e.key === 'Enter') { e.preventDefault(); runCode(); }
+    if (mod && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); transpileCode(); return; }
+    if (mod && e.shiftKey && (e.key === 'N' || e.key === 'n')) { e.preventDefault(); transpileNativeCode(); return; }
+    if (mod && e.shiftKey && (e.key === 'B' || e.key === 'b')) { e.preventDefault(); benchmarkCode(); return; }
     else if (mod && e.key.toLowerCase() === 'b') {
       e.preventDefault();
       var d = document.getElementById('drawer');
@@ -917,13 +1007,13 @@ function boot() {
   initMonaco().then(function() {
     console.log('[Cat++] Monaco ready');
   }).catch(function(e) {
-    console.error('[Cat++] Monaco lỗi:', e);
+    console.error('[Cat++] Monaco error:', e);
   });
 
   console.log('[Cat++] Boot done');
 }
 
-// Chạy khi DOM ready
+// Run khi DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {
