@@ -297,8 +297,13 @@ class LLVMCodegen:
             array_size = vtype[2]
             # Array type: paw int arr[5]
             if array_size is not None:
+                # array_size may be ('num', 5) or int
+                if isinstance(array_size, tuple) and array_size[0] == 'num':
+                    size_n = int(array_size[1])
+                else:
+                    size_n = int(array_size)
                 elem_ty = self._basic_type((base, 0, None, None))
-                arr_ty = ir.ArrayType(elem_ty, array_size)
+                arr_ty = ir.ArrayType(elem_ty, size_n)
                 alloca = self.builder.alloca(arr_ty, name=name)
                 self.env[name] = (alloca, arr_ty)
                 return None

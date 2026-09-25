@@ -230,6 +230,13 @@ class Parser:
         self.expect('PAW')
         vtype = self.parse_type()
         name = self.expect('IDENT').value
+        # Array size after name: int arr[5]
+        if self.at('['):
+            self.next()
+            size_expr = self.parse_expr()
+            self.expect(']')
+            base, ptr_depth, _, generic = vtype
+            vtype = (base, ptr_depth, size_expr, generic)
         init = None
         if self.match('='):
             init = self.parse_expr()
