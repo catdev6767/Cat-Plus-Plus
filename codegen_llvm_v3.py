@@ -39,6 +39,7 @@ class LLVMCodegen:
         self.f64 = ir.DoubleType()
         self.i8 = ir.IntType(8)
         self.i8ptr = ir.PointerType(self.i8)
+        self.str_count = 0
 
     def c_type(self, vtype):
         base, ptr_depth, array_size, generic = vtype
@@ -214,7 +215,9 @@ class LLVMCodegen:
             return ir.Constant(self.i32, 1 if e[1] else 0)
 
         if t == 'str':
-            s = e[1] + '\0'
+            s = e[1]
+            if not s.endswith('\0'):
+                s += '\0'
             return self._global_string(s, name='.str')
 
         if t == 'char':
@@ -321,6 +324,8 @@ class LLVMCodegen:
 
     def _global_string(self, s, name='.str'):
         """Create a global string constant, return pointer."""
+        self.str_count += 1
+        name = f'{name}.{self.str_count}'
         # Encode UTF-8
         b = s.encode('utf-8')
         str_const = ir.Constant(ir.ArrayType(self.i8, len(b)), bytearray(b))
