@@ -55,3 +55,11 @@ assets/
 # Allow example tools
 !examples/tools/
 !examples/tools/**
+
+# v3 cleanup
+docs/
+content/
+felisos/
+.translate_cache.json
+test[0-9]*
+kitty.iso
