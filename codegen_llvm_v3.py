@@ -1,0 +1,435 @@
+"""Cat++ v3 → LLVM IR codegen."""
+import llvmlite.ir as ir
+import llvmlite.binding as llvm
+import ctypes, sys
+from parser_v3 import parse, ParseError
+
+# ═══ Initialize LLVM targets (required for JIT + native codegen) ═══
+try:
+    llvm.initialize()
+except RuntimeError:
+    pass  # Newer llvmlite auto-initializes
+try:
+    llvm.initialize_native_target()
+except RuntimeError:
+    pass
+try:
+    llvm.initialize_native_asmprinter()
+except RuntimeError:
+    pass
+try:
+    llvm.initialize_native_asmparser()
+except RuntimeError:
+    pass
+
+class CodegenError(Exception):
+    def __init__(self, msg, line=0):
+        super().__init__(msg)
+        self.line = line
+
+
+class LLVMCodegen:
+    def __init__(self):
+        self.module = ir.Module(name='catpp')
+        self.builder = None
+        self.env = {}  # name → (alloca, ir_type)
+        self.funcs = {}
+        self.i32 = ir.IntType(32)
+        self.i64 = ir.IntType(64)
+        self.f64 = ir.DoubleType()
+        self.i8 = ir.IntType(8)
+        self.i8ptr = ir.PointerType(self.i8)
+
+    def c_type(self, vtype):
+        base, ptr_depth, array_size, generic = vtype
+        if base in ('int', 'bool'):
+            base_t = self.i32
+        elif base in ('long',):
+            base_t = self.i64
+        elif base in ('float', 'double'):
+            base_t = self.f64
+        elif base == 'char':
+            base_t = self.i8
+        elif base == 'void':
+            base_t = ir.VoidType()
+        elif base == 'str':
+            base_t = self.i8ptr
+        else:
+            base_t = self.i32  # fallback
+        for _ in range(ptr_depth):
+            base_t = ir.PointerType(base_t)
+        return base_t
+
+    def compile(self, ast):
+        # Pass 1: collect function signatures
+        for stmt in ast[1]:
+            if stmt[0] == 'func':
+                self._declare_func(stmt)
+
+        # Pass 2: emit function bodies
+        for stmt in ast[1]:
+            if stmt[0] == 'func':
+                self._emit_func(stmt)
+
+        return str(self.module)
+
+    def _declare_func(self, s):
+        _, ret_type, name, params, body = s
+        param_types = [self.c_type(p[0]) for p in params]
+        fn_ty = ir.FunctionType(self.c_type(ret_type), param_types)
+        fn = ir.Function(self.module, fn_ty, name=name)
+        # Name args
+        for i, (ptype, pname) in enumerate(params):
+            fn.args[i].name = pname
+        self.funcs[name] = fn
+
+    def _emit_func(self, s):
+        _, ret_type, name, params, body = s
+        fn = self.funcs[name]
+        entry = fn.append_basic_block(name='entry')
+        self.builder = ir.IRBuilder(entry)
+        self.env = {}
+
+        # Alloc params
+        for i, (ptype, pname) in enumerate(params):
+            ctype = self.c_type(ptype)
+            alloca = self.builder.alloca(ctype, name=pname)
+            self.builder.store(fn.args[i], alloca)
+            self.env[pname] = (alloca, ctype)
+
+        # Emit body
+        last_value = None
+        for stmt in body:
+            last_value = self._emit_stmt(stmt)
+
+        # Auto return
+        if not self.builder.block.is_terminated:
+            if ret_type[0] == 'void':
+                self.builder.ret_void()
+            else:
+                self.builder.ret(ir.Constant(self.c_type(ret_type), 0))
+
+    def _emit_stmt(self, s):
+        t = s[0]
+
+        if t == 'var_decl':
+            _, vtype, name, init = s
+            ctype = self.c_type(vtype)
+            alloca = self.builder.alloca(ctype, name=name)
+            if init is not None:
+                val = self._emit_expr(init)
+                self.builder.store(val, alloca)
+            self.env[name] = (alloca, ctype)
+            return None
+
+        if t == 'meow':
+            val = self._emit_expr(s[1])
+            # Detect type
+            if isinstance(val.type, ir.PointerType) and val.type.pointee == self.i8:
+                # String: call puts
+                puts = self._get_or_declare_puts()
+                self.builder.call(puts, [val])
+            elif isinstance(val.type, ir.DoubleType):
+                printf = self._get_or_declare_printf()
+                fmt = self._global_string('%g\n\0', name='.fmt_d')
+                self.builder.call(printf, [fmt, val])
+            else:
+                printf = self._get_or_declare_printf()
+                fmt = self._global_string('%d\n\0', name='.fmt_i')
+                # Cast to i32
+                if val.type != self.i32:
+                    val = self.builder.trunc(val, self.i32) if val.type.width > 32 else self.builder.sext(val, self.i32)
+                self.builder.call(printf, [fmt, val])
+            return None
+
+        if t == 'return':
+            if s[1] is None:
+                self.builder.ret_void()
+            else:
+                self.builder.ret(self._emit_expr(s[1]))
+            return None
+
+        if t == 'if':
+            _, cond, then, els = s
+            cond_val = self._emit_expr(cond)
+            then_bb = self.builder.function.append_basic_block(name='then')
+            merge_bb = self.builder.function.append_basic_block(name='merge')
+            if els:
+                else_bb = self.builder.function.append_basic_block(name='else')
+                self.builder.cbranch(cond_val, then_bb, else_bb)
+            else:
+                self.builder.cbranch(cond_val, then_bb, merge_bb)
+
+            # Then
+            self.builder.position_at_end(then_bb)
+            for st in then: self._emit_stmt(st)
+            if not self.builder.block.is_terminated:
+                self.builder.branch(merge_bb)
+
+            # Else
+            if els:
+                self.builder.position_at_end(else_bb)
+                for st in els: self._emit_stmt(st)
+                if not self.builder.block.is_terminated:
+                    self.builder.branch(merge_bb)
+
+            self.builder.position_at_end(merge_bb)
+            return None
+
+        if t == 'while':
+            _, cond, body = s
+            cond_bb = self.builder.function.append_basic_block(name='while.cond')
+            body_bb = self.builder.function.append_basic_block(name='while.body')
+            end_bb = self.builder.function.append_basic_block(name='while.end')
+            self.builder.branch(cond_bb)
+
+            self.builder.position_at_end(cond_bb)
+            cond_val = self._emit_expr(cond)
+            self.builder.cbranch(cond_val, body_bb, end_bb)
+
+            self.builder.position_at_end(body_bb)
+            for st in body: self._emit_stmt(st)
+            if not self.builder.block.is_terminated:
+                self.builder.branch(cond_bb)
+
+            self.builder.position_at_end(end_bb)
+            return None
+
+        if t == 'expr_stmt':
+            self._emit_expr(s[1])
+            return None
+
+        raise CodegenError(f'Unknown stmt: {t}')
+
+    def _emit_expr(self, e):
+        t = e[0]
+
+        if t == 'num':
+            v = e[1]
+            if isinstance(v, float):
+                return ir.Constant(self.f64, v)
+            return ir.Constant(self.i32, int(v))
+
+        if t == 'bool':
+            return ir.Constant(self.i32, 1 if e[1] else 0)
+
+        if t == 'str':
+            s = e[1] + '\0'
+            return self._global_string(s, name='.str')
+
+        if t == 'char':
+            return ir.Constant(self.i8, ord(e[1]) if e[1] else 0)
+
+        if t == 'null':
+            return ir.Constant(self.i8ptr, None)
+
+        if t == 'var':
+            name = e[1]
+            if name not in self.env:
+                raise CodegenError(f'Undefined: {name}')
+            alloca, ctype = self.env[name]
+            return self.builder.load(alloca, name=name)
+
+        if t == 'binop':
+            op, a, b = e[1], self._emit_expr(e[2]), self._emit_expr(e[3])
+            if op == '+':
+                if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
+                    return self.builder.fadd(a, b)
+                return self.builder.add(a, b)
+            if op == '-':
+                if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
+                    return self.builder.fsub(a, b)
+                return self.builder.sub(a, b)
+            if op == '*':
+                if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
+                    return self.builder.fmul(a, b)
+                return self.builder.mul(a, b)
+            if op == '/':
+                if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
+                    return self.builder.fdiv(a, b)
+                return self.builder.sdiv(a, b)
+            if op == '%':
+                return self.builder.srem(a, b)
+            if op == '==':
+                if isinstance(a.type, ir.DoubleType):
+                    return self.builder.fcmp_ordered('==', a, b)
+                return self.builder.icmp_signed('==', a, b)
+            if op == '!=':
+                if isinstance(a.type, ir.DoubleType):
+                    return self.builder.fcmp_ordered('!=', a, b)
+                return self.builder.icmp_signed('!=', a, b)
+            if op == '<': return self.builder.icmp_signed('<', a, b)
+            if op == '>': return self.builder.icmp_signed('>', a, b)
+            if op == '<=': return self.builder.icmp_signed('<=', a, b)
+            if op == '>=': return self.builder.icmp_signed('>=', a, b)
+            if op == '&&':
+                return self.builder.and_(a, b)
+            if op == '||':
+                return self.builder.or_(a, b)
+
+        if t == 'unary':
+            op = e[1]
+            v = self._emit_expr(e[2])
+            if op == '-':
+                if isinstance(v.type, ir.DoubleType):
+                    return self.builder.fsub(ir.Constant(self.f64, 0.0), v)
+                return self.builder.sub(ir.Constant(self.i32, 0), v)
+            if op == '!':
+                return self.builder.icmp_signed('==', v, ir.Constant(self.i32, 0))
+
+        if t == 'assign':
+            op, target, value_expr = e[1], e[2], e[3]
+            if target[0] != 'var':
+                raise CodegenError('assign only to var')
+            name = target[1]
+            if name not in self.env:
+                raise CodegenError(f'Undefined: {name}')
+            alloca, ctype = self.env[name]
+            value = self._emit_expr(value_expr)
+            if op != '=':
+                cur = self.builder.load(alloca)
+                if op == 'ADD_EQ': value = self.builder.add(cur, value)
+                elif op == 'SUB_EQ': value = self.builder.sub(cur, value)
+                elif op == 'MUL_EQ': value = self.builder.mul(cur, value)
+                elif op == 'DIV_EQ': value = self.builder.sdiv(cur, value)
+            self.builder.store(value, alloca)
+            return value
+
+        if t == 'call':
+            fn_expr = e[1]
+            args = [self._emit_expr(a) for a in e[2]]
+            if fn_expr[0] == 'var':
+                name = fn_expr[1]
+                if name in self.funcs:
+                    return self.builder.call(self.funcs[name], args)
+            raise CodegenError(f'Unknown function: {fn_expr}')
+
+        raise CodegenError(f'Unknown expr: {t}')
+
+    def _global_string(self, s, name='.str'):
+        """Create a global string constant, return pointer."""
+        # Encode UTF-8
+        b = s.encode('utf-8')
+        str_const = ir.Constant(ir.ArrayType(self.i8, len(b)), bytearray(b))
+        global_var = ir.GlobalVariable(self.module, str_const.type, name=name)
+        global_var.linkage = 'private'
+        global_var.global_constant = True
+        global_var.initializer = str_const
+        return self.builder.gep(global_var, [ir.Constant(self.i32, 0), ir.Constant(self.i32, 0)], inbounds=True)
+
+    def _get_or_declare_printf(self):
+        if 'printf' in self.funcs:
+            return self.funcs['printf']
+        fn_ty = ir.FunctionType(self.i32, [self.i8ptr], var_arg=True)
+        fn = ir.Function(self.module, fn_ty, name='printf')
+        self.funcs['printf'] = fn
+        return fn
+
+    def _get_or_declare_puts(self):
+        if 'puts' in self.funcs:
+            return self.funcs['puts']
+        fn_ty = ir.FunctionType(self.i32, [self.i8ptr])
+        fn = ir.Function(self.module, fn_ty, name='puts')
+        self.funcs['puts'] = fn
+        return fn
+
+
+def compile_to_llvm(source):
+    ast = parse(source)
+    return LLVMCodegen().compile(ast)
+
+
+
+
+# ═══ Optimization passes (safe — no segfault) ═══
+def optimize_module(mod, level=3):
+    """Apply optimization passes (llvmlite new API)."""
+    pm = llvm.ModulePassManager()
+    # Discover available passes dynamically
+    pass_fns = [
+        'add_mem2reg_pass',
+        'add_instruction_combining_pass',
+        'add_cfg_simplification_pass',
+        'add_dead_code_elimination_pass',
+        'add_reassociate_pass',
+        'add_gvn_pass',
+        'add_promote_memory_to_register_pass',
+        'add_sccp_pass',
+        'add_loop_unroll_pass',
+        'add_function_inlining_pass',
+    ]
+    applied = []
+    for fn in pass_fns:
+        if hasattr(pm, fn):
+            getattr(pm, fn)()
+            applied.append(fn.replace('add_','').replace('_pass',''))
+    pm.run(mod)
+    return applied
+
+def jit_run(source, fn_name='main', opt_level=2):
+    """Compile and run with JIT, return exit value."""
+    llvm_ir = compile_to_llvm(source)
+    mod = llvm.parse_assembly(llvm_ir)
+    mod.verify()
+
+    if opt_level > 0:
+        optimize_module(mod, opt_level)
+
+    target = llvm.Target.from_default_triple()
+    target_machine = target.create_target_machine(opt=opt_level)
+    engine = llvm.create_mcjit_compiler(mod, target_machine)
+    engine.finalize_object()
+    addr = engine.get_function_address(fn_name)
+    fn = ctypes.CFUNCTYPE(ctypes.c_int32)(addr)
+    return fn()
+
+
+def compile_to_binary(source, out_name='a.out', opt_level=3):
+    """Compile to native binary."""
+    import subprocess, os
+    llvm_ir = compile_to_llvm(source)
+
+    # Parse + verify
+    mod = llvm.parse_assembly(llvm_ir)
+    mod.verify()
+
+    if opt_level > 0:
+        optimize_module(mod, opt_level)
+
+    target = llvm.Target.from_default_triple()
+    target_machine = target.create_target_machine(opt=opt_level)
+    obj = target_machine.emit_object(mod)
+
+    obj_file = out_name + '.o'
+    with open(obj_file, 'wb') as f:
+        f.write(obj)
+
+    # Link with system libc
+    r = subprocess.run(['cc', '-o', out_name, obj_file, '-lm'],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print('Link failed:', r.stderr)
+        return False
+    if not os.path.exists(out_name + '.keep.o'):
+        os.remove(obj_file)
+    print(f'✓ Built {out_name}')
+    return True
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: codegen_llvm_v3.py <file.cat> [--ir|--run|--build output]')
+        sys.exit(1)
+    src = open(sys.argv[1]).read()
+    try:
+        if '--ir' in sys.argv or len(sys.argv) == 2:
+            print(compile_to_llvm(src))
+        elif '--run' in sys.argv:
+            result = jit_run(src)
+            print(f'Exit: {result}')
+        elif '--build' in sys.argv:
+            out = sys.argv[sys.argv.index('--build') + 1]
+            compile_to_binary(src, out)
+    except (ParseError, CodegenError) as e:
+        print(f'Error: {e}')
+        sys.exit(1)

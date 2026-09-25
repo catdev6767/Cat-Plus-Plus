@@ -53,6 +53,30 @@ def cmd_run(args):
         return 1
 
 
+def cmd_build(args):
+    """catpp build file.cat -o output"""
+    path = args.file
+    if not os.path.exists(path):
+        print(c('Loi: ', C.RED) + 'khong tim thay file ' + path)
+        return 1
+
+    try:
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from codegen_llvm_v3 import compile_to_binary
+        src = open(path, encoding='utf-8').read()
+        out = getattr(args, 'output', None) or path.rsplit('.', 1)[0]
+        print(c('Building ' + path + ' -> ' + out, C.CYAN))
+        ok = compile_to_binary(src, out)
+        if ok:
+            print(c('Built ' + out, C.GREEN))
+            return 0
+        return 1
+    except Exception as e:
+        print(c('Build error: ' + str(e), C.RED))
+        return 1
+
+
 # ============ CMD: repl ============
 def cmd_repl(args):
     print(c('🐱 Cat++ REPL v1.0', C.ORANGE + C.B))
@@ -324,6 +348,12 @@ def main():
     p_run.add_argument('args', nargs='*', help='Args truyền vào script')
     p_run.add_argument('--timeout', '-t', type=float, default=5.0, help='Timeout (giây)')
     p_run.set_defaults(func=cmd_run)
+
+    # build
+    p_build = sub.add_parser('build', help='Compile to native binary (v3)')
+    p_build.add_argument('file', help='File .cat (v3 C++ syntax)')
+    p_build.add_argument('-o', '--output', help='Output binary name')
+    p_build.set_defaults(func=cmd_build)
 
     # repl
     p_repl = sub.add_parser('repl', help='REPL tương tác')

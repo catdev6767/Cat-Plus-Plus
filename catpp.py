@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.loader import Loader
 
 
-CLI_COMMANDS = ('run', 'repl', 'fmt', 'lint', 'test', '--help', '-h', '--version')
+CLI_COMMANDS = ('run', 'repl', 'fmt', 'lint', 'test', 'build', '--help', '-h', '--version')
 
 
 def main():
