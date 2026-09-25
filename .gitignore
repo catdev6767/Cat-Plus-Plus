@@ -63,3 +63,5 @@ felisos/
 .translate_cache.json
 test[0-9]*
 kitty.iso
+
+release/
