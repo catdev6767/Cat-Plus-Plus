@@ -112,7 +112,7 @@
 .sr-match:hover { background: var(--bg-selected, #094771); color: #fff; }
 .sr-line-num { color: var(--fg-dim, #888); min-width: 40px; text-align: right; }
 .sr-line-text { flex: 1; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
-.sr-highlight { background: rgba(249,115,22,.4); color: #fff; padding: 0 2px; border-radius: 2px; }
+.sr-highlight { background: rgba(59,130,246,.4); color: #fff; padding: 0 2px; border-radius: 2px; }
 
 /* Toast */
 .cat-toast {
@@ -129,6 +129,6 @@
   opacity: 0;
   transition: opacity .2s;
   pointer-events: none;
-  border: 1px solid rgba(249,115,22,.5);
+  border: 1px solid rgba(59,130,246,.5);
 }
 .cat-toast.show { opacity: 1; }

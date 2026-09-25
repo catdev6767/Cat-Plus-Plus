@@ -464,7 +464,7 @@ function applyTheme(mode) {
   }
   if (term) {
     if (document.body.classList.contains('cat-theme')) {
-      term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#f97316' };
+      term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#3b82f6' };
     } else {
       term.options.theme = mode === 'dark'
         ? { background:'#1e1e1e', foreground:'#cccccc' }
@@ -484,7 +484,7 @@ function applyCatTheme(on) {
     document.body.classList.remove('theme-dark');
     document.body.classList.remove('theme-light');
     if (editor) monaco.editor.setTheme('catpp-cat');
-    if (term) term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#f97316' };
+    if (term) term.options.theme = { background:'#0a0e1a', foreground:'#e2e8f0', cursor:'#3b82f6' };
   } else {
     var mode = 'dark';
     try { mode = localStorage.getItem(STORAGE_THEME) || 'dark'; } catch (e) {}
@@ -637,9 +637,9 @@ function initMonaco() {
           'editor.background': '#0a0e1a',
           'editor.foreground': '#e2e8f0',
           'editorLineNumber.foreground': '#475569',
-          'editorLineNumber.activeForeground': '#f97316',
-          'editorCursor.foreground': '#f97316',
-          'editor.selectionBackground': '#f9731666',
+          'editorLineNumber.activeForeground': '#3b82f6',
+          'editorCursor.foreground': '#3b82f6',
+          'editor.selectionBackground': '#3b82f666',
           'editor.lineHighlightBackground': '#0d1220'
         }
       });
