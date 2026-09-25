@@ -744,6 +744,18 @@ def make_builtins():
         'to_int': lambda x: int(x),
         'to_float': lambda x: float(x),
 
+        'test': _test_start,
+        'assert_eq': _assert_eq,
+        'assert_true': _assert_true,
+        'assert_false': _assert_false,
+        'test_summary': _test_summary,
+        'test_reset': _test_reset,
+
+        'sqlite_open': _sqlite_open,
+        'sqlite_exec': _sqlite_exec,
+        'sqlite_query': _sqlite_query,
+        'sqlite_close': _sqlite_close,
+
         # ═══ Phase 15a ═══
         'csv_parse': _csv_parse,
         'csv_parse_list': _csv_parse_list,
@@ -923,6 +935,104 @@ def _base64_decode(s):
 def _uuid():
     import uuid
     return str(uuid.uuid4())
+
+# ═══ Phase 15b: SQLite ═══
+_sqlite_conns = {}
+_sqlite_counter = [0]
+
+def _sqlite_open(path):
+    import sqlite3
+    _sqlite_counter[0] += 1
+    conn_id = f'db{_sqlite_counter[0]}'
+    conn = sqlite3.connect(str(path))
+    conn.row_factory = sqlite3.Row
+    _sqlite_conns[conn_id] = conn
+    return conn_id
+
+def _sqlite_exec(conn_id, sql, params=None):
+    conn = _sqlite_conns.get(str(conn_id))
+    if not conn:
+        raise CatError(f'SQLite connection {conn_id} not found')
+    try:
+        cur = conn.cursor()
+        if params:
+            cur.execute(str(sql), params)
+        else:
+            cur.execute(str(sql))
+        conn.commit()
+        return cur.rowcount
+    except Exception as e:
+        raise CatError(f'sqlite_exec failed: {e}')
+
+def _sqlite_query(conn_id, sql, params=None):
+    conn = _sqlite_conns.get(str(conn_id))
+    if not conn:
+        raise CatError(f'SQLite connection {conn_id} not found')
+    try:
+        cur = conn.cursor()
+        if params:
+            cur.execute(str(sql), params)
+        else:
+            cur.execute(str(sql))
+        return [dict(row) for row in cur.fetchall()]
+    except Exception as e:
+        raise CatError(f'sqlite_query failed: {e}')
+
+def _sqlite_close(conn_id):
+    conn = _sqlite_conns.pop(str(conn_id), None)
+    if conn:
+        conn.close()
+    return True
+
+# ═══ Phase 15b: Test framework ═══
+_test_state = {'passed': 0, 'failed': 0, 'current': None, 'errors': []}
+
+def _test_start(name):
+    _test_state['current'] = str(name)
+
+def _assert_eq(a, b, msg=''):
+    if a != b:
+        err = f'{_test_state["current"]}: expected {b!r}, got {a!r}'
+        if msg: err += f' ({msg})'
+        _test_state['failed'] += 1
+        _test_state['errors'].append(err)
+        raise CatError(err)
+    _test_state['passed'] += 1
+    return True
+
+def _assert_true(x, msg=''):
+    if not x:
+        err = f'{_test_state["current"]}: expected truthy'
+        if msg: err += f' ({msg})'
+        _test_state['failed'] += 1
+        _test_state['errors'].append(err)
+        raise CatError(err)
+    _test_state['passed'] += 1
+    return True
+
+def _assert_false(x, msg=''):
+    if x:
+        err = f'{_test_state["current"]}: expected falsy'
+        if msg: err += f' ({msg})'
+        _test_state['failed'] += 1
+        _test_state['errors'].append(err)
+        raise CatError(err)
+    _test_state['passed'] += 1
+    return True
+
+def _test_summary():
+    p = _test_state['passed']
+    f = _test_state['failed']
+    print(f'Tests: {p} passed, {f} failed')
+    for e in _test_state['errors']:
+        print(f'  ✗ {e}')
+    return {'passed': p, 'failed': f}
+
+def _test_reset():
+    _test_state['passed'] = 0
+    _test_state['failed'] = 0
+    _test_state['errors'] = []
+    _test_state['current'] = None
 
 _threads = []
 
