@@ -138,13 +138,16 @@ class Parser:
         while self.match('*'):
             ptr_depth += 1
 
-        # array [N]
+        # array [N] or []
         array_size = None
         if self.match('['):
             if not self.at(']'):
                 size_tok = self.next()
                 if size_tok.type == 'NUMBER':
                     array_size = int(size_tok.value)
+                elif size_tok.type == 'IDENT':
+                    # array of size known at runtime — for now support const only
+                    array_size = 0
             self.expect(']')
 
         # generic <T>
@@ -427,6 +430,18 @@ class Parser:
             self.next(); return ('bool', True)
         if t.type == 'SHAKE':
             self.next(); return ('bool', False)
+
+        # Array literal: [1, 2, 3]
+        if t.type == '[':
+            self.next()
+            elements = []
+            if not self.at(']'):
+                while True:
+                    elements.append(self.parse_expr())
+                    if not self.match(','):
+                        break
+            self.expect(']')
+            return ('array', elements)
 
         # Parenthesized
         if t.type == '(':
