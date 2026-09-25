@@ -43,7 +43,7 @@ swat
             sniff tail(args) < 2
                 meow "Error: need id"
             swat
-                sqlite_exec(db, "UPDATE tasks SET done = 1 WHERE id = ?", [int(args[1])])
+                sqlite_exec(db, "UPDATE tasks SET done = 1 WHERE id = ?", [tally(args[1])])
                 meow "Done: " + args[1]
         swat
             meow "Unknown command: " + cmd
