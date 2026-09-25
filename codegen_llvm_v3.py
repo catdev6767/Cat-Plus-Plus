@@ -976,6 +976,86 @@ class LLVMCodegen:
         result = self.builder.call(strcmp, [a, b])
         return self.builder.icmp_signed('==', result, ir.Constant(self.i32, 0))
 
+    def _emit_builtin(self, name, args, args_expr):
+        """Emit LLVM IR for builtin function."""
+        if name == 'strlen':
+            fn = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+            return self.builder.call(fn, [args[0]])
+        if name == 'length':
+            if args and isinstance(args[0].type, ir.PointerType):
+                fn = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+                return self.builder.call(fn, [args[0]])
+            return ir.Constant(self.i32, 0)
+        if name == 'strcmp':
+            fn = self._get_or_declare('strcmp', self.i32, [self.i8ptr, self.i8ptr])
+            return self.builder.call(fn, args[:2])
+        if name == 'atoi':
+            fn = self._get_or_declare('atoi', self.i32, [self.i8ptr])
+            return self.builder.call(fn, [args[0]])
+        if name == 'atof':
+            fn = self._get_or_declare('atof', self.f64, [self.i8ptr])
+            return self.builder.call(fn, [args[0]])
+        if name == 'sqrt':
+            fn = self._get_or_declare('sqrt', self.f64, [self.f64])
+            v = args[0]
+            if isinstance(v.type, ir.IntType): v = self.builder.sitofp(v, self.f64)
+            return self.builder.call(fn, [v])
+        if name == 'pow':
+            fn = self._get_or_declare('pow', self.f64, [self.f64, self.f64])
+            a, b = args[0], args[1]
+            if isinstance(a.type, ir.IntType): a = self.builder.sitofp(a, self.f64)
+            if isinstance(b.type, ir.IntType): b = self.builder.sitofp(b, self.f64)
+            return self.builder.call(fn, [a, b])
+        if name in ('abs', 'fabs'):
+            if isinstance(args[0].type, ir.DoubleType):
+                fn = self._get_or_declare('fabs', self.f64, [self.f64])
+                return self.builder.call(fn, [args[0]])
+            v = args[0]
+            zero = ir.Constant(v.type, 0)
+            neg = self.builder.sub(zero, v)
+            cond = self.builder.icmp_signed('<', v, zero)
+            return self.builder.select(cond, neg, v)
+        if name == 'floor':
+            fn = self._get_or_declare('floor', self.f64, [self.f64])
+            v = args[0]
+            if isinstance(v.type, ir.IntType): v = self.builder.sitofp(v, self.f64)
+            return self.builder.call(fn, [v])
+        if name == 'ceil':
+            fn = self._get_or_declare('ceil', self.f64, [self.f64])
+            v = args[0]
+            if isinstance(v.type, ir.IntType): v = self.builder.sitofp(v, self.f64)
+            return self.builder.call(fn, [v])
+        if name == 'sin':
+            fn = self._get_or_declare('sin', self.f64, [self.f64])
+            v = args[0]
+            if isinstance(v.type, ir.IntType): v = self.builder.sitofp(v, self.f64)
+            return self.builder.call(fn, [v])
+        if name == 'cos':
+            fn = self._get_or_declare('cos', self.f64, [self.f64])
+            v = args[0]
+            if isinstance(v.type, ir.IntType): v = self.builder.sitofp(v, self.f64)
+            return self.builder.call(fn, [v])
+        if name == 'to_int':
+            v = args[0]
+            if isinstance(v.type, ir.DoubleType):
+                return self.builder.fptosi(v, self.i32)
+            return v
+        if name == 'to_float':
+            v = args[0]
+            if isinstance(v.type, ir.IntType):
+                return self.builder.sitofp(v, self.f64)
+            return v
+        if name == 'malloc':
+            fn = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+            return self.builder.call(fn, [args[0]])
+        if name == 'free':
+            fn = self._get_or_declare('free', ir.VoidType(), [self.i8ptr])
+            if isinstance(args[0].type, ir.PointerType):
+                raw = self.builder.bitcast(args[0], self.i8ptr)
+                self.builder.call(fn, [raw])
+            return ir.Constant(self.i32, 0)
+        raise CodegenError(f'Unknown builtin: {name}')
+
     def _get_or_declare(self, name, ret, args):
         """Get or declare an external C function."""
         if name in self.funcs:
