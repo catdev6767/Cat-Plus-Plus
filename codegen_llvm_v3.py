@@ -74,9 +74,11 @@ class LLVMCodegen:
                 return self._var_classes[name]
             if name in self.env:
                 alloca, ir_ty = self.env[name]
-                # Strict identity check
+                # Check struct type or pointer-to-struct
                 for cname, cty in self._class_types.items():
                     if ir_ty is cty:
+                        return cname
+                    if isinstance(ir_ty, ir.PointerType) and ir_ty.pointee is cty:
                         return cname
         return None
 
@@ -319,10 +321,12 @@ class LLVMCodegen:
                 ctype = self.c_type(vtype)
                 alloca = self.builder.alloca(ctype, name=name)
                 self.env[name] = (alloca, ctype)
+                # Record class if pointer to class
+                if base in self.classes:
+                    self._var_classes[name] = base
                 if init is not None:
                     val = self._emit_expr(init)
                     if val.type != ctype:
-                        # Try cast
                         if isinstance(val.type, ir.PointerType) and isinstance(ctype, ir.PointerType):
                             val = self.builder.bitcast(val, ctype)
                     self.builder.store(val, alloca)
