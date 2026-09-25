@@ -195,7 +195,8 @@ class LLVMCodegen:
         """Get LLVM type for basic type (no pointers)."""
         base = vtype[0]
         if base == 'void': return ir.VoidType()
-        if base in ('int', 'bool'): return self.i32
+        if base == 'int': return self.i32
+        if base == 'bool': return self.i32
         if base == 'long': return self.i64
         if base in ('float', 'double'): return self.f64
         if base == 'char': return self.i8
@@ -318,7 +319,6 @@ class LLVMCodegen:
             val = self._emit_expr(s[1])
             # Detect type
             if isinstance(val.type, ir.PointerType) and val.type.pointee == self.i8:
-                # String: call puts
                 puts = self._get_or_declare_puts()
                 self.builder.call(puts, [val])
             elif isinstance(val.type, ir.DoubleType):
@@ -328,9 +328,11 @@ class LLVMCodegen:
             else:
                 printf = self._get_or_declare_printf()
                 fmt = self._global_string('%d\n\0', name='.fmt_i')
-                # Cast to i32
-                if val.type != self.i32:
-                    val = self.builder.trunc(val, self.i32) if val.type.width > 32 else self.builder.sext(val, self.i32)
+                if isinstance(val.type, ir.IntType):
+                    if val.type.width > 32:
+                        val = self.builder.trunc(val, self.i32)
+                    elif val.type.width < 32:
+                        val = self.builder.sext(val, self.i32)
                 self.builder.call(printf, [fmt, val])
             return None
 
@@ -375,6 +377,34 @@ class LLVMCodegen:
                     self.builder.branch(merge_bb)
 
             self.builder.position_at_end(merge_bb)
+            return None
+
+        if t == 'for':
+            _, init, cond, step, body = s
+            # Emit init
+            self._emit_stmt(init)
+            # Loop blocks
+            cond_bb = self.builder.function.append_basic_block(name='for.cond')
+            body_bb = self.builder.function.append_basic_block(name='for.body')
+            step_bb = self.builder.function.append_basic_block(name='for.step')
+            end_bb = self.builder.function.append_basic_block(name='for.end')
+            self.builder.branch(cond_bb)
+            # Cond
+            self.builder.position_at_end(cond_bb)
+            c_val = self._to_i1(self._emit_expr(cond))
+            self.builder.cbranch(c_val, body_bb, end_bb)
+            # Body
+            self.builder.position_at_end(body_bb)
+            for st in body:
+                self._emit_stmt(st)
+            if not self.builder.block.is_terminated:
+                self.builder.branch(step_bb)
+            # Step
+            self.builder.position_at_end(step_bb)
+            self._emit_expr(step)
+            self.builder.branch(cond_bb)
+            # End
+            self.builder.position_at_end(end_bb)
             return None
 
         if t == 'while':
@@ -458,6 +488,11 @@ class LLVMCodegen:
                     return self.builder.xor(cmp_i32, ir.Constant(self.i32, 1))
             if op == '+':
                 if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
+                    # Promote int -> double
+                    if isinstance(a.type, ir.IntType):
+                        a = self.builder.sitofp(a, self.f64)
+                    if isinstance(b.type, ir.IntType):
+                        b = self.builder.sitofp(b, self.f64)
                     return self.builder.fadd(a, b)
                 return self.builder.add(a, b)
             if op == '-':

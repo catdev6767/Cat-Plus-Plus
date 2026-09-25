@@ -198,6 +198,10 @@ class Parser:
             self.expect(';')
             return ('return', expr)
 
+        # for (init; cond; step) { }
+        if self.at('FOR'):
+            return self.parse_for()
+
         # sniff (cond) { } [swat { }]
         if self.at('SNIFF'):
             return self.parse_if()
@@ -228,6 +232,23 @@ class Parser:
             init = self.parse_expr()
         self.expect(';')
         return ('var_decl', vtype, name, init)
+
+    def parse_for(self):
+        self.expect('FOR')
+        self.expect('(')
+        # init: paw int i = 0 OR i = 0
+        if self.at('PAW'):
+            init = self.parse_var_decl()
+        else:
+            init_expr = self.parse_expr()
+            self.expect(';')
+            init = ('expr_stmt', init_expr)
+        cond = self.parse_expr()
+        self.expect(';')
+        step = self.parse_expr()
+        self.expect(')')
+        body = self.parse_block()
+        return ('for', init, cond, step, body)
 
     def parse_if(self):
         self.expect('SNIFF')
