@@ -63,10 +63,50 @@ class Parser:
         if self.at('CAT'):
             return self.parse_class()
 
+        # struct <Name> { ... };
+        if self.at('STRUCT'):
+            return self.parse_struct()
+
+        # enum <Name> { A, B, C };
+        if self.at('ENUM'):
+            return self.parse_enum()
+
         # top-level statement
         return self.parse_stmt()
 
     # ═══ FUNCTION ═══
+    def parse_struct(self):
+        self.expect('STRUCT')
+        name = self.expect('IDENT').value
+        self.expect('{')
+        fields = []
+        while not self.at('}', 'EOF'):
+            ftype = self.parse_type()
+            fname = self.expect('IDENT').value
+            self.expect(';')
+            fields.append((ftype, fname))
+        self.expect('}')
+        self.match(';')
+        return ('struct', name, fields)
+
+    def parse_enum(self):
+        self.expect('ENUM')
+        name = self.expect('IDENT').value
+        self.expect('{')
+        members = []
+        while not self.at('}', 'EOF'):
+            m = self.expect('IDENT').value
+            if self.match('='):
+                # Skip enum value: skip until , or }
+                while not self.at(',', '}', 'EOF'):
+                    self.next()
+            members.append(m)
+            if not self.match(','):
+                break
+        self.expect('}')
+        self.match(';')
+        return ('enum', name, members)
+
     def parse_function(self):
         self.expect('PURR')
         # Constructor: purr ClassName(args) { ... }

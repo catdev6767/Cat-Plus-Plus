@@ -49,6 +49,8 @@ class LLVMCodegen:
         self._loop_end_stack = []
         self._loop_cond_stack = []
         self._var_classes = {}
+        self._enum_names = set()
+        self._enum_values = {}
 
     def _get_all_fields(self, cls_name):
         if cls_name not in self.classes:
@@ -153,6 +155,37 @@ class LLVMCodegen:
     def compile(self, ast):
         # Pass 0: collect classes and functions
         self._collect(ast[1])
+
+        # Pass 0.5: emit structs and enums as C typedefs
+        for stmt in ast[1]:
+            if stmt[0] == 'struct':
+                _, name, fields = stmt
+                all_fields = list(fields)
+                struct_ty = ir.LiteralStructType([self._basic_type(ft) for ft, _ in all_fields])
+                self._class_types[name] = struct_ty
+                # Register as class for field access
+                self.classes[name] = {'parent': None, 'fields': fields, 'methods': {}}
+                self.emit(f'struct {name} {{')
+                self.indent += 1
+                for ft, fn in all_fields:
+                    self.emit(f'{self._basic_c_type(ft)} {fn};')
+                if not all_fields:
+                    self.emit('int _dummy;')
+                self.indent -= 1
+                self.emit('};')
+                self.emit('')
+            elif stmt[0] == 'enum':
+                _, name, members = stmt
+                self.emit(f'enum {name} {{')
+                self.indent += 1
+                for i, m in enumerate(members):
+                    self.emit(f'{name}_{m} = {i},')
+                self.indent -= 1
+                self.emit('};')
+                self.emit('')
+                self._enum_names.add(name)
+                for i, m in enumerate(members):
+                    self._enum_values[f'{name}_{m}'] = i
 
         # Pass 1: emit class structs
         for stmt in ast[1]:
@@ -660,6 +693,9 @@ class LLVMCodegen:
 
         if t == 'var':
             name = e[1]
+            # Enum value
+            if name in self._enum_values:
+                return ir.Constant(self.i32, self._enum_values[name])
             if name not in self.env:
                 raise CodegenError(f'Undefined: {name}')
             alloca, ctype = self.env[name]
@@ -844,6 +880,13 @@ class LLVMCodegen:
         if t == 'member':
             obj_expr = e[1]
             field_name = e[2]
+            # Enum access: Color.red -> Color_red (constant int)
+            if obj_expr[0] == 'var' and obj_expr[1] in self._enum_names:
+                enum_name = obj_expr[1]
+                const_name = f'{enum_name}_{field_name}'
+                if const_name in self._enum_values:
+                    return ir.Constant(self.i32, self._enum_values[const_name])
+                raise CodegenError(f'Unknown enum member: {const_name}')
             # Determine class
             if obj_expr[0] == 'me':
                 cls_name = self._current_class
