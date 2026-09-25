@@ -42,6 +42,8 @@ class LLVMCodegen:
         self.i8 = ir.IntType(8)
         self.i8ptr = ir.PointerType(self.i8)
         self.str_count = 0
+        self._class_types = {}
+        self._current_class = None
 
     def c_type(self, vtype):
         base, ptr_depth, array_size, generic = vtype
