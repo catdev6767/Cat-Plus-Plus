@@ -570,6 +570,36 @@ class LLVMCodegen:
         if t == 'bool':
             return ir.Constant(self.i32, 1 if e[1] else 0)
 
+        if t == 'sizeof_type':
+            tn = e[1]
+            # Map C types to sizes
+            sizes = {'int': 4, 'float': 8, 'double': 8, 'bool': 1, 'char': 1,
+                     'long': 8, 'short': 2, 'str': 8, 'void': 1}
+            sz = sizes.get(tn, 8)
+            if tn in self.classes:
+                # struct size
+                if tn in self._class_types:
+                    struct_ty = self._class_types[tn]
+                    if isinstance(struct_ty, ir.LiteralStructType):
+                        sz = sum(
+                            4 if isinstance(el, ir.IntType) and el.width == 32 else
+                            8 if isinstance(el, (ir.IntType, ir.DoubleType, ir.PointerType)) else
+                            1 if isinstance(el, ir.IntType) else 8
+                            for el in struct_ty.elements
+                        )
+            return ir.Constant(self.i32, sz)
+
+        if t == 'sizeof':
+            # sizeof expression — approximate
+            val = self._emit_expr(e[1])
+            if isinstance(val.type, ir.IntType):
+                return ir.Constant(self.i32, max(1, val.type.width // 8))
+            if isinstance(val.type, ir.DoubleType):
+                return ir.Constant(self.i32, 8)
+            if isinstance(val.type, ir.PointerType):
+                return ir.Constant(self.i32, 8)
+            return ir.Constant(self.i32, 8)
+
         if t == 'address_of':
             inner = e[1]
             if inner[0] == 'var':
@@ -1256,6 +1286,21 @@ class LLVMCodegen:
             # printf(fmt, args...) — first arg must be str
             printf_fn = self._get_or_declare_printf()
             return self.builder.call(printf_fn, args)
+
+        if name == 'exit':
+            exit_fn = self._get_or_declare('exit', ir.VoidType(), [self.i32])
+            self.builder.call(exit_fn, [args[0] if args else ir.Constant(self.i32, 0)])
+            return ir.Constant(self.i32, 0)
+
+        if name == 'sizeof':
+            # sizeof(expr) at runtime — approximate
+            if args:
+                a = args[0]
+                if isinstance(a.type, ir.IntType):
+                    return ir.Constant(self.i32, max(1, a.type.width // 8))
+                if isinstance(a.type, ir.DoubleType):
+                    return ir.Constant(self.i32, 8)
+            return ir.Constant(self.i32, 8)
 
         raise CodegenError(f'Unknown builtin: {name}')
 

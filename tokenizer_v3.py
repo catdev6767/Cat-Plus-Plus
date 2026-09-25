@@ -15,7 +15,7 @@ KEYWORDS = {
     # Control
     'if', 'else', 'while', 'for', 'return', 'break', 'continue',
     'class', 'struct', 'enum', 'namespace',
-    'new', 'delete', 'this',
+    'new', 'delete', 'this', 'print', 'exit', 'sizeof', 'static', 'const',
     'true', 'false', 'nullptr', 'include',
 }
 

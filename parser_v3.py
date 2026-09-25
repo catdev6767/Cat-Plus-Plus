@@ -283,6 +283,9 @@ class Parser:
 
     def parse_var_decl(self):
         self.expect('PAW')
+        # Skip const/static modifiers
+        while self.at('CONST', 'STATIC'):
+            self.next()
         vtype = self.parse_type()
         name = self.expect('IDENT').value
         # Array size after name: int arr[5]
@@ -504,6 +507,24 @@ class Parser:
                         break
             self.expect(']')
             return ('array', elements)
+
+        # sizeof(type) or sizeof(expr)
+        if t.type == 'SIZEOF':
+            self.next()
+            self.expect('(')
+            # Check if it's a type
+            if self.at('INT', 'FLOAT', 'STR', 'BOOL', 'CHAR', 'LONG', 'DOUBLE', 'VOID'):
+                type_name = self.next().value
+                self.expect(')')
+                return ('sizeof_type', type_name)
+            if self.at('IDENT') and self.peek(1).type == ')':
+                # Could be type name
+                name = self.next().value
+                self.expect(')')
+                return ('sizeof_type', name)
+            expr = self.parse_expr()
+            self.expect(')')
+            return ('sizeof', expr)
 
         # Parenthesized
         if t.type == '(':
