@@ -75,6 +75,21 @@ class LLVMCodegen:
                         return cname
         return None
 
+    def _find_method(self, cls_name, method_name):
+        """Find method in class or parent chain. Return (class_name, func) or (None, None)."""
+        c = cls_name
+        while c:
+            fn_name = f'{c}__{method_name}'
+            for f in self.module.functions:
+                if f.name == fn_name:
+                    return (c, f)
+            # Look up parent
+            if c in self.classes:
+                c = self.classes[c]['parent']
+            else:
+                break
+        return (None, None)
+
     def emit(self, line=''):
         self.lines.append('  ' * self.indent + line)
 
@@ -539,9 +554,8 @@ class LLVMCodegen:
                 cls_name = self._infer_obj_class(obj_expr)
                 if not cls_name:
                     raise CodegenError('Unknown class for method: ' + method_name)
-                # Pass POINTER to obj, not loaded value
+                # Pass POINTER to obj
                 if obj_expr[0] == 'var':
-                    # Get alloca pointer directly
                     alloca, _ = self.env[obj_expr[1]]
                     obj_ptr = alloca
                 elif obj_expr[0] == 'me':
@@ -549,11 +563,15 @@ class LLVMCodegen:
                     obj_ptr = self.builder.load(alloca, name='me')
                 else:
                     obj_ptr = self._emit_expr(obj_expr)
-                fn_name = cls_name + '__' + method_name
-                for f in self.module.functions:
-                    if f.name == fn_name:
-                        return self.builder.call(f, [obj_ptr] + args)
-                raise CodegenError('Unknown method: ' + method_name)
+                # Find method in class chain (inheritance)
+                found_cls, fn = self._find_method(cls_name, method_name)
+                if fn is None:
+                    raise CodegenError(f'Unknown method: {method_name} in class {cls_name}')
+                # Cast obj_ptr to correct type if method in parent
+                fn_me_ty = fn.function_type.args[0]
+                if obj_ptr.type != fn_me_ty:
+                    obj_ptr = self.builder.bitcast(obj_ptr, fn_me_ty)
+                return self.builder.call(fn, [obj_ptr] + args)
             if fn_expr[0] == 'var':
                 name = fn_expr[1]
                 if name in self.funcs:
