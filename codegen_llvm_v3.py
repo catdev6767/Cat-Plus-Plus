@@ -232,6 +232,19 @@ class LLVMCodegen:
 
         if t == 'binop':
             op, a, b = e[1], self._emit_expr(e[2]), self._emit_expr(e[3])
+            # String concat
+            if op == '+' and isinstance(a.type, ir.PointerType) and a.type.pointee == self.i8:
+                return self._str_concat(a, b)
+            if op == '+' and isinstance(b.type, ir.PointerType) and b.type.pointee == self.i8:
+                return self._str_concat(a, b)
+            if op == '==':
+                # String compare
+                if isinstance(a.type, ir.PointerType) and isinstance(b.type, ir.PointerType):
+                    return self._str_cmp(a, b)
+            if op == '!=':
+                if isinstance(a.type, ir.PointerType) and isinstance(b.type, ir.PointerType):
+                    cmp = self._str_cmp(a, b)
+                    return self.builder.xor(cmp, ir.Constant(self.i32, 1))
             if op == '+':
                 if isinstance(a.type, ir.DoubleType) or isinstance(b.type, ir.DoubleType):
                     return self.builder.fadd(a, b)
@@ -317,6 +330,42 @@ class LLVMCodegen:
         global_var.initializer = str_const
         return self.builder.gep(global_var, [ir.Constant(self.i32, 0), ir.Constant(self.i32, 0)], inbounds=True)
 
+
+    def _str_concat(self, a, b):
+        """Concat 2 strings using malloc + strcat."""
+        # Ensure both are i8*
+        if isinstance(a.type, ir.PointerType) and a.type.pointee != self.i8:
+            a = self.builder.bitcast(a, self.i8ptr)
+        if isinstance(b.type, ir.PointerType) and b.type.pointee != self.i8:
+            b = self.builder.bitcast(b, self.i8ptr)
+        # Get lengths
+        strlen = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+        malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+        strcpy = self._get_or_declare('strcpy', self.i8ptr, [self.i8ptr, self.i8ptr])
+        strcat = self._get_or_declare('strcat', self.i8ptr, [self.i8ptr, self.i8ptr])
+        len_a = self.builder.call(strlen, [a])
+        len_b = self.builder.call(strlen, [b])
+        total = self.builder.add(self.builder.add(len_a, len_b), ir.Constant(self.i64, 1))
+        buf = self.builder.call(malloc, [total])
+        self.builder.call(strcpy, [buf, a])
+        self.builder.call(strcat, [buf, b])
+        return buf
+
+    def _str_cmp(self, a, b):
+        """strcmp(a, b) == 0"""
+        strcmp = self._get_or_declare('strcmp', self.i32, [self.i8ptr, self.i8ptr])
+        result = self.builder.call(strcmp, [a, b])
+        return self.builder.icmp_signed('==', result, ir.Constant(self.i32, 0))
+
+    def _get_or_declare(self, name, ret, args):
+        """Get or declare an external C function."""
+        if name in self.funcs:
+            return self.funcs[name]
+        fn_ty = ir.FunctionType(ret, args)
+        fn = ir.Function(self.module, fn_ty, name=name)
+        self.funcs[name] = fn
+        return fn
+
     def _get_or_declare_printf(self):
         if 'printf' in self.funcs:
             return self.funcs['printf']
@@ -343,29 +392,8 @@ def compile_to_llvm(source):
 
 # ═══ Optimization passes (safe — no segfault) ═══
 def optimize_module(mod, level=3):
-    """Apply optimization passes (llvmlite new API)."""
-    pm = llvm.ModulePassManager()
-    # Discover available passes dynamically
-    pass_fns = [
-        'add_mem2reg_pass',
-        'add_instruction_combining_pass',
-        'add_cfg_simplification_pass',
-        'add_dead_code_elimination_pass',
-        'add_reassociate_pass',
-        'add_gvn_pass',
-        'add_promote_memory_to_register_pass',
-        'add_sccp_pass',
-        'add_loop_unroll_pass',
-        'add_function_inlining_pass',
-    ]
-    applied = []
-    for fn in pass_fns:
-        if hasattr(pm, fn):
-            getattr(pm, fn)()
-            applied.append(fn.replace('add_','').replace('_pass',''))
-    pm.run(mod)
-    return applied
-
+    """Optimization passes skipped (llvmlite API buggy). Uses tm(opt=N) instead."""
+    return []
 def jit_run(source, fn_name='main', opt_level=2):
     """Compile and run with JIT, return exit value."""
     llvm_ir = compile_to_llvm(source)
