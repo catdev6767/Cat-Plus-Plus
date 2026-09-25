@@ -32,6 +32,7 @@ def cmd_run(args):
     with open(path, encoding='utf-8') as f:
         code = f.read()
     try:
+        sys.argv = [path] + (getattr(args, 'args', []) or [])
         out = run_catpp(code, timeout=args.timeout)
         if out:
             print(out)
@@ -320,6 +321,7 @@ def main():
     # run
     p_run = sub.add_parser('run', help='Chạy file .cat')
     p_run.add_argument('file', help='File cần chạy')
+    p_run.add_argument('args', nargs='*', help='Args truyền vào script')
     p_run.add_argument('--timeout', '-t', type=float, default=5.0, help='Timeout (giây)')
     p_run.set_defaults(func=cmd_run)
 
