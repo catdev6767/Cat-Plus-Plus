@@ -243,6 +243,19 @@ class LLVMCodegen:
 
         if t == 'var_decl':
             _, vtype, name, init = s
+            base = vtype[0]
+            if base in self.classes and base in self._class_types:
+                struct_ty = self._class_types[base]
+                alloca = self.builder.alloca(struct_ty, name=name)
+                self.env[name] = (alloca, struct_ty)
+                if init is not None and init[0] == 'call' and init[1][0] == 'var' and init[1][1] == base:
+                    args = [self._emit_expr(a) for a in init[2]]
+                    fn_name = base + '__' + base
+                    for f in self.module.functions:
+                        if f.name == fn_name:
+                            self.builder.call(f, [alloca] + args)
+                            break
+                return None
             ctype = self.c_type(vtype)
             alloca = self.builder.alloca(ctype, name=name)
             if init is not None:
@@ -363,6 +376,12 @@ class LLVMCodegen:
         if t == 'null':
             return ir.Constant(self.i8ptr, None)
 
+        if t == 'me':
+            if 'me' not in self.env:
+                raise CodegenError('me not in scope')
+            alloca, ctype = self.env['me']
+            return self.builder.load(alloca, name='me')
+
         if t == 'var':
             name = e[1]
             if name not in self.env:
@@ -434,6 +453,25 @@ class LLVMCodegen:
 
         if t == 'assign':
             op, target, value_expr = e[1], e[2], e[3]
+            if target[0] == 'member':
+                obj = self._emit_expr(target[1])
+                field_name = target[2]
+                cls_name = self._current_class
+                if cls_name and cls_name in self._class_types:
+                    all_fields = self._get_all_fields(cls_name)
+                    if field_name in all_fields:
+                        idx = all_fields.index(field_name)
+                        ptr = self.builder.gep(obj, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
+                        value = self._emit_expr(value_expr)
+                        if value.type != ptr.type.pointee:
+                            if isinstance(value.type, ir.IntType) and isinstance(ptr.type.pointee, ir.IntType):
+                                if value.type.width < ptr.type.pointee.width:
+                                    value = self.builder.sext(value, ptr.type.pointee)
+                                elif value.type.width > ptr.type.pointee.width:
+                                    value = self.builder.trunc(value, ptr.type.pointee)
+                        self.builder.store(value, ptr)
+                        return value
+                raise CodegenError('Unknown field: ' + field_name)
             if target[0] != 'var':
                 raise CodegenError('assign only to var')
             name = target[1]
@@ -450,9 +488,33 @@ class LLVMCodegen:
             self.builder.store(value, alloca)
             return value
 
+        if t == 'member':
+            obj = self._emit_expr(e[1])
+            field_name = e[2]
+            cls_name = self._current_class
+            if cls_name and cls_name in self._class_types:
+                all_fields = self._get_all_fields(cls_name)
+                if field_name in all_fields:
+                    idx = all_fields.index(field_name)
+                    ptr = self.builder.gep(obj, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
+                    return self.builder.load(ptr, name=field_name)
+            raise CodegenError('Unknown member: ' + field_name)
+
         if t == 'call':
             fn_expr = e[1]
             args = [self._emit_expr(a) for a in e[2]]
+            # Method call: p.sum() -> ClassName__sum(&p)
+            if fn_expr[0] == 'member':
+                obj_expr = fn_expr[1]
+                method_name = fn_expr[2]
+                obj = self._emit_expr(obj_expr)
+                cls_name = self._infer_obj_class(obj_expr)
+                if cls_name:
+                    fn_name = cls_name + '__' + method_name
+                    for f in self.module.functions:
+                        if f.name == fn_name:
+                            return self.builder.call(f, [obj] + args)
+                raise CodegenError('Unknown method: ' + method_name)
             if fn_expr[0] == 'var':
                 name = fn_expr[1]
                 if name in self.funcs:
