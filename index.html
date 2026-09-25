@@ -8,13 +8,13 @@
 <title>Cat++ — A programming language with cat syntax</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,"Segoe UI",sans-serif; background:#0a0e1a; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
+body { font-family:-apple-system,"Segoe UI",sans-serif; background:#020408; color:#e2e8f0; line-height:1.7; overflow-x:hidden; }
 a { color:#f97316; text-decoration:none; }
 a:hover { text-decoration:underline; }
 .container { max-width:1100px; margin:0 auto; padding:0 24px; }
 
 /* Navbar */
-.nav { padding:16px 0; border-bottom:1px solid #1e293b; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
+.nav { padding:16px 0; border-bottom:1px solid #0f1729; background:rgba(10,14,26,0.95); position:sticky; top:0; z-index:100; backdrop-filter:blur(8px); }
 .nav-inner { display:flex; align-items:center; gap:24px; }
 .nav-logo { font-size:20px; font-weight:700; color:#f8fafc; margin-right:auto; }
 .nav-logo span { color:#f97316; }
@@ -24,7 +24,7 @@ a:hover { text-decoration:underline; }
 .nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(249,115,22,0.4); text-decoration:none; color:#fff; }
 
 /* Hero */
-.hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#0a0e1a 60%); }
+.hero { padding:100px 0 80px; text-align:center; position:relative; overflow:hidden; background:radial-gradient(ellipse at top,#1a1f2e 0%,#020408 60%); }
 .hero::before { content:"🐱"; position:absolute; top:40px; left:8%; font-size:80px; opacity:0.08; }
 .hero::after { content:"🐾"; position:absolute; bottom:40px; right:8%; font-size:60px; opacity:0.08; }
 .hero h1 { font-size:80px; font-weight:800; background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fbbf24 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; letter-spacing:-2px; }
@@ -43,7 +43,7 @@ h3 { font-size:20px; color:#f97316; margin:24px 0 12px; }
 p { color:#cbd5e1; }
 
 /* Code block */
-pre { background:#0d1220; border:1px solid #1e293b; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
+pre { background:#050810; border:1px solid #0f1729; border-radius:12px; padding:24px 28px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:15px; line-height:1.7; margin:20px 0; }
 code { font-family:ui-monospace,Consolas,monospace; }
 .kw { color:#f97316; font-weight:600; }
 .str { color:#fbbf24; }
@@ -53,7 +53,7 @@ code { font-family:ui-monospace,Consolas,monospace; }
 
 /* Grid */
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:40px; }
-.card { background:#111827; border:1px solid #1e293b; border-radius:16px; padding:28px; transition:all 0.25s; }
+.card { background:#0a0f1a; border:1px solid #0f1729; border-radius:16px; padding:28px; transition:all 0.25s; }
 .card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.3); }
 .card h3 { margin-top:0; font-size:20px; color:#f8fafc; }
 .card p { color:#94a3b8; font-size:14px; margin:0; }
@@ -61,17 +61,17 @@ code { font-family:ui-monospace,Consolas,monospace; }
 
 /* Stats */
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; margin:48px 0; }
-.stat { background:#111827; border-radius:16px; padding:32px; text-align:center; border:1px solid #1e293b; }
+.stat { background:#0a0f1a; border-radius:16px; padding:32px; text-align:center; border:1px solid #0f1729; }
 .stat .num { font-size:48px; font-weight:800; color:#f97316; display:block; line-height:1; }
 .stat .label { font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1.5px; margin-top:12px; display:block; }
 
 /* CTA section */
-.cta-box { background:linear-gradient(135deg,#1a1f2e 0%,#0d1220 100%); border:1px solid #1e293b; border-radius:20px; padding:60px; text-align:center; margin:60px 0; }
+.cta-box { background:linear-gradient(135deg,#1a1f2e 0%,#050810 100%); border:1px solid #0f1729; border-radius:20px; padding:60px; text-align:center; margin:60px 0; }
 .cta-box h2 { border:none; padding:0; margin-bottom:16px; }
 .cta-box p { font-size:18px; margin-bottom:32px; }
 
 /* Footer */
-footer { padding:60px 0 40px; text-align:center; border-top:1px solid #1e293b; color:#64748b; font-size:14px; }
+footer { padding:60px 0 40px; text-align:center; border-top:1px solid #0f1729; color:#64748b; font-size:14px; }
 footer a { color:#94a3b8; }
 
 @media (max-width:700px) {
@@ -153,7 +153,7 @@ footer a { color:#94a3b8; }
     </div>
 </section>
 
-<section id="features" style="background:#0d1220;">
+<section id="features" style="background:#050810;">
   <div class="container">
     <h2>Features</h2>
     <div class="grid">
@@ -169,7 +169,7 @@ footer a { color:#94a3b8; }
   </div>
 </section>
 
-<section id="performance" style="background:#0d1220;">
+<section id="performance" style="background:#050810;">
   <div class="container">
     <h2>Performance — Nearly C++</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
@@ -189,17 +189,17 @@ footer a { color:#94a3b8; }
 <span class="kw">meow</span> <span class="fn">sum_to</span>(<span class="num">1000000</span>)</code></pre>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:32px 0;">
-      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+      <div style="background:#020408;border:1px solid #0f1729;border-radius:12px;padding:24px;">
         <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Interpreter</div>
         <div style="font-size:32px;font-weight:800;color:#e2e8f0;">5,547<span style="font-size:16px;color:#64748b;">ms</span></div>
         <div style="font-size:13px;color:#64748b;margin-top:8px;">1×</div>
       </div>
-      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+      <div style="background:#020408;border:1px solid #0f1729;border-radius:12px;padding:24px;">
         <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">Bytecode VM</div>
         <div style="font-size:32px;font-weight:800;color:#e2e8f0;">2,581<span style="font-size:16px;color:#64748b;">ms</span></div>
         <div style="font-size:13px;color:#64748b;margin-top:8px;">2.1×</div>
       </div>
-      <div style="background:#0a0e1a;border:1px solid #1e293b;border-radius:12px;padding:24px;">
+      <div style="background:#020408;border:1px solid #0f1729;border-radius:12px;padding:24px;">
         <div style="font-size:14px;color:#94a3b8;margin-bottom:8px;">C boxed</div>
         <div style="font-size:32px;font-weight:800;color:#e2e8f0;">27<span style="font-size:16px;color:#64748b;">ms</span></div>
         <div style="font-size:13px;color:#64748b;margin-top:8px;">205×</div>
@@ -239,7 +239,7 @@ footer a { color:#94a3b8; }
   </div>
 </section>
 
-<section id="cli" style="background:#0d1220;">
+<section id="cli" style="background:#050810;">
   <div class="container">
     <h2>CLI — paw</h2>
     <p style="font-size:18px; max-width:800px; margin-bottom:32px;">
@@ -289,7 +289,7 @@ paw check game.cat</code></pre>
   </div>
 </section>
 
-<section id="install" style="background:#0d1220;">
+<section id="install" style="background:#050810;">
   <div class="container">
     <h2>Install</h2>
 

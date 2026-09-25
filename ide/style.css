@@ -1,10 +1,10 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,"Segoe UI",Ubuntu,sans-serif; font-size:13px; height:100vh; overflow:hidden;
        display:grid; grid-template-rows:34px 1fr 22px; }
-body.theme-dark { --bg-title:#3c3c3c; --bg-act:#333; --bg-side:#252526; --bg-edit:#1e1e1e;
-  --bg-tab:#2d2d2d; --bg-tab-a:#1e1e1e; --bg-panel:#1e1e1e; --bg-status:#007acc;
-  --bg-hover:#2a2d2e; --bg-selected:#094771; --bg-modal:#1e1e1e; --bg-modal-head:#252526;
-  --fg:#ccc; --fg-dim:#858585; --fg-bright:#fff; --border:#3c3c3c; --border-soft:#2b2b2b;
+body.theme-dark { --bg-title:#050810; --bg-act:#333; --bg-side:#0a0f1a; --bg-edit:#020408;
+  --bg-tab:#0a0f1a; --bg-tab-a:#020408; --bg-panel:#020408; --bg-status:#007acc;
+  --bg-hover:#111827; --bg-selected:#094771; --bg-modal:#020408; --bg-modal-head:#0a0f1a;
+  --fg:#ccc; --fg-dim:#858585; --fg-bright:#fff; --border:#050810; --border-soft:#2b2b2b;
   --accent:#007acc; --accent-h:#1177bb; }
 body.theme-light { --bg-title:#ddd; --bg-act:#2c2c2c; --bg-side:#f3f3f3; --bg-edit:#fff;
   --bg-tab:#ececec; --bg-tab-a:#fff; --bg-panel:#f8f8f8; --bg-status:#007acc;
@@ -128,7 +128,7 @@ body.zen .main { grid-template-rows:0 1fr 0; }
     grid-column: 1 / -1;
 }
 .split-divider {
-    background: var(--border, #3c3c3c);
+    background: var(--border, #050810);
     cursor: col-resize;
     position: relative;
     z-index: 10;
