@@ -535,13 +535,23 @@ class LLVMCodegen:
             if fn_expr[0] == 'member':
                 obj_expr = fn_expr[1]
                 method_name = fn_expr[2]
-                obj = self._emit_expr(obj_expr)
                 cls_name = self._infer_obj_class(obj_expr)
-                if cls_name:
-                    fn_name = cls_name + '__' + method_name
-                    for f in self.module.functions:
-                        if f.name == fn_name:
-                            return self.builder.call(f, [obj] + args)
+                if not cls_name:
+                    raise CodegenError('Unknown class for method: ' + method_name)
+                # Pass POINTER to obj, not loaded value
+                if obj_expr[0] == 'var':
+                    # Get alloca pointer directly
+                    alloca, _ = self.env[obj_expr[1]]
+                    obj_ptr = alloca
+                elif obj_expr[0] == 'me':
+                    alloca, _ = self.env['me']
+                    obj_ptr = self.builder.load(alloca, name='me')
+                else:
+                    obj_ptr = self._emit_expr(obj_expr)
+                fn_name = cls_name + '__' + method_name
+                for f in self.module.functions:
+                    if f.name == fn_name:
+                        return self.builder.call(f, [obj_ptr] + args)
                 raise CodegenError('Unknown method: ' + method_name)
             if fn_expr[0] == 'var':
                 name = fn_expr[1]
