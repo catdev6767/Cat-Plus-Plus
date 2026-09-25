@@ -8,7 +8,35 @@ KEYWORDS = {'paw','meow','purr','give','hiss','tap','sit','leap','listen',
             'struct','volatile','cast','sizeof','asm','ptr','null','packed'}
 
 class CatError(Exception):
-    def __init__(self, msg, line=0): super().__init__(msg); self.line = line
+    def __init__(self, msg, line=0, col=0, stack=None):
+        super().__init__(msg)
+        self.line = line
+        self.col = col
+        self.stack = stack or []
+
+    def format(self, source=None):
+        """Pretty print error with line + column + stack."""
+        out = []
+        loc = f'line {self.line}'
+        if self.col:
+            loc += f', col {self.col}'
+        out.append(f'Error at {loc}: {super().__str__()}')
+
+        # Show source line if available
+        if source and self.line > 0:
+            lines = source.split(chr(10))
+            if 1 <= self.line <= len(lines):
+                src_line = lines[self.line - 1]
+                out.append(f'  {self.line} | {src_line}')
+                if self.col > 0:
+                    out.append(f'  {" " * (len(str(self.line)) + 3 + self.col - 1)}^')
+
+        # Show stack trace
+        if self.stack:
+            out.append('Stack trace:')
+            for frame in reversed(self.stack):
+                out.append(f'  at {frame}')
+        return chr(10).join(out)
 
 @dataclass
 class Tok:
@@ -716,6 +744,19 @@ def make_builtins():
         'to_int': lambda x: int(x),
         'to_float': lambda x: float(x),
 
+        # ═══ Phase 15a ═══
+        'csv_parse': _csv_parse,
+        'csv_parse_list': _csv_parse_list,
+        'csv_write': _csv_write,
+        'yaml_parse': _yaml_parse,
+        'yaml_write': _yaml_write,
+        'md5': _md5,
+        'sha1': _sha1,
+        'sha256': _sha256,
+        'base64_encode': _base64_encode,
+        'base64_decode': _base64_decode,
+        'uuid': _uuid,
+
         # ═══ Phase 12b: HTTP ═══
         'http_get': _http_get,
         'http_post': _http_post,
@@ -815,6 +856,73 @@ def _sh_code(cmd):
         return r.returncode
     except Exception as e:
         raise CatError(f'sh_code failed: {e}')
+
+# ═══ Phase 15a: CSV ═══
+def _csv_parse(text):
+    import csv, io
+    reader = csv.DictReader(io.StringIO(str(text)))
+    return [dict(row) for row in reader]
+
+def _csv_parse_list(text):
+    import csv, io
+    reader = csv.reader(io.StringIO(str(text)))
+    return [list(row) for row in reader]
+
+def _csv_write(rows):
+    import csv, io
+    buf = io.StringIO()
+    if not rows:
+        return ''
+    if isinstance(rows[0], dict):
+        writer = csv.DictWriter(buf, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+    else:
+        writer = csv.writer(buf)
+        for row in rows:
+            writer.writerow(row)
+    return buf.getvalue()
+
+# ═══ Phase 15a: YAML ═══
+def _yaml_parse(text):
+    try:
+        import yaml
+        return yaml.safe_load(str(text))
+    except ImportError:
+        raise CatError('yaml not installed. Run: pip install pyyaml')
+
+def _yaml_write(data):
+    try:
+        import yaml
+        return yaml.safe_dump(data, allow_unicode=True, default_flow_style=False)
+    except ImportError:
+        raise CatError('yaml not installed. Run: pip install pyyaml')
+
+# ═══ Phase 15a: Crypto ═══
+def _md5(s):
+    import hashlib
+    return hashlib.md5(str(s).encode()).hexdigest()
+
+def _sha1(s):
+    import hashlib
+    return hashlib.sha1(str(s).encode()).hexdigest()
+
+def _sha256(s):
+    import hashlib
+    return hashlib.sha256(str(s).encode()).hexdigest()
+
+def _base64_encode(s):
+    import base64
+    return base64.b64encode(str(s).encode()).decode()
+
+def _base64_decode(s):
+    import base64
+    return base64.b64decode(str(s)).decode('utf-8', errors='replace')
+
+def _uuid():
+    import uuid
+    return str(uuid.uuid4())
 
 _threads = []
 
