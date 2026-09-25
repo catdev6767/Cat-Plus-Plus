@@ -174,6 +174,7 @@ class LLVMCodegen:
     def _basic_type(self, vtype):
         """Get LLVM type for basic type (no pointers)."""
         base = vtype[0]
+        if base == 'void': return ir.VoidType()
         if base in ('int', 'bool'): return self.i32
         if base == 'long': return self.i64
         if base in ('float', 'double'): return self.f64
