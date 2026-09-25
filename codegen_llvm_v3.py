@@ -120,7 +120,14 @@ class LLVMCodegen:
 
     def c_type(self, vtype):
         base, ptr_depth, array_size, generic = vtype
-        if base in ('int', 'bool'):
+        # Class type
+        if base in self.classes and base in self._class_types:
+            base_t = self._class_types[base]
+        elif base.startswith('ptr_') and base[4:] in self._class_types:
+            base_t = ir.PointerType(self._class_types[base[4:]])
+            # Already pointer; don't apply ptr_depth twice
+            return base_t
+        elif base in ('int', 'bool'):
             base_t = self.i32
         elif base in ('long',):
             base_t = self.i64
@@ -133,7 +140,10 @@ class LLVMCodegen:
         elif base == 'str':
             base_t = self.i8ptr
         else:
-            base_t = self.i32  # fallback
+            base_t = self.i32
+        # Array -> pointer to elem
+        if array_size is not None:
+            return ir.PointerType(base_t)
         for _ in range(ptr_depth):
             base_t = ir.PointerType(base_t)
         return base_t
