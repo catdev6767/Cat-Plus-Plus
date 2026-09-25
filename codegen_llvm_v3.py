@@ -918,6 +918,8 @@ class LLVMCodegen:
                 name = fn_expr[1]
                 if name in self.funcs:
                     return self.builder.call(self.funcs[name], args)
+                # Builtins
+                return self._emit_builtin(name, args, e[2])
             raise CodegenError(f'Unknown function: {fn_expr}')
 
         raise CodegenError(f'Unknown expr: {t}')
