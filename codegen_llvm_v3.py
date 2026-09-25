@@ -457,8 +457,12 @@ class LLVMCodegen:
             self.builder.cbranch(c_val, body_bb, end_bb)
             # Body
             self.builder.position_at_end(body_bb)
+            self._loop_end_stack.append(end_bb)
+            self._loop_cond_stack.append(step_bb)
             for st in body:
                 self._emit_stmt(st)
+            self._loop_end_stack.pop()
+            self._loop_cond_stack.pop()
             if not self.builder.block.is_terminated:
                 self.builder.branch(step_bb)
             # Step
@@ -507,11 +511,16 @@ class LLVMCodegen:
         if t == 'break':
             if hasattr(self, '_loop_end_stack') and self._loop_end_stack:
                 self.builder.branch(self._loop_end_stack[-1])
+                # Move to dead block so following code isn't emitted in this block
+                dead = self.builder.function.append_basic_block(name='break.dead')
+                self.builder.position_at_end(dead)
             return None
 
         if t == 'continue':
             if hasattr(self, '_loop_cond_stack') and self._loop_cond_stack:
                 self.builder.branch(self._loop_cond_stack[-1])
+                dead = self.builder.function.append_basic_block(name='cont.dead')
+                self.builder.position_at_end(dead)
             return None
 
         raise CodegenError(f'Unknown stmt: {t}')
