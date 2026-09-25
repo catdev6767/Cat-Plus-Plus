@@ -47,6 +47,34 @@ class LLVMCodegen:
         self.indent = 0
         self._current_class = None
 
+    def _get_all_fields(self, cls_name):
+        if cls_name not in self.classes:
+            return []
+        result = []
+        chain = []
+        p = self.classes[cls_name]['parent']
+        while p and p in self.classes:
+            chain.append(p)
+            p = self.classes[p]['parent']
+        for anc in reversed(chain):
+            for _, fname in self.classes[anc]['fields']:
+                result.append(fname)
+        for _, fname in self.classes[cls_name]['fields']:
+            result.append(fname)
+        return result
+
+    def _infer_obj_class(self, expr):
+        if expr[0] == 'me':
+            return self._current_class
+        if expr[0] == 'var':
+            name = expr[1]
+            if name in self.env:
+                alloca, ir_ty = self.env[name]
+                for cname, cty in self._class_types.items():
+                    if ir_ty == cty or (isinstance(ir_ty, ir.PointerType) and ir_ty.pointee == cty):
+                        return cname
+        return None
+
     def emit(self, line=''):
         self.lines.append('  ' * self.indent + line)
 
