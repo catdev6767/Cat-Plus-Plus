@@ -46,6 +46,7 @@ class LLVMCodegen:
         self.lines = []
         self.indent = 0
         self._current_class = None
+        self._var_classes = {}
 
     def _get_all_fields(self, cls_name):
         if cls_name not in self.classes:
@@ -68,10 +69,14 @@ class LLVMCodegen:
             return self._current_class
         if expr[0] == 'var':
             name = expr[1]
+            # Check var_classes mapping first (set in var_decl)
+            if hasattr(self, '_var_classes') and name in self._var_classes:
+                return self._var_classes[name]
             if name in self.env:
                 alloca, ir_ty = self.env[name]
+                # Strict identity check
                 for cname, cty in self._class_types.items():
-                    if ir_ty == cty or (isinstance(ir_ty, ir.PointerType) and ir_ty.pointee == cty):
+                    if ir_ty is cty:
                         return cname
         return None
 
@@ -292,6 +297,7 @@ class LLVMCodegen:
                 struct_ty = self._class_types[base]
                 alloca = self.builder.alloca(struct_ty, name=name)
                 self.env[name] = (alloca, struct_ty)
+                self._var_classes[name] = base
                 if init is not None and init[0] == 'call' and init[1][0] == 'var' and init[1][1] == base:
                     args = [self._emit_expr(a) for a in init[2]]
                     fn_name = base + '__' + base
@@ -498,9 +504,18 @@ class LLVMCodegen:
         if t == 'assign':
             op, target, value_expr = e[1], e[2], e[3]
             if target[0] == 'member':
-                obj = self._emit_expr(target[1])
+                obj_expr = target[1]
                 field_name = target[2]
-                cls_name = self._current_class
+                if obj_expr[0] == 'me':
+                    cls_name = self._current_class
+                    alloca, _ = self.env['me']
+                    obj = self.builder.load(alloca, name='me')
+                else:
+                    cls_name = self._infer_obj_class(obj_expr)
+                    if obj_expr[0] == 'var':
+                        obj = self.env[obj_expr[1]][0]
+                    else:
+                        obj = self._emit_expr(obj_expr)
                 if cls_name and cls_name in self._class_types:
                     all_fields = self._get_all_fields(cls_name)
                     if field_name in all_fields:
@@ -533,14 +548,24 @@ class LLVMCodegen:
             return value
 
         if t == 'member':
-            obj = self._emit_expr(e[1])
+            obj_expr = e[1]
             field_name = e[2]
-            cls_name = self._current_class
+            # Determine class
+            if obj_expr[0] == 'me':
+                cls_name = self._current_class
+                alloca, _ = self.env['me']
+                obj_ptr = self.builder.load(alloca, name='me')
+            else:
+                cls_name = self._infer_obj_class(obj_expr)
+                if obj_expr[0] == 'var':
+                    obj_ptr = self.env[obj_expr[1]][0]
+                else:
+                    obj_ptr = self._emit_expr(obj_expr)
             if cls_name and cls_name in self._class_types:
                 all_fields = self._get_all_fields(cls_name)
                 if field_name in all_fields:
                     idx = all_fields.index(field_name)
-                    ptr = self.builder.gep(obj, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
+                    ptr = self.builder.gep(obj_ptr, [ir.Constant(self.i32, 0), ir.Constant(self.i32, idx)], inbounds=True)
                     return self.builder.load(ptr, name=field_name)
             raise CodegenError('Unknown member: ' + field_name)
 
