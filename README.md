@@ -7,6 +7,44 @@ A programming language with cat-themed syntax.
 > 🌐 **Website:** https://catdev6767.github.io/Cat-Plus-Plus/
 > 📦 **GitHub:** https://github.com/catdev6767/Cat-Plus-Plus
 
+## v3 - C++-like syntax + LLVM native
+
+Cat++ v3 compiles to native binary via LLVM. No C transpilation, no gcc needed.
+
+```cpp
+purr int main() {
+    meow("Hello, v3!");
+    give 0;
+}
+
+cat Point {
+    paw int x;
+    paw int y;
+    purr Point(int a, int b) {
+        me.x = a;
+        me.y = b;
+    }
+    purr int sum() {
+        give me.x + me.y;
+    }
+};
+```
+
+Compile native:
+
+    catpp build hello.cat -o hello
+    ./hello
+
+v3 features:
+- C++ syntax with braces, semicolons, line comments
+- Types: int, float, bool, str, void, char
+- Classes + inheritance + methods
+- Pointers (int*, &x, *p)
+- Arrays, structs, enums
+- new / delete + arrow operator
+- Stdlib: sqrt, pow, read_file, upper, substr, ...
+- Speed: ~2x slower than C, 1000x faster than interpreter
+
 ## Quick install
 
 One line (Linux / macOS):

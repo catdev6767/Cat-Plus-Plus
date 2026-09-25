@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Cat++ IDE</title>
-<link rel="stylesheet" href="/style.css">
-<link rel="stylesheet" href="/extras.css">
-<link rel="stylesheet" href="/learn.css">
-<link rel="stylesheet" href="/learn2.css">
-<link rel="stylesheet" href="/cat-theme.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="extras.css">
+<link rel="stylesheet" href="learn.css">
+<link rel="stylesheet" href="learn2.css">
+<link rel="stylesheet" href="cat-theme.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -24,13 +24,14 @@
   padding: 4px 0; cursor: pointer; font-size: 13px; transition: all .15s; }
 .project-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 </style>
+<link rel="stylesheet" href="v3-theme.css">
 </head>
 <body class="theme-dark">
 <div class="menubar">
   <button id="hamburger"><i class="fas fa-bars"></i></button>
-  <a href="/" class="tb-icon-btn" title="Home" style="text-decoration:none;color:inherit;">🏠</a>
+  <a href="../" class="tb-icon-btn" title="Home" style="text-decoration:none;color:inherit;">🏠</a>
   <span class="title">Cat++ <small>IDE</small></span>
-  <a href="/docs/" class="menu-item" target="_blank"><i class="fas fa-book"></i> Docs</a>
+  <a href="../docs/" class="menu-item" target="_blank"><i class="fas fa-book"></i> Docs</a>
   <span class="menu-item" data-menu="examples"><i class="fas fa-code"></i> <span data-i18n="menu.examples">Examples</span></span>
   <span class="menu-item" data-menu="cheatsheet"><i class="fas fa-list"></i> <span data-i18n="menu.cheatsheet">Cheatsheet</span></span>
   <span class="menu-item" data-menu="shortcuts"><i class="fas fa-keyboard"></i> <span data-i18n="menu.shortcuts">Shortcuts</span></span>
@@ -124,7 +125,7 @@
 </div>
 
 <div class="statusbar">
-  <span>Cat++ v2.0</span>
+  <span>Cat++ v3.0</span>
   <span id="status">Ready</span>
   <span class="spacer"></span>
   <span id="cursor-pos">Ln 1, Col 1</span>
@@ -146,11 +147,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
-<script src="/lang/vi.js"></script>
-<script src="/lang/en.js"></script>
-<script src="/app.js"></script>
-<script src="/extras.js"></script>
-<script src="/learn.js"></script>
-<script src="/learn2.js"></script>
+<script src="lang/vi.js"></script>
+<script src="lang/en.js"></script>
+<script src="app.js"></script>
+<script src="extras.js"></script>
+<script src="learn.js"></script>
+<script src="learn2.js"></script>
+<script src="pyodide-runner.js"></script>
 </body>
 </html>

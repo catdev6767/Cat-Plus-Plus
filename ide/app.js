@@ -418,20 +418,14 @@ function examplesHtml() {
 }
 function cheatsheetHtml() {
   return '<h1>' + T('modal.cheatsheet') + '</h1>' +
-    '<h2>' + T('cheat.syntax') + '</h2>' +
-    '<pre><code>meow "print"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "big"\nswat\n    meow "small"\n\npaw i = 0\nknead i < 5\n    meow i\n    paw i = i + 1</code></pre>' +
-    '<h2>' + T('cheat.keyword') + '</h2>' +
-    '<table><tr><th>' + T('cheat.cat') + '</th><th>' + T('cheat.meaning') + '</th></tr>' +
-    '<tr><td><code>meow</code></td><td>' + T('cheat.in') + '</td></tr>' +
-    '<tr><td><code>paw</code></td><td>' + T('cheat.var') + '</td></tr>' +
-    '<tr><td><code>purr / give</code></td><td>' + T('cheat.fn') + '</td></tr>' +
-    '<tr><td><code>sniff / swat</code></td><td>' + T('cheat.if') + '</td></tr>' +
-    '<tr><td><code>knead</code></td><td>' + T('cheat.while') + '</td></tr>' +
-    '<tr><td><code>groom ... of</code></td><td>' + T('cheat.each') + '</td></tr>' +
-    '<tr><td><code>tap / hiss</code></td><td>' + T('cheat.try') + '</td></tr>' +
-    '<tr><td><code>cat / me / kin</code></td><td>' + T('cheat.oop') + '</td></tr>' +
-    '</table>';
+    '<h2>Cat++ v3 — C++-like syntax</h2>' +
+    '<pre><code>purr int main() {\n    meow("Hello, v3!");\n    give 0;\n}\n\ncat Point {\n    paw int x;\n    paw int y;\n    purr Point(int a, int b) {\n        me.x = a;\n        me.y = b;\n    }\n    purr int sum() {\n        give me.x + me.y;\n    }\n};\n\npurr int main() {\n    paw Point p = Point(3, 4);\n    meow(p.sum());\n    give 0;\n}</code></pre>' +
+    '<h2>Pointers & Arrays (v3)</h2>' +
+    '<pre><code>paw int x = 42;\npaw int* p = &x;\n*p = 100;  // x = 100\n\npaw int arr[5];\nfor (paw int i = 0; i < 5; i = i + 1) {\n    arr[i] = i * i;\n}</code></pre>' +
+    '<h2>Cat++ v2 (Python-like) — vẫn hỗ trợ</h2>' +
+    '<pre><code>meow "print"\npaw x = 10\npurr add(a, b)\n    give a + b\n\nsniff x > 5\n    meow "big"\nswat\n    meow "small"</code></pre>';
 }
+
 function shortcutsHtml() {
   return '<h1>' + T('modal.shortcuts') + '</h1><table>' +
     '<tr><th>Key</th><th>Action</th></tr>' +
