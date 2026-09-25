@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var CDN = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
-  var FILES = ['interpreter.py', 'catpp_pycompiler.py', 'catpp_vm.py'];
+  var FILES = ['interpreter.py', 'catpp_pycompiler.py', 'catpp_vm.py', 'interpreter_v3.py', 'parser_v3.py', 'tokenizer_v3.py'];
   var pyodide = null;
   var loading = null;
 
