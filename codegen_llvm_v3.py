@@ -1107,6 +1107,110 @@ class LLVMCodegen:
                     obj_ptr = self.builder.bitcast(obj_ptr, fn_me_ty)
                 return self.builder.call(fn, [obj_ptr] + args)
 
+            # Built-in string methods: s.length(), s.upper(), etc.
+            if fn_expr[0] == 'member':
+                obj_expr = fn_expr[1]
+                method_name = fn_expr[2]
+                # Check if obj is a string
+                obj_type = self.infer_type(obj_expr) if hasattr(self, 'infer_type') else None
+                # Try to detect string type from env
+                is_str = False
+                if obj_expr[0] == 'var':
+                    name = obj_expr[1]
+                    if name in self.env:
+                        _, ty = self.env[name]
+                        if isinstance(ty, ir.PointerType) and ty.pointee == self.i8:
+                            is_str = True
+                if is_str:
+                    s = self._emit_expr(obj_expr)
+                    # s.length() -> strlen
+                    if method_name in ('length', 'size', 'len'):
+                        fn = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+                        result = self.builder.call(fn, [s])
+                        return self.builder.trunc(result, self.i32)
+                    # s.upper() -> toupper each
+                    if method_name == 'upper':
+                        strlen = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+                        malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+                        strcpy = self._get_or_declare('strcpy', self.i8ptr, [self.i8ptr, self.i8ptr])
+                        toupper = self._get_or_declare('toupper', self.i32, [self.i32])
+                        n = self.builder.call(strlen, [s])
+                        size = self.builder.add(n, ir.Constant(self.i64, 1))
+                        buf = self.builder.call(malloc, [size])
+                        self.builder.call(strcpy, [buf, s])
+                        i_var = self.builder.alloca(self.i64, name='i')
+                        self.builder.store(ir.Constant(self.i64, 0), i_var)
+                        loop_bb = self.builder.function.append_basic_block(name='up.loop')
+                        body_bb = self.builder.function.append_basic_block(name='up.body')
+                        end_bb = self.builder.function.append_basic_block(name='up.end')
+                        self.builder.branch(loop_bb)
+                        self.builder.position_at_end(loop_bb)
+                        iv = self.builder.load(i_var)
+                        cond = self.builder.icmp_signed('<', iv, n)
+                        self.builder.cbranch(cond, body_bb, end_bb)
+                        self.builder.position_at_end(body_bb)
+                        cp = self.builder.gep(buf, [iv])
+                        ch = self.builder.load(cp)
+                        ch_ext = self.builder.zext(ch, self.i32)
+                        up = self.builder.call(toupper, [ch_ext])
+                        up_trunc = self.builder.trunc(up, self.i8)
+                        self.builder.store(up_trunc, cp)
+                        iv2 = self.builder.add(iv, ir.Constant(self.i64, 1))
+                        self.builder.store(iv2, i_var)
+                        self.builder.branch(loop_bb)
+                        self.builder.position_at_end(end_bb)
+                        return buf
+                    # s.lower() -> similar with tolower
+                    if method_name == 'lower':
+                        strlen = self._get_or_declare('strlen', self.i64, [self.i8ptr])
+                        malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+                        strcpy = self._get_or_declare('strcpy', self.i8ptr, [self.i8ptr, self.i8ptr])
+                        tolower = self._get_or_declare('tolower', self.i32, [self.i32])
+                        n = self.builder.call(strlen, [s])
+                        size = self.builder.add(n, ir.Constant(self.i64, 1))
+                        buf = self.builder.call(malloc, [size])
+                        self.builder.call(strcpy, [buf, s])
+                        i_var = self.builder.alloca(self.i64, name='i')
+                        self.builder.store(ir.Constant(self.i64, 0), i_var)
+                        loop_bb = self.builder.function.append_basic_block(name='lo.loop')
+                        body_bb = self.builder.function.append_basic_block(name='lo.body')
+                        end_bb = self.builder.function.append_basic_block(name='lo.end')
+                        self.builder.branch(loop_bb)
+                        self.builder.position_at_end(loop_bb)
+                        iv = self.builder.load(i_var)
+                        cond = self.builder.icmp_signed('<', iv, n)
+                        self.builder.cbranch(cond, body_bb, end_bb)
+                        self.builder.position_at_end(body_bb)
+                        cp = self.builder.gep(buf, [iv])
+                        ch = self.builder.load(cp)
+                        ch_ext = self.builder.zext(ch, self.i32)
+                        lo = self.builder.call(tolower, [ch_ext])
+                        lo_trunc = self.builder.trunc(lo, self.i8)
+                        self.builder.store(lo_trunc, cp)
+                        iv2 = self.builder.add(iv, ir.Constant(self.i64, 1))
+                        self.builder.store(iv2, i_var)
+                        self.builder.branch(loop_bb)
+                        self.builder.position_at_end(end_bb)
+                        return buf
+                    # s.substr(start, len)
+                    if method_name == 'substr':
+                        start = args[0] if len(args) > 0 else ir.Constant(self.i32, 0)
+                        length = args[1] if len(args) > 1 else ir.Constant(self.i32, 0)
+                        # Cast to i64
+                        if isinstance(start.type, ir.IntType) and start.type.width != 64:
+                            start = self.builder.sext(start, self.i64)
+                        if isinstance(length.type, ir.IntType) and length.type.width != 64:
+                            length = self.builder.sext(length, self.i64)
+                        malloc = self._get_or_declare('malloc', self.i8ptr, [self.i64])
+                        size = self.builder.add(length, ir.Constant(self.i64, 1))
+                        buf = self.builder.call(malloc, [size])
+                        memcpy = self._get_or_declare('memcpy', self.i8ptr, [self.i8ptr, self.i8ptr, self.i64])
+                        src_ptr = self.builder.gep(s, [start])
+                        self.builder.call(memcpy, [buf, src_ptr, length])
+                        end_ptr = self.builder.gep(buf, [length])
+                        self.builder.store(ir.Constant(self.i8, 0), end_ptr)
+                        return buf
+
             # Method call: p.sum() -> ClassName__sum(&p)
             if fn_expr[0] == 'member':
                 obj_expr = fn_expr[1]
