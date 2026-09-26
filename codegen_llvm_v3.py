@@ -50,6 +50,7 @@ class LLVMCodegen:
         self._loop_cond_stack = []
         self._var_classes = {}
         self._ref_vars = set()
+        self.func_params = {}
         self._enum_names = set()
         self._enum_values = {}
 
@@ -221,6 +222,7 @@ class LLVMCodegen:
             if s[0] == 'func':
                 _, ret_type, name, params, body = s
                 self.funcs[name] = (ret_type, params)
+                self.func_params[name] = params
             elif s[0] == 'class':
                 _, name, parent, members = s
                 fields = []
@@ -963,18 +965,16 @@ class LLVMCodegen:
             # Build args with REF awareness
             args = []
             for arg_idx, arg_expr in enumerate(e[2]):
-                # If called function has REF param → pass address
                 param_is_ref = False
                 if fn_expr[0] == 'var':
                     fname = fn_expr[1]
-                    if fname in self.funcs:
-                        _, fparams = self.funcs[fname]
+                    if fname in self.func_params:
+                        fparams = self.func_params[fname]
                         if arg_idx < len(fparams):
                             ptype = fparams[arg_idx][0]
                             if isinstance(ptype, tuple) and ptype[0].startswith('REF_'):
                                 param_is_ref = True
                 if param_is_ref and arg_expr[0] == 'var':
-                    # Pass address of variable
                     name = arg_expr[1]
                     if name in self.env:
                         alloca, _ = self.env[name]
