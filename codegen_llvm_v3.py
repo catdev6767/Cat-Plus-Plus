@@ -960,7 +960,27 @@ class LLVMCodegen:
 
         if t == 'call':
             fn_expr = e[1]
-            args = [self._emit_expr(a) for a in e[2]]
+            # Build args with REF awareness
+            args = []
+            for arg_idx, arg_expr in enumerate(e[2]):
+                # If called function has REF param → pass address
+                param_is_ref = False
+                if fn_expr[0] == 'var':
+                    fname = fn_expr[1]
+                    if fname in self.funcs:
+                        _, fparams = self.funcs[fname]
+                        if arg_idx < len(fparams):
+                            ptype = fparams[arg_idx][0]
+                            if isinstance(ptype, tuple) and ptype[0].startswith('REF_'):
+                                param_is_ref = True
+                if param_is_ref and arg_expr[0] == 'var':
+                    # Pass address of variable
+                    name = arg_expr[1]
+                    if name in self.env:
+                        alloca, _ = self.env[name]
+                        args.append(alloca)
+                        continue
+                args.append(self._emit_expr(arg_expr))
             # Method call: p->sum()
             if fn_expr[0] == 'arrow':
                 obj_expr = fn_expr[1]
