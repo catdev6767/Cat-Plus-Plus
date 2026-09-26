@@ -173,10 +173,19 @@ class Parser:
         else:
             base = self.expect('IDENT').value
 
+        # reference & (prefix base)
+        is_ref = False
+        if self.at('&'):
+            self.next()
+            is_ref = True
+
         # pointer *
         ptr_depth = 0
         while self.match('*'):
             ptr_depth += 1
+
+        if is_ref:
+            base = 'REF_' + base
 
         # array [N] or []
         array_size = None

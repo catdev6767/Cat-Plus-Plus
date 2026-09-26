@@ -49,6 +49,7 @@ class LLVMCodegen:
         self._loop_end_stack = []
         self._loop_cond_stack = []
         self._var_classes = {}
+        self._ref_vars = set()
         self._enum_names = set()
         self._enum_values = {}
 
@@ -124,6 +125,12 @@ class LLVMCodegen:
 
     def c_type(self, vtype):
         base, ptr_depth, array_size, generic = vtype
+        # Reference type: REF_<base> → pointer to <base>
+        if base.startswith('REF_'):
+            inner_base = base[4:]
+            inner_vtype = (inner_base, ptr_depth, array_size, generic)
+            inner_t = self.c_type(inner_vtype)
+            return ir.PointerType(inner_t)
         # Class type
         if base in self.classes and base in self._class_types:
             base_t = self._class_types[base]
@@ -340,6 +347,9 @@ class LLVMCodegen:
             alloca = self.builder.alloca(ctype, name=pname)
             self.builder.store(fn.args[i], alloca)
             self.env[pname] = (alloca, ctype)
+            # Track if param is reference
+            if isinstance(ptype, tuple) and ptype[0].startswith('REF_'):
+                self._ref_vars.add(pname)
 
         # Emit body
         last_value = None
@@ -729,7 +739,11 @@ class LLVMCodegen:
             if name not in self.env:
                 raise CodegenError(f'Undefined: {name}')
             alloca, ctype = self.env[name]
-            return self.builder.load(alloca, name=name)
+            loaded = self.builder.load(alloca, name=name)
+            # Auto-deref if reference
+            if name in self._ref_vars and isinstance(loaded.type, ir.PointerType):
+                return self.builder.load(loaded, name=name + '_deref')
+            return loaded
 
         if t == 'binop':
             op, a, b = e[1], self._emit_expr(e[2]), self._emit_expr(e[3])
@@ -800,6 +814,14 @@ class LLVMCodegen:
 
         if t == 'assign':
             op, target, value_expr = e[1], e[2], e[3]
+            # Assign to reference var: x = val
+            if target[0] == 'var' and target[1] in self._ref_vars:
+                name = target[1]
+                alloca, ctype = self.env[name]
+                ptr = self.builder.load(alloca, name=name)
+                value = self._emit_expr(value_expr)
+                self.builder.store(value, ptr)
+                return value
             # Deref assign: *p = val
             if target[0] == 'deref':
                 ptr = self._emit_expr(target[1])

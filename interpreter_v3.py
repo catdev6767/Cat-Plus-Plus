@@ -36,6 +36,19 @@ class Env:
         self.vars[name] = val
 
 
+class Ref:
+    """Reference to a variable in a specific environment."""
+    def __init__(self, env, name):
+        self.env = env
+        self.name = name
+    @property
+    def value(self):
+        return self.env.get(self.name)
+    @value.setter
+    def value(self, v):
+        self.env.set(self.name, v)
+
+
 class Func:
     def __init__(self, name, params, body, env, ret_type=None):
         self.name = name
@@ -255,7 +268,10 @@ class Interp:
             return None
 
         if t == 'var':
-            return env.get(e[1])
+            v = env.get(e[1])
+            if isinstance(v, Ref):
+                return v.value
+            return v
 
         if t == 'array':
             return [self.eval(x, env) for x in e[1]]
@@ -290,6 +306,23 @@ class Interp:
             val = self.eval(rhs, env)
             if target[0] == 'var':
                 name = target[1]
+                try:
+                    cur = env.get(name)
+                except CatError:
+                    cur = None
+                if isinstance(cur, Ref):
+                    if op == '=':
+                        cur.value = val
+                        return val
+                    actual = cur.value
+                    if op == 'ADD_EQ': nv = actual + val
+                    elif op == 'SUB_EQ': nv = actual - val
+                    elif op == 'MUL_EQ': nv = actual * val
+                    elif op == 'DIV_EQ': nv = actual / val
+                    elif op == 'MOD_EQ': nv = actual % val
+                    else: nv = val
+                    cur.value = nv
+                    return nv
                 if op == '=':
                     env.set(name, val)
                 else:
@@ -331,7 +364,7 @@ class Interp:
                 if isinstance(fn, ClassObj):
                     return self.instantiate(fn, args)
                 if isinstance(fn, Func):
-                    return self.call_func(fn, args)
+                    return self.call_func(fn, args, e[2], env)
                 # Builtin
                 return self.call_builtin(name, args)
             if fn_expr[0] == 'member':
@@ -471,11 +504,18 @@ class Interp:
             cls = cls.parent
         raise CatError(f'Unknown method: {mname}')
 
-    def call_func(self, fn, args):
+    def call_func(self, fn, args, arg_exprs=None, caller_env=None):
         env = Env(fn.env)
         if len(args) != len(fn.params):
             raise CatError(f"{fn.name} expects {len(fn.params)} args, got {len(args)}")
-        for (ptype, pname), aval in zip(fn.params, args):
+        for i, ((ptype, pname), aval) in enumerate(zip(fn.params, args)):
+            base = ptype[0]
+            # Reference parameter → bind Ref to caller's variable
+            if base.startswith('REF_') and arg_exprs and caller_env is not None:
+                aexpr = arg_exprs[i]
+                if aexpr[0] == 'var':
+                    env.define(pname, Ref(caller_env, aexpr[1]))
+                    continue
             env.define(pname, aval)
         try:
             for st in fn.body:
