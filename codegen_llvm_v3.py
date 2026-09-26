@@ -184,7 +184,16 @@ class LLVMCodegen:
                                 ) if isinstance(ptype, tuple) else ptype
                                 new_params.append((new_ptype, pname))
                             new_name = f'{fn[2]}__{concrete_type}'
-                            ast_flat.append(('func', fn[1], new_name, new_params, fn[4]))
+                            # Substitute return type
+                            old_ret = fn[1]
+                            if isinstance(old_ret, tuple):
+                                new_ret = tuple(
+                                    concrete_type if x == type_param else x
+                                    for x in old_ret
+                                )
+                            else:
+                                new_ret = old_ret
+                            ast_flat.append(('func', new_ret, new_name, new_params, fn[4]))
                     else:
                         ast_flat.append(member)
             elif stmt[0] == 'template_func':
@@ -199,7 +208,16 @@ class LLVMCodegen:
                         ) if isinstance(ptype, tuple) else ptype
                         new_params.append((new_ptype, pname))
                     new_name = f'{fn[2]}__{concrete_type}'
-                    ast_flat.append(('func', fn[1], new_name, new_params, fn[4]))
+                    # Substitute return type
+                    old_ret = fn[1]
+                    if isinstance(old_ret, tuple):
+                        new_ret = tuple(
+                            concrete_type if x == type_param else x
+                            for x in old_ret
+                        )
+                    else:
+                        new_ret = old_ret
+                    ast_flat.append(('func', new_ret, new_name, new_params, fn[4]))
             else:
                 ast_flat.append(stmt)
 
