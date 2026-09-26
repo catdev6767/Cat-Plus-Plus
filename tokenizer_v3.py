@@ -14,6 +14,7 @@ KEYWORDS = {
     'ptr', 'null',
     # Control
     'if', 'else', 'while', 'for', 'return', 'break', 'continue',
+    'try', 'catch', 'throw', 'template', 'typename',
     'class', 'struct', 'enum', 'namespace',
     'new', 'delete', 'this', 'print', 'exit', 'sizeof', 'static', 'const',
     'true', 'false', 'nullptr', 'include',

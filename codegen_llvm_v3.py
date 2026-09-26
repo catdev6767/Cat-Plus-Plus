@@ -161,11 +161,53 @@ class LLVMCodegen:
         return base_t
 
     def compile(self, ast):
+        # Pass 0: expand namespaces + templates
+        ast_flat = []
+        # First, expand templates for int/float/str
+        for stmt in ast[1]:
+            if stmt[0] == 'namespace':
+                ns_name = stmt[1]
+                for member in stmt[2]:
+                    if member[0] == 'func':
+                        new_name = f'{ns_name}__{member[2]}'
+                        ast_flat.append(('func', member[1], new_name, member[3], member[4]))
+                    elif member[0] == 'template_func':
+                        type_param = member[1]
+                        fn = member[2]
+                        for concrete_type in ['int', 'float', 'str']:
+                            # Substitute type_param with concrete_type in fn params and body
+                            new_params = []
+                            for (ptype, pname) in fn[3]:
+                                new_ptype = tuple(
+                                    concrete_type if x == type_param else x
+                                    for x in ptype
+                                ) if isinstance(ptype, tuple) else ptype
+                                new_params.append((new_ptype, pname))
+                            new_name = f'{fn[2]}__{concrete_type}'
+                            ast_flat.append(('func', fn[1], new_name, new_params, fn[4]))
+                    else:
+                        ast_flat.append(member)
+            elif stmt[0] == 'template_func':
+                type_param = stmt[1]
+                fn = stmt[2]
+                for concrete_type in ['int', 'float', 'str']:
+                    new_params = []
+                    for (ptype, pname) in fn[3]:
+                        new_ptype = tuple(
+                            concrete_type if x == type_param else x
+                            for x in ptype
+                        ) if isinstance(ptype, tuple) else ptype
+                        new_params.append((new_ptype, pname))
+                    new_name = f'{fn[2]}__{concrete_type}'
+                    ast_flat.append(('func', fn[1], new_name, new_params, fn[4]))
+            else:
+                ast_flat.append(stmt)
+
         # Pass 0: collect classes and functions
-        self._collect(ast[1])
+        self._collect(ast_flat)
 
         # Pass 0.5: emit structs and enums as C typedefs
-        for stmt in ast[1]:
+        for stmt in ast_flat:
             if stmt[0] == 'struct':
                 _, name, fields = stmt
                 all_fields = list(fields)
@@ -201,7 +243,7 @@ class LLVMCodegen:
                 self._emit_class(stmt)
 
         # Pass 2: declare function signatures
-        for stmt in ast[1]:
+        for stmt in ast_flat:
             if stmt[0] == 'func':
                 self._declare_func(stmt)
 
@@ -211,7 +253,7 @@ class LLVMCodegen:
                 self._emit_class_methods(stmt)
 
         # Pass 4: emit function bodies
-        for stmt in ast[1]:
+        for stmt in ast_flat:
             if stmt[0] == 'func':
                 self._emit_func(stmt)
 
@@ -543,6 +585,49 @@ class LLVMCodegen:
 
         if t == 'expr_stmt':
             self._emit_expr(s[1])
+            return None
+
+        if t == 'try':
+            _, body, catch_var, handler = s
+            # Use setjmp/longjmp pattern
+            # Actually: simple try = just execute body, if error → skip to handler
+            # For MVP: emit as sequential with a flag
+            try_var = self.builder.alloca(self.i32, name='__try_flag')
+            self.builder.store(ir.Constant(self.i32, 0), try_var)
+
+            # Emit body statements
+            for st in body:
+                self._emit_stmt(st)
+
+            if handler:
+                # Handler block
+                handler_bb = self.builder.function.append_basic_block(name='catch')
+                end_bb = self.builder.function.append_basic_block(name='try.end')
+                self.builder.branch(end_bb)
+                self.builder.position_at_end(handler_bb)
+                if catch_var:
+                    err_msg = self._global_string('error\0', name='.err')
+                    msg_alloca = self.builder.alloca(self.i8ptr, name=catch_var)
+                    self.builder.store(err_msg, msg_alloca)
+                    self.env[catch_var] = (msg_alloca, self.i8ptr)
+                for st in handler:
+                    self._emit_stmt(st)
+                self.builder.branch(end_bb)
+                self.builder.position_at_end(end_bb)
+            return None
+
+        if t == 'throw':
+            # Throw = set flag + jump (simplified)
+            # MVP: just print error and return
+            err_val = self._emit_expr(s[1])
+            printf = self._get_or_declare_printf()
+            fmt = self._global_string('Exception: %s\n\0', name='.exfmt')
+            if isinstance(err_val.type, ir.PointerType):
+                self.builder.call(printf, [fmt, err_val])
+            else:
+                # Non-string: just int
+                ifmt = self._global_string('Exception: %d\n\0', name='.exfmt_i')
+                self.builder.call(printf, [ifmt, err_val])
             return None
 
         if t == 'delete':

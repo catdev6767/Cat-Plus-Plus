@@ -63,6 +63,14 @@ class Parser:
         if self.at('CAT'):
             return self.parse_class()
 
+        # template<T> — parse but store type param
+        if self.at('TEMPLATE'):
+            return self.parse_template()
+
+        # namespace <Name> { ... }
+        if self.at('NAMESPACE'):
+            return self.parse_namespace()
+
         # struct <Name> { ... };
         if self.at('STRUCT'):
             return self.parse_struct()
@@ -75,6 +83,29 @@ class Parser:
         return self.parse_stmt()
 
     # ═══ FUNCTION ═══
+    def parse_template(self):
+        self.expect('TEMPLATE')
+        self.expect('<')
+        type_param = self.expect('IDENT').value
+        self.expect('>')
+        # Then parse the function normally, storing type param
+        if self.at('PURR'):
+            fn = self.parse_function()
+            # Attach type param to fn tuple
+            return ('template_func', type_param, fn)
+        raise ParseError('Template must be followed by purr', self.peek().line, self.peek().col)
+
+    def parse_namespace(self):
+        self.expect('NAMESPACE')
+        name = self.expect('IDENT').value
+        self.expect('{')
+        members = []
+        while not self.at('}', 'EOF'):
+            members.append(self.parse_toplevel())
+        self.expect('}')
+        self.match(';')
+        return ('namespace', name, members)
+
     def parse_struct(self):
         self.expect('STRUCT')
         name = self.expect('IDENT').value
@@ -262,6 +293,17 @@ class Parser:
         if self.at('KNEAD'):
             return self.parse_while()
 
+        # try { ... } catch (err) { ... }
+        if self.at('TRY'):
+            return self.parse_try()
+
+        # throw expr;
+        if self.at('THROW'):
+            self.next()
+            expr = self.parse_expr()
+            self.expect(';')
+            return ('throw', expr)
+
         # delete expr;
         if self.at('DELETE'):
             self.next()
@@ -309,6 +351,19 @@ class Parser:
             init = self.parse_expr()
         self.expect(';')
         return ('var_decl', vtype, name, init)
+
+    def parse_try(self):
+        self.expect('TRY')
+        body = self.parse_block()
+        catch_var = None
+        handler = []
+        if self.at('CATCH'):
+            self.next()
+            self.expect('(')
+            catch_var = self.expect('IDENT').value
+            self.expect(')')
+            handler = self.parse_block()
+        return ('try', body, catch_var, handler)
 
     def parse_for(self):
         self.expect('FOR')
